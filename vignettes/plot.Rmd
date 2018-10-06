@@ -34,26 +34,56 @@ p <-
 ggplotly(p, tooltip=c("y","label","size","label2","x"))
 ## order buggy https://github.com/ropenslotly/issues/849
 }
+
+
+## which(is.na(table(bpaeplot$aetype)[aecategs])) # 7, 10, 15, 23, 27, 46 
+
 ```
 
 ```{r}
 plotfn(aecategs[1])
-```
-```{r}
 plotfn(aecategs[2])
-```
-```{r}
 plotfn(aecategs[3])
-```
-```{r}
 plotfn(aecategs[4])
-```
-
-```{r}
 plotfn(aecategs[5])
-```
-```{r}
 plotfn(aecategs[6])
-```
+plotfn(aecategs[8])
+plotfn(aecategs[9])
+plotfn(aecategs[11])
+plotfn(aecategs[12])
+plotfn(aecategs[13])
+plotfn(aecategs[14])
+plotfn(aecategs[16])
+plotfn(aecategs[17])
+plotfn(aecategs[18])
+plotfn(aecategs[19])
+plotfn(aecategs[20])
+plotfn(aecategs[21])
+plotfn(aecategs[22])
+plotfn(aecategs[24])
+plotfn(aecategs[25])
+plotfn(aecategs[26])
+plotfn(aecategs[28])
+plotfn(aecategs[29])
+plotfn(aecategs[30])
+plotfn(aecategs[31])
+plotfn(aecategs[32])
+plotfn(aecategs[33])
+plotfn(aecategs[34])
+plotfn(aecategs[35])
+plotfn(aecategs[36])
+plotfn(aecategs[37])
+plotfn(aecategs[38])
+plotfn(aecategs[39])
+plotfn(aecategs[40])
+plotfn(aecategs[41])
+plotfn(aecategs[42])
+plotfn(aecategs[43])
+plotfn(aecategs[44])
+plotfn(aecategs[45])
+plotfn(aecategs[47])
+plotfn(aecategs[48])
+plotfn(aecategs[49])
 
+```
 
