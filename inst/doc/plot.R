@@ -1,19 +1,7 @@
----
-title: "Biphosphonates adverse event rates"
-author: ""
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
- %\VignetteIndexEntry{Vignette Title}
- %\VignetteEngine{knitr::rmarkdown}
- \usepackage[utf8]{inputenc}
----
-
-```{r include = FALSE}
+## ----include = FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo=FALSE, fig.width=10, fig.height=5)
-```
 
-```{r}
+## ------------------------------------------------------------------------
 
 library(ggplot2)
 library(plotly)
@@ -34,26 +22,22 @@ p <-
 ggplotly(p, tooltip=c("y","label","size","label2","x"))
 ## order buggy https://github.com/ropenslotly/issues/849
 }
-```
 
-```{r}
+## ------------------------------------------------------------------------
 plotfn(aecategs[1])
-```
-```{r}
+
+## ------------------------------------------------------------------------
 plotfn(aecategs[2])
-```
-```{r}
+
+## ------------------------------------------------------------------------
 plotfn(aecategs[3])
-```
-```{r}
+
+## ------------------------------------------------------------------------
 plotfn(aecategs[4])
-```
 
-```{r}
+## ------------------------------------------------------------------------
 plotfn(aecategs[5])
-```
-```{r}
-plotfn(aecategs[6])
-```
 
+## ------------------------------------------------------------------------
+plotfn(aecategs[6])
 
