@@ -1,0 +1,31 @@
+
+
+
+
+##' TODO 
+## Treatment labels 
+## TODO allow interactive querying of the treatment label
+
+```{r}
+
+library(ggplot2)
+
+aesel <- c("FATIGUE", "VOMITING", "DIARRHOEA", "ANAEMIA")
+
+datplot <- bpae %>%
+    gather(aetype, prop, which(names(.) %in% paste0(aesel,"_p")))  %>%
+    filter(!is.na(prop)) %>%
+    droplevels()
+
+p <- ggplot(data=datplot,
+       aes(x=prop, y=`Trial name`,
+           size=N, col=`treatment`)) +
+    facet_wrap(vars(aetype)) + 
+    geom_point(size=2) +
+    xlim(0,1)
+p
+
+library(plotly)
+ggplotly(p)
+
+```
