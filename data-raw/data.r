@@ -105,7 +105,7 @@ bpaeplot <- bpae %>%
     mutate(prop = props$prop) %>% 
     select(`Trial name`, `Trial Code`, armno, treatment, trtcat, N, aetype, count, prop) %>%
     mutate(aetype = gsub("_p$","", aetype)) %>% 
-    filter(!is.na(prop)) %>%
+    filter(!is.na(Proportion)) %>%
     droplevels()
 
 use_data(bpaeplot, overwrite=TRUE)

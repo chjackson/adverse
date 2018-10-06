@@ -1,5 +1,7 @@
 ## ----include = FALSE-----------------------------------------------------
-knitr::opts_chunk$set(echo=FALSE, fig.width=10, fig.height=5)
+knitr::opts_chunk$set(echo=FALSE,
+                      fig.width=15,
+                      fig.height=5)
 
 ## ------------------------------------------------------------------------
 
@@ -17,6 +19,8 @@ p <-
     facet_wrap(vars(aetype)) + 
     geom_point() +
     xlim(0,1) +
+    xlab("Proportion with adverse event") +
+    ylab("") +
     guides(size=FALSE) +
     theme(legend.title = element_blank())
 ggplotly(p, tooltip=c("y","label","size","label2","x"))
@@ -24,52 +28,12 @@ ggplotly(p, tooltip=c("y","label","size","label2","x"))
 }
 
 
-## which(is.na(table(bpaeplot$aetype)[aecategs])) # 7, 10, 15, 23, 27, 46 
-
-
 ## ------------------------------------------------------------------------
-plotfn(aecategs[1])
-plotfn(aecategs[2])
-plotfn(aecategs[3])
-plotfn(aecategs[4])
-plotfn(aecategs[5])
-plotfn(aecategs[6])
-plotfn(aecategs[8])
-plotfn(aecategs[9])
-plotfn(aecategs[11])
-plotfn(aecategs[12])
-plotfn(aecategs[13])
-plotfn(aecategs[14])
-plotfn(aecategs[16])
-plotfn(aecategs[17])
-plotfn(aecategs[18])
-plotfn(aecategs[19])
-plotfn(aecategs[20])
-plotfn(aecategs[21])
-plotfn(aecategs[22])
-plotfn(aecategs[24])
-plotfn(aecategs[25])
-plotfn(aecategs[26])
-plotfn(aecategs[28])
-plotfn(aecategs[29])
-plotfn(aecategs[30])
-plotfn(aecategs[31])
-plotfn(aecategs[32])
-plotfn(aecategs[33])
-plotfn(aecategs[34])
-plotfn(aecategs[35])
-plotfn(aecategs[36])
-plotfn(aecategs[37])
-plotfn(aecategs[38])
-plotfn(aecategs[39])
-plotfn(aecategs[40])
-plotfn(aecategs[41])
-plotfn(aecategs[42])
-plotfn(aecategs[43])
-plotfn(aecategs[44])
-plotfn(aecategs[45])
-plotfn(aecategs[47])
-plotfn(aecategs[48])
-plotfn(aecategs[49])
+has_events <- which(!is.na(table(bpaeplot$aetype)[aecategs])) # not 7, 10, 15, 23, 27, 46 
 
+## https://github.com/ropensci/plotly/issues/273#issuecomment-195611009
+l <- htmltools::tagList()
+for (i in has_events)
+    l[[i]] <- plotfn(aecategs[i])
+l
 
