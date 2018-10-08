@@ -32,6 +32,7 @@ bpaeraw$"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4" <- as.numeric(bpaeraw
 
 use_data(bpaeraw, overwrite=TRUE)
 
+
 ##' Problems 
 ## "any adverse event" has character info in.  
 ##  vonmoos, pivot have same treatments in E1 and E2, and no 
@@ -54,8 +55,11 @@ bpaelong <- bpaeraw %>%
          matches("^A[1-5]"),
          which(aecat %in% aesel)
          ) %>%
-  select("Trial name", "Trial Code", vname, x) %>%
-  extract(vname, "armno", "([1-5])", remove=FALSE) %>%
+  select("Trial name", "Trial Code", vname, x) %>% 
+  extract(vname, "armno1", "^(?:A|N)([1-5])", remove=FALSE) %>%
+  extract(vname, "armno2", ";A([1-5])$", remove=FALSE) %>%
+  mutate(armno = ifelse(is.na(armno1), armno2, armno1)) %>%
+  select(-armno1, -armno2) %>% 
   mutate(armno = as.numeric(armno),
          vname = gsub("N[1-5]","N",vname),
          vname = gsub("A[1-5] (additional coding)", "\\1", vname), 
@@ -63,7 +67,10 @@ bpaelong <- bpaeraw %>%
          vname = gsub(";A[1-5]$","",vname)) %>%
   mutate(aecat = aecat[match(vname, gsub(";A[0-9]$","",names(bpaeraw)))],
          aecat = ifelse(is.na(aecat), vname, aecat)) 
-   
+
+bpaelong %>%
+  filter(`Trial name`=="HOBOE") %>% 
+  as.data.frame
 
 use_data(bpaelong, overwrite=TRUE)
 
@@ -110,4 +117,3 @@ bpaeplot <- bpae %>%
     droplevels()
 
 use_data(bpaeplot, overwrite=TRUE)
-

@@ -8,8 +8,6 @@ knitr::opts_chunk$set(echo=FALSE,
 library(ggplot2)
 library(plotly)
 
-aesel <- c("FATIGUE", "VOMITING", "DIARRHOEA", "ANAEMIA")
-
 plotfn <- function(aesel){
 p <- 
     bpaeplot %>%
