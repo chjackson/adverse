@@ -24,7 +24,9 @@ fullnames <- gsub("E2$", "A4", fullnames)
 fullnames <- gsub("E3$", "A5", fullnames)
 aeinds <- 26:ncol(bpaeraw)
 names(bpaeraw)[aeinds] <- fullnames[aeinds]
-bpaeraw <- bpaeraw %>% rename(N1="N Control", N2="N Control2", N3="N Exp1", N4="N Exp2", N5="N Exp3")
+bpaeraw <- bpaeraw %>%
+  rename(N1="N Control", N2="N Control2", N3="N Exp1", N4="N Exp2", N5="N Exp3") %>% 
+  mutate(has_control = as.numeric(!is.na(`A1 coding`) | !is.na(`A2 coding`)))
 
 ## character notes in this cell 
 bpaeraw[39,"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4"] <- NA
@@ -55,7 +57,7 @@ bpaelong <- bpaeraw %>%
          matches("^A[1-5]"),
          which(aecat %in% aesel)
          ) %>%
-  select("Trial name", "Trial Code", vname, x) %>% 
+  select("Trial name", "Trial Code", has_control, vname, x) %>% 
   extract(vname, "armno1", "^(?:A|N)([1-5])", remove=FALSE) %>%
   extract(vname, "armno2", ";A([1-5])$", remove=FALSE) %>%
   mutate(armno = ifelse(is.na(armno1), armno2, armno1)) %>%
@@ -67,10 +69,6 @@ bpaelong <- bpaeraw %>%
          vname = gsub(";A[1-5]$","",vname)) %>%
   mutate(aecat = aecat[match(vname, gsub(";A[0-9]$","",names(bpaeraw)))],
          aecat = ifelse(is.na(aecat), vname, aecat)) 
-
-bpaelong %>%
-  filter(`Trial name`=="HOBOE") %>% 
-  as.data.frame
 
 use_data(bpaelong, overwrite=TRUE)
 
@@ -103,17 +101,55 @@ bpae <- bpaelongsum %>%
     mutate_at(vars(matches(!!aestr)), funs(p = . / N))
 bpae$trtcat <- relevel(factor(bpae$trtcat), "Control")
 
+## Define the control arm for each study 
+
+bpae2 <- bpae %>%
+  mutate(armno2 = paste0("A", armno)) %>%
+  select(`Trial Code`, armno2, trtcat) %>% 
+  spread(armno2, trtcat) %>%
+  select(`Trial Code`, A1:A5) %>% 
+  mutate(control_arm = ifelse(is.na(A2), ifelse(is.na(A1), NA, 1), 2)) %>%
+  mutate(control_arm = ifelse(`Trial Code`==45, 1, control_arm)) %>% ## HOBOE has two control arms - select letrozole arm 
+  select(`Trial Code`, control_arm)
+
+bpae <- bpae %>% left_join(bpae2, "Trial Code")
+
+## Get the event rate in the control arm for each study 
+
+control_outcomes <- bpae %>%
+  filter(armno == control_arm) %>%
+  select(`Trial Code`, which(names(.) %in% paste0(aecategs,"_p")))
+colnames(control_outcomes) <- gsub("_p", "_pcon", colnames(control_outcomes))
+
+bpae <- bpae %>% left_join(control_outcomes, "Trial Code")
+
+# bpae %>% select("Trial Code", FATIGUE_p, FATIGUE_pcon)
+
 use_data(bpae, overwrite=TRUE)
 
 ## Ultra tidy data with one row per arm and AE type.  Use for ggplot2
 props <- bpae %>%
     gather(aetype, prop, which(names(.) %in% paste0(aecategs,"_p")))
-bpaeplot <- bpae %>%
+pcon <- bpae %>%
+    gather(aetype, pcon, which(names(.) %in% paste0(aecategs,"_pcon")))
+bpaearmtype <- bpae %>%
     gather(aetype, count, which(names(.) %in% aecategs)) %>% 
     mutate(prop = props$prop) %>% 
-    select(`Trial name`, `Trial Code`, armno, treatment, trtcat, N, aetype, count, prop) %>%
+    mutate(pcon = pcon$pcon) %>% 
+    select(`Trial name`, `Trial Code`, armno, treatment, trtcat, N, aetype, count, prop, pcon) %>%
     mutate(aetype = gsub("_p$","", aetype)) %>% 
     filter(!is.na(prop)) %>%
     droplevels()
 
-use_data(bpaeplot, overwrite=TRUE)
+use_data(bpaearmtype, overwrite=TRUE)
+
+## data with one row per active treatment arm and AE type, with risk diff vs control
+bpaeriskdiff <- bpaearmtype %>%
+  filter(!is.na(pcon)) %>%
+  filter(armno >= 3) %>%
+  mutate(riskdiff = prop - pcon) %>%
+  droplevels()
+
+bpaeriskdiff[1:30,]
+
+use_data(bpaeriskdiff, overwrite=TRUE)

@@ -4,4 +4,8 @@ Meta-analysis of adverse events of adjuvant breast cancer treatments
 
 Project in progress 
 
-[Latest plots](https://chjackson.github.io/adverse/inst/doc/plot.html)
+Latest plots
+
+[Absolute rates by study and treatment arm](https://chjackson.github.io/adverse/inst/doc/plot.html)
+
+[Risk differences from control, for studies with a no-biphosphonate control](https://chjackson.github.io/adverse/inst/doc/trtvsae.html)

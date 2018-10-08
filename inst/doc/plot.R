@@ -10,7 +10,7 @@ library(plotly)
 
 plotfn <- function(aesel){
 p <- 
-    bpaeplot %>%
+    bpaearmtype %>%
     filter(aetype %in% aesel) %>% 
     ggplot(aes(x=prop, y=`Trial name`,
            size=N, col=trtcat, label=treatment, label2=count)) +
@@ -27,7 +27,7 @@ ggplotly(p, tooltip=c("y","label","size","label2","x"))
 
 
 ## ------------------------------------------------------------------------
-has_events <- which(!is.na(table(bpaeplot$aetype)[aecategs])) # not 7, 10, 15, 23, 27, 46 
+has_events <- which(!is.na(table(bpaearmtype$aetype)[aecategs])) # not 7, 10, 15, 23, 27, 46 
 
 ## https://github.com/ropensci/plotly/issues/273#issuecomment-195611009
 l <- htmltools::tagList()

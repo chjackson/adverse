@@ -1,7 +1,7 @@
 Package: adverse
 Title: Data on adverse events of adjuvant breast cancer treatment
 Version: 0.0.0.9000
-Authors@R: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+Authors: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 Description: Data on adverse events of adjuvant breast cancer treatment
 Depends: R (>= 3.4.3)
 License: GPL-3
