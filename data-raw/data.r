@@ -41,14 +41,14 @@ use_data(bpaeraw, overwrite=TRUE)
 aecat <- scan("aecategs.txt", what="character", sep="\n") # one element per col of bpaeraw
 aecategs <- unique(aecat)[16:64]
 
-use_data(aecategs)
+use_data(aecategs, overwrite=TRUE)
 
 ## Select a number of AEs for exploration 
 aesel <- aecategs
 aestr <- paste(aesel, collapse="|")
 
 ##' RESHAPE DATA INTO ONE ROW PER ARM 
-bpaelong <- datraw %>%
+bpaelong <- bpaeraw %>%
   gather(vname, x,
          matches("^N[1-5]"),
          matches("^A[1-5]"),
@@ -61,7 +61,7 @@ bpaelong <- datraw %>%
          vname = gsub("A[1-5] (additional coding)", "\\1", vname), 
          vname = gsub("A[1-5] (coding)", "\\1", vname), 
          vname = gsub(";A[1-5]$","",vname)) %>%
-  mutate(aecat = aecat[match(vname, gsub(";A[0-9]$","",names(datraw)))],
+  mutate(aecat = aecat[match(vname, gsub(";A[0-9]$","",names(bpaeraw)))],
          aecat = ifelse(is.na(aecat), vname, aecat)) 
    
 
@@ -85,6 +85,7 @@ bpae <- bpaelongsum %>%
     extract(coding, "trtcat", "^([0-9]).+", remove=FALSE) %>%
     mutate(trtcat = recode(trtcat,
                            `1` = "Control",
+                           `7` = "Control",
                            `2` = "Zoledronic acid",
                            `3` = "Pamidronate",
                            `4` = "Ibandronate",
@@ -105,20 +106,8 @@ bpaeplot <- bpae %>%
     mutate(prop = props$prop) %>% 
     select(`Trial name`, `Trial Code`, armno, treatment, trtcat, N, aetype, count, prop) %>%
     mutate(aetype = gsub("_p$","", aetype)) %>% 
-    filter(!is.na(Proportion)) %>%
+    filter(!is.na(prop)) %>%
     droplevels()
 
 use_data(bpaeplot, overwrite=TRUE)
 
-
-## ## 
-
-## last digit 0 iv 1 oral OK.
-## So what is the middle digit?
-
-## Additional trts ? what does each digit mean 
-## "Chemo - Hormone - Trastuzumab; 1 = None, 2 = Yes, but unspecified, 0 = Don't know" 
-## is that the last digit
-
-## controls
-## "**0 = iv placebo; **1= oral placebo; **3 = no placebo"
