@@ -1,5 +1,5 @@
 ---
-title: "Biphosphonates adverse event rate differences"
+title: "Bisphosphonates adverse event rate differences"
 author: ""
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -27,7 +27,7 @@ p <-
     bpaeriskdiff %>%
     filter(aetype %in% aesel) %>% 
     ggplot(aes(x=riskdiff, y=`Trial name`,
-           size=N, col=trtcat, label=treatment, label2=count)) +
+           size=N, col=drug, label=treatment, label2=count)) +
     facet_wrap(vars(aetype)) + 
     geom_point() +
     xlab("Rate(Treatment) - Rate(Control)") +
@@ -41,7 +41,7 @@ ggplotly(p, tooltip=c("y","label"))
 
 ```
 
-Risk in treatment arm minus risk in control arm. 
+Rate in treatment arm minus rate in control arm. 
 
 Including only studies with a placebo or other non-biphosphonate control.
 

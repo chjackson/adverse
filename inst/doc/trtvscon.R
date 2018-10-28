@@ -15,7 +15,7 @@ p <-
     bpaeriskdiff %>%
     filter(aetype %in% aesel) %>% 
     ggplot(aes(x=riskdiff, y=`Trial name`,
-           size=N, col=trtcat, label=treatment, label2=count)) +
+           size=N, col=drug, label=treatment, label2=count)) +
     facet_wrap(vars(aetype)) + 
     geom_point() +
     xlab("Rate(Treatment) - Rate(Control)") +
