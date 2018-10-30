@@ -19,9 +19,13 @@ knitr::opts_chunk$set(echo=FALSE,
 
 ## Raw data
 
+<<<<<<< HEAD
 ```{r,message=FALSE,warning=FALSE}
 library(adverse)
 # load_all("..")
+=======
+```{r}
+>>>>>>> 3eb37274a7450f256bb63ca02e47823d4515ea2e
 nstudies <- length(unique(bpaearmtype$`Trial name`))
 nstudies_fever <- length(unique(bpaearmtype[bpaearmtype$aetype == "FEVER",]$"Trial name"))
 ``` 
@@ -216,19 +220,30 @@ library(meta)
 
 dres <- direct.tidydata("drug,dose,delivery"=fit.trt, "drug, delivery"=fit.drugdm, "drug"=fit.drug, "drug class"=fit.drugclass, groups=c("id","drugdm","drug","drugclass"))
 
+<<<<<<< HEAD
 p <- ggplot(dres, aes(x=comp, y=est, col=mod)) +
   coord_flip() +
   geom_hline(aes(yintercept=1), col="gray") + 
   geom_point(aes(), position=position_dodge(-0.4)) +
   geom_errorbar(aes(ymin=lower, ymax=upper),
+=======
+ggplot(dres, aes(x=comp, col=mod)) +
+  coord_flip() +
+  geom_hline(aes(yintercept=1), col="gray") + 
+  geom_point(aes(y=est, x=comp), position=position_dodge(-0.4)) +
+  geom_errorbar(aes(ymin=lower, ymax=upper, x=comp),
+>>>>>>> 3eb37274a7450f256bb63ca02e47823d4515ea2e
                 width=0, position=position_dodge(-0.4)) +
     theme(legend.title = element_blank()) +
     scale_y_continuous(trans="log", limits=c(0.08, 12),
                        breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10)) + 
     ylab("Relative odds of fever") + xlab("")
+<<<<<<< HEAD
 ggplotly(p)
 
 # note for ggplotly to work, y=est has to be in main aes 
+=======
+>>>>>>> 3eb37274a7450f256bb63ca02e47823d4515ea2e
 
 ```
 
@@ -313,16 +328,26 @@ datsumm <- datsumm %>%
     mutate(mod = factor(mod, levels=c("direct", names(mods)))) %>%
     mutate(description = treatments$description[match(treatment, treatments$id)])
 
+<<<<<<< HEAD
 p <- ggplot(datsumm, aes(x=description, y=med, col=mod)) +
   coord_flip() + 
   geom_point(aes(), position=position_dodge(-0.4)) +
   geom_errorbar(aes(ymin=l95, ymax=u95),
+=======
+ggplot(datsumm, aes(x=description, col=mod)) +
+  coord_flip() + 
+  geom_point(aes(y=med, x=description), position=position_dodge(-0.4)) +
+  geom_errorbar(aes(ymin=l95, ymax=u95, x=description),
+>>>>>>> 3eb37274a7450f256bb63ca02e47823d4515ea2e
                 width=0, position=position_dodge(-0.4)) +
   theme(legend.title = element_blank()) +
   ylab("Probability of fever") +
     xlab("Treatment ID") + xlab("") + 
     ylim(0, 1)
+<<<<<<< HEAD
 ggplotly(p)
+=======
+>>>>>>> 3eb37274a7450f256bb63ca02e47823d4515ea2e
 
 ```
 

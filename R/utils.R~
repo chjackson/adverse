@@ -1,0 +1,12 @@
+
+direct.comparisons <- function(fit){
+    con <- rep(fit$model$data$t[,1], fit$model$data$na - 1)
+    act <- na.omit(as.vector(t(fit$model$data$t[,-1])))
+    conr <- rep(fit$model$data$r[,1], fit$model$data$na - 1)
+    actr <- na.omit(as.vector(t(fit$model$data$r[,-1])))
+    conn <- rep(fit$model$data$n[,1], fit$model$data$na - 1)
+    actn <- na.omit(as.vector(t(fit$model$data$n[,-1])))
+    lab <- sprintf("%d,%d", con, act)
+    compno <- match(lab, unique(lab))
+    data.frame(con, act, conr, actr, conn, actn, lab, compno)
+}
