@@ -1,5 +1,7 @@
 library(readxl)
 library(tidyverse)
+library(devtools)
+load_all("..")
 
 bpaeraw <- read_excel("Bisphosphonates coded data - Alex.xlsx", range="A2:AMJ61")
 
@@ -82,31 +84,72 @@ bpaelongsum <- bpaelong %>%
 
 ## Data with one row per arm, and cols for each aggregate AE type
 bpae <- bpaelongsum %>%
-    spread(vname, x) %>%
-    filter(!is.na(coding), # remove empty arms 
-           !is.na(N)) %>%
-    mutate(trt2 = as.character(`additional coding`)) %>%
-    replace_na(list(trt2 = "")) %>%
-    extract(coding, "trtcat", "^([0-9]).+", remove=FALSE) %>%
-    mutate(trtcat = recode(trtcat,
-                           `1` = "Control",
-                           `7` = "Control",
-                           `2` = "Zoledronic acid",
-                           `3` = "Pamidronate",
-                           `4` = "Ibandronate",
-                           `5` = "Risedronate",
-                           `6` = "Clodronate")) %>%
-    mutate(treatment = paste0(as.character(coding), "/", trt2)) %>%
-    select("Trial name", "Trial Code", armno, treatment, trtcat, N, matches(!!aestr)) %>%
+  spread(vname, x) %>%
+  filter(!is.na(coding), # remove empty arms 
+         !is.na(N)) %>%
+  mutate(treatment = as.character(coding)) %>% 
+  mutate(addtrt = as.character(`additional coding`)) %>%
+  replace_na(list(addtrt = ""))
+
+## Treatment description database 
+
+bpcoding <- bpae %>%
+    select(treatment) %>%
+    distinct %>%
+    extract(treatment, c("drug", "dose", "delivery"), "^([0-9])([0-9])([0-9])$", remove=FALSE) %>%
+    mutate(drug0 = recode(drug,
+                         `1` = "Control",
+                         `7` = "Denosumab",
+                         `2` = "Zoledronic_acid",
+                         `3` = "Pamidronate",
+                         `4` = "Ibandronate",
+                         `5` = "Risedronate",
+                         `6` = "Clodronate"),
+           drug = ifelse(treatment %in% c("100","101"), "Placebo",
+                  ifelse(treatment == "103", "Observation", drug0)),
+           delivery = recode(delivery,
+                             `0` = "IV",
+                             `1` = "Oral",
+                             `3` = "Observation")) %>%
+    mutate(description = paste(drug, dose, delivery, sep="_")) %>%
+    mutate(drugdm = paste(drug, delivery, sep="_")) %>%
+    mutate(drugdm = ifelse(drugdm=="Observation_Observation", "Observation", drugdm),
+           description = ifelse(description=="Observation_0_Observation", "Observation", description)) %>%
+    mutate(drugclass = fct_collapse(drug,
+                                    `Nitrogenous` = c("Zoledronic_acid","Pamidronate","Ibandronate","Risedronate"),
+                                    `Non-nitrogenous` = "Clodronate")) %>%
+    mutate(id = treatment) %>%
+    select(treatment, id, description, drugdm, drug, drugclass, drug0, dose, delivery)
+bpcoding
+as.data.frame(bpcoding)
+use_data(bpcoding, overwrite=TRUE)
+
+bpae <- bpae %>%
+    left_join(bpcoding) %>%
+    mutate(addtrtclass = fct_collapse(addtrt,  ## TODO deduce from numbers
+                                  "chemoonly" = c("211", "311", "411", "711"),
+                                  "hormoneaionly" = c("131", "151", "161"),
+                                  "hormoneonly" = c("121", "141"),
+                                  "notrt" = c("111"),
+                                  "mixed" = c("120", "212", "221", "261", "200", "222", "300", "400", "522", "600", "622", "262", "60", "70")
+                                  )) %>%    
+    select("Trial name", "Trial Code", armno, treatment, description, N, matches(!!aestr),
+           drug, drugdm, drugclass, drug0, delivery, addtrt, addtrtclass) %>%
     mutate_at(vars(matches(!!aestr)), funs(p = . / N))
-bpae$trtcat <- relevel(factor(bpae$trtcat), "Control")
+
+table(bpae$drug)
+table(bpae$drugdm)
+table(bpae$drugclass)
+table(bpae$delivery)
+table(bpae$addtrt)
+table(bpae$addtrtclass)
 
 ## Define the control arm for each study 
 
 bpae2 <- bpae %>%
   mutate(armno2 = paste0("A", armno)) %>%
-  select(`Trial Code`, armno2, trtcat) %>% 
-  spread(armno2, trtcat) %>%
+  select(`Trial Code`, armno2, drug0) %>% 
+  spread(armno2, drug0) %>%
   select(`Trial Code`, A1:A5) %>% 
   mutate(control_arm = ifelse(is.na(A2), ifelse(is.na(A1), NA, 1), 2)) %>%
   mutate(control_arm = ifelse(`Trial Code`==45, 1, control_arm)) %>% ## HOBOE has two control arms - select letrozole arm 
@@ -114,12 +157,21 @@ bpae2 <- bpae %>%
 
 bpae <- bpae %>% left_join(bpae2, "Trial Code")
 
-## Get the event rate in the control arm for each study 
+## Get the event rate (and denominator) in the control arm for each study 
 
 control_outcomes <- bpae %>%
-  filter(armno == control_arm) %>%
-  select(`Trial Code`, which(names(.) %in% paste0(aecategs,"_p")))
+    filter(armno == control_arm) %>%
+    select(`Trial Code`,
+           `N`,
+           `treatment`,
+           which(names(.) %in% aecategs),
+           which(names(.) %in% paste0(aecategs,"_p"))
+           ) %>%
+    rename(ncon = "N",
+           trtcon = "treatment")
 colnames(control_outcomes) <- gsub("_p", "_pcon", colnames(control_outcomes))
+colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs] <-
+    paste0(colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs], "_rcon")
 
 bpae <- bpae %>% left_join(control_outcomes, "Trial Code")
 
@@ -132,11 +184,17 @@ props <- bpae %>%
     gather(aetype, prop, which(names(.) %in% paste0(aecategs,"_p")))
 pcon <- bpae %>%
     gather(aetype, pcon, which(names(.) %in% paste0(aecategs,"_pcon")))
+rcon <- bpae %>%
+    gather(aetype, rcon, which(names(.) %in% paste0(aecategs,"_rcon")))
 bpaearmtype <- bpae %>%
     gather(aetype, count, which(names(.) %in% aecategs)) %>% 
     mutate(prop = props$prop) %>% 
     mutate(pcon = pcon$pcon) %>% 
-    select(`Trial name`, `Trial Code`, armno, treatment, trtcat, N, aetype, count, prop, pcon) %>%
+    mutate(rcon = rcon$rcon) %>% 
+    select(`Trial name`, `Trial Code`, armno,
+           treatment, description, drug, drug0, drugdm, drugclass,
+           delivery, addtrt, addtrtclass,
+           N, aetype, count, prop, pcon, rcon, ncon, trtcon) %>%
     mutate(aetype = gsub("_p$","", aetype)) %>% 
     filter(!is.na(prop)) %>%
     droplevels()
@@ -148,8 +206,21 @@ bpaeriskdiff <- bpaearmtype %>%
   filter(!is.na(pcon)) %>%
   filter(armno >= 3) %>%
   mutate(riskdiff = prop - pcon) %>%
+  mutate(rr = prop / pcon) %>%
+  mutate(or = plogis(prop) / plogis(pcon)) %>%
   droplevels()
 
 bpaeriskdiff[1:30,]
 
 use_data(bpaeriskdiff, overwrite=TRUE)
+
+
+### Four nested analyses: 
+### 1) id+description already done
+### 2) drugdm
+### 3) drug
+### 4) drugclass 
+
+### Fifth: group by delivery method, todo 
+
+

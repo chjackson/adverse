@@ -1,5 +1,5 @@
 ---
-title: "Biphosphonates adverse event rates"
+title: "Bisphosphonates adverse event rates"
 author: ""
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -25,7 +25,7 @@ p <-
     bpaearmtype %>%
     filter(aetype %in% aesel) %>% 
     ggplot(aes(x=prop, y=`Trial name`,
-           size=N, col=trtcat, label=treatment, label2=count)) +
+           size=count, col=drug, label=treatment, label2=count)) +
     facet_wrap(vars(aetype)) + 
     geom_point() +
     xlim(0,1) +

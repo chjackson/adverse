@@ -1,4 +1,6 @@
 .Rproj.user
 .Rhistory
 .RData
-
+vignettes/*_cache
+*~
+.DS_Store
