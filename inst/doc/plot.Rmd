@@ -25,11 +25,7 @@ p <-
     bpaearmtype %>%
     filter(aetype %in% aesel) %>% 
     ggplot(aes(x=prop, y=`Trial name`,
-<<<<<<< HEAD
            size=count, col=drug, label=treatment, label2=count)) +
-=======
-           size=N, col=drug, label=treatment, label2=count)) +
->>>>>>> 3eb37274a7450f256bb63ca02e47823d4515ea2e
     facet_wrap(vars(aetype)) + 
     geom_point() +
     xlim(0,1) +
