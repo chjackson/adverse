@@ -1,0 +1,344 @@
+---
+title: "Bisphosphonates network meta-analysis: fever"
+author: ""
+date: "`r Sys.Date()`"
+output:
+ html_document:
+  code_folding: hide
+vignette: >
+ %\VignetteIndexEntry{Vignette Title}
+ %\VignetteEngine{knitr::rmarkdown}
+ \usepackage[utf8]{inputenc}
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      fig.width=10,
+                      fig.height=7)
+```
+
+## Raw data
+
+```{r,message=FALSE,warning=FALSE}
+library(adverse)
+# load_all("..")
+nstudies <- length(unique(bpaearmtype$`Trial name`))
+nstudies_fever <- length(unique(bpaearmtype[bpaearmtype$aetype == "FEVER",]$"Trial name"))
+``` 
+`r {nstudies_fever}` out of `r {nstudies}` studies reported an outcome
+of Fever.  All grades combined.
+
+```{r}
+library(plotly)
+library(ggplot2)
+
+plotfn <- function(aesel){
+p <- 
+    bpaearmtype %>%
+    filter(aetype %in% aesel) %>% 
+    ggplot(aes(x=prop, y=`Trial name`,
+           size=count, col=description, label=treatment, label2=count)) +
+    facet_wrap(vars(aetype)) + 
+    geom_point() +
+    xlim(0,1) +
+    xlab("Proportion with adverse event") +
+    ylab("") +
+    guides(size=FALSE) +
+    theme(legend.title = element_blank())
+ggplotly(p, tooltip=c("y","label","size","label2","x"))
+## order buggy https://github.com/ropenslotly/issues/849
+}
+
+plotfn("FEVER")
+```
+
+### Treatment groupings for analysis
+
+Consider four alternative groupings from finer to coarser: 
+
+1. Biphosphonate drug, dose and delivery method.   IV placebo, oral
+   placebo and observation only distinguished. 
+
+2. Biphosphonate drug and delivery method.
+
+3. Biphosphonate drug.  IV and oral placebo grouped, but distinguished
+   from observation only. 
+
+4. Drug class, considering all nitrogenous biphosphonates together.
+   IV and oral placebo grouped, but distinguished from observation
+   only.
+
+### Notes 
+
+* Only study including Clodronate was NSABP B-34, whose control arm
+  used oral placebo.  1 and 0 people with fever were reported in the
+  active / control arms respectively, out of 1623, 1612.  No other
+  study used oral placebos. Exclude for now, but may be included later
+  if we decide to combine all placebos or all controls.
+
+* Two studies, ABCSG12 and HOBOE, included separate arms to compare a
+different kind of hormone therapy for the same biphosphonate ("main"
+treatment).  To start with, define these as different treatments. 
+
+
+```{r,results='hide',message=FALSE}
+
+load_all("..")
+library(tidyverse)
+load_all("../../gemtc/gemtc")
+
+dat <- bpaearmtype %>%
+    filter(aetype == "FEVER") %>%
+    mutate(trtadj = treatment,
+           treatment =
+               ifelse(addtrtclass %in% c("hormoneonly"),
+                      paste(treatment, "hormone_notai", sep="_"),
+                      treatment),
+           treatment0 = fct_collapse(treatment,
+                                     Control=c("100","101","103","103_hormone_notai"))) %>%
+    rename("study"="Trial name", "responders"="count", "sampleSize"="N") %>%
+    filter(study != "Hershman 2007") %>% 
+    group_by(study, treatment, description, treatment0, drug, drug0, drugdm,
+             drugclass, delivery, addtrt, addtrtclass,
+             pcon, ncon, rcon, trtcon) %>%
+    summarise(responders=sum(responders), sampleSize=sum(sampleSize)) %>%
+    mutate(prop = responders / sampleSize) %>%
+    droplevels() %>% 
+    as.data.frame
+filter(dat, study == "NSABP B-34")
+dat <- filter(dat, study != "NSABP B-34")
+dat
+dat[,c("study","treatment","addtrt","pcon","ncon","rcon","trtcon")]
+
+treatments <- bpcoding %>%
+    select(-treatment) %>% 
+    filter(id %in% dat$treatment) %>% 
+    rbind(
+        cbind(id="103_hormone_notai", description="Observation_hormone_notAI",
+              bpcoding %>% filter(id=="103") %>% select(-id, -description, -treatment)),
+        cbind(id="220_hormone_notai", description="Zoledronic_2_IV_hormone_notAI",
+              bpcoding %>% filter(id=="220") %>% select(-id, -description, -treatment))
+    ) %>%
+    mutate(treatment = id) %>%
+    as.data.frame
+
+```
+
+
+
+
+## Networks of comparisons
+
+Number of studies for each comparison indicated on the connecting
+lines.
+
+
+```{r} 
+
+par(mfrow=c(2,2), mar=c(0,1,1,1))
+
+net.trt <- mtc.network(dat, treatments=treatments)
+plot(net.trt, nstudies=TRUE, layout=NULL, use.description=TRUE, main="Drug, dose, delivery")
+
+net.drugdm <- dat %>% mutate(treatment=drugdm) %>% mtc.network
+plot(net.drugdm, nstudies=TRUE, layout=NULL, main="Drug, delivery")
+
+net.drug <- dat %>% mutate(treatment=drug) %>% mtc.network
+plot(net.drug, nstudies=TRUE, layout=NULL, main="Drug")
+
+net.drugclass <- dat %>% mutate(treatment=drugclass) %>% mtc.network
+plot(net.drugclass, nstudies=TRUE, layout=NULL, main="Drug class")
+
+```
+
+
+## Network meta analysis models
+
+#### Model assumptions 
+
+* Relative effects for each comparison are "random effects",
+  normally distributed between studies with an unknown mean and variance 
+
+* Baseline rate of adverse events (that is, for "observation only"
+  controls) is also a random effect.  Log odds is normally distributed
+  between studies with an unknown mean and variance.
+
+* gemtc R package used, with code modified to deal with random
+  baselines. Package default weakly informative priors. 
+
+The only relative effects which can't be estimated from the data are
+those relating to Ibandronate.  There is only one study for this drug
+(Body 2007) which reported data for fever.  26 out of 137 in the
+zoledronic acid arm reported fever, compared to 0 / 137 in the
+ibandronate arm.  Unsure how to deal with this!  Is it clinically
+plausible?  We might be able to moderate this outlying result using
+some model which borrows information from other drugs which are
+similar to ibandronate?  Or just merge all nitrogenous biphosphonates?
+
+
+```{r,cache=TRUE,results="hide"}
+hy.prior <- mtc.hy.empirical.lor(outcome.type="semi-objective",
+                                 comparison.type="pharma-pharma")
+# hy.prior=hy.prior, om.scale=1 in below? 
+
+#load_all("..")
+#load_all("../../gemtc/gemtc")
+#unload("../../gemtc/gemtc")
+
+mod.trt <- mtc.model(net.trt, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="103", groups="treatment")
+mod.drugdm <- mtc.model(net.drugdm, type="grouptreat", likelihood="cjbinom", link="logit", groups="drugdm", basetrt="Observation")
+mod.drug <- mtc.model(net.drug, type="grouptreat", likelihood="cjbinom", link="logit", groups="drug", basetrt="Observation")
+mod.drugclass <- mtc.model(net.drugclass, type="grouptreat", likelihood="cjbinom", link="logit", groups="drugclass", basetrt="Observation")
+
+fit.trt <- mtc.run(mod.trt)
+fit.drugdm <- mtc.run(mod.drugdm)
+fit.drug <- mtc.run(mod.drug)
+fit.drugclass <- mtc.run(mod.drugclass)
+```
+
+
+```{r, eval=FALSE}
+trace.basic(fit.trt)
+trace.basic(fit.drug)
+trace.basic(fit.drugdm)
+trace.basic(fit.drugclass)
+
+```
+
+
+## Relative treatment effects
+
+Estimates from each of the four network meta-analysis models, compared
+with direct data, for the comparisons where there is direct data. 
+
+```{r, warning=FALSE}
+library(meta)
+
+dres <- direct.tidydata("drug,dose,delivery"=fit.trt, "drug, delivery"=fit.drugdm, "drug"=fit.drug, "drug class"=fit.drugclass, groups=c("id","drugdm","drug","drugclass"))
+
+p <- ggplot(dres, aes(x=comp, y=est, col=mod)) +
+  coord_flip() +
+  geom_hline(aes(yintercept=1), col="gray") + 
+  geom_point(aes(), position=position_dodge(-0.4)) +
+  geom_errorbar(aes(ymin=lower, ymax=upper),
+                width=0, position=position_dodge(-0.4)) +
+    theme(legend.title = element_blank()) +
+    scale_y_continuous(trans="log", limits=c(0.08, 12),
+                       breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10)) + 
+    ylab("Relative odds of fever") + xlab("")
+ggplotly(p)
+
+# note for ggplotly to work, y=est has to be in main aes 
+
+```
+
+* Lower fever rates in Zoledronic acid dose definition 4 compared to
+  other Zoledronic acid doses.  Makes sense as this is "delayed"
+  dosage?
+
+* Not much difference between Zoledronic acid dose definitions 1, 2, 3 
+
+* Apparent difference between "placebo" and "observation only"
+  controls when compared to Zoledronic acid dose 2.  Sounds
+  implausible. 
+  Consistent with unexplained between study heterogeneity
+
+* Perhaps this causes the apparent overestimate (compared to direct
+  data) of the effect of Zol 1 IV and Zol 2 IV (non-AI hormone) vs
+  observation only.
+
+* Pamidronate dose 8 - not much difference from Zoledronic acid dose def 1
+
+* Pamidronate dose 1 appears to do better than Zol 1 (hence better than
+  Pamidronate dose 8)
+
+* Denosumab appears to do better than Zoledronate dose 1, but this effect is
+moderated under the model
+
+* Note estimated relative odds is exactly 1 between e.g. two drugs in the same
+  class under the "drug class" model, or two dosages or delivery
+  methods of the same drug in the "drug" model.
+
+
+
+
+The four alternative ways of grouping effects of similar treatments
+appear to give a similar fit to the data, according to standard methods
+of statistical model comparison (DIC)
+
+```{r,results="hide"}
+dicres <- t(sapply(list(fit.trt, fit.drugdm, fit.drug, fit.drugclass),
+                   function(x){x$deviance[c("Dbar","pD","DIC")]}))
+rownames(dicres) <- c("trt", "drugdm", "drug", "drugclass")
+dicres
+
+```
+
+
+## Absolute rates of fever
+
+To produce the absolute event rate under each treatment:
+
+* first the absolute rate under control (observation only) for a
+predicted new study is estimated
+
+* then the relative odds for each treatment is applied to this
+
+Posterior mean and 95% credible intervals
+
+```{r, warning=FALSE}
+
+library(binom)
+
+## todo list stuff. learn broom? 
+mods <- list("drug,dose,delivery"=fit.trt,
+             "drug, delivery"=fit.drugdm,
+             "drug"=fit.drug,
+             "drug class"=fit.drugclass)
+
+bres <- do.call(baserate.tidydata,
+                c(mods, list(groups=c("id","drugdm","drug","drugclass"))))
+
+datsumm <- dat %>% group_by(treatment) %>%
+  summarise(r=sum(responders), n=sum(sampleSize)) %>%
+  mutate(p = r/n)
+ci <- binom.confint(datsumm$r, datsumm$n, methods="logit")
+
+datsumm <- datsumm %>%
+    mutate(l95=ci$lower, u95=ci$upper) %>%
+    rename(med=p) %>%
+    mutate(mod = "direct") %>% 
+    select(l95, med, u95, treatment, mod) %>%
+    bind_rows(bres) %>%
+    mutate(mod = factor(mod, levels=c("direct", names(mods)))) %>%
+    mutate(description = treatments$description[match(treatment, treatments$id)])
+
+p <- ggplot(datsumm, aes(x=description, y=med, col=mod)) +
+  coord_flip() + 
+  geom_point(aes(), position=position_dodge(-0.4)) +
+  geom_errorbar(aes(ymin=l95, ymax=u95),
+                width=0, position=position_dodge(-0.4)) +
+  theme(legend.title = element_blank()) +
+  ylab("Probability of fever") +
+    xlab("Treatment ID") + xlab("") + 
+    ylim(0, 1)
+ggplotly(p)
+
+```
+
+
+* Observation vs placebo strangeness
+
+* More uncertainty in estimates from model, compared to raw data,
+  reflecting between study heterogeneity in baseline rates
+
+
+## TODO 
+
+More cross checking of all these model results against raw data
+
+Study additional treatments 
+
+* check if variability in baseline event rate is explained by additional treatment.  Add regression term. 
+
+* assess if _relative_ effects vary between additional treatments. 
