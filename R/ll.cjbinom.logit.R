@@ -43,36 +43,54 @@ validate.data.cjbinom.logit <- gemtc:::validate.data.counts
 ## where "control" is defined as treatment indexed 1.  id=100 
 ## if merging controls, all should have same risk 
 
-study.baseline.priors.cjbinom.logit <- function(basetrt=1) {
+study.baseline.priors.cjbinom.logit <- function(basetrt=1, ncovs=0) {
+    sq <- seq(length=ncovs)
+    linpred <- if (ncovs==0)
+                   "0" else
+                           paste(sprintf("beta[%s]*x[i,%s]", sq, sq), collapse=" + ")
+    betapriors <- paste(paste(sprintf("beta[%s] ~ dt(0, reg.prior.prec, 1)", sq), collapse="\n"),"\nreg.prior.prec <- pow(om.scale, -2)")
+      
 sprintf("
 ## mu[i] is log odds in baseline arm of study i 
-## bstudy[i] is log odds in treatment indexed 1, if that treatment had been given in study i
+## bstudy[i] is log odds in treatment indexed `basetrt`, if that treatment had been given in study i
 ## model this as random effect to account for different reporting rates / baseline pops
+
 
 ## Can we compare mu[i] with direct data from study i 
 basetrt <- %s
 for (i in studies.a) {
   mu[i] <- bstudy[i] + d[basetrt, t[i,1]] 
-  bstudy[i] ~ dnorm(mumu, mutau)
+  bstudy[i] ~ dnorm(mumu[i], mutau)
+  mumu[i] <- alpha + %s 
 }
-bstudy.rep ~ dnorm(mumu, mutau)
+
+## TODO define covariate value we want to predict for, e.g. typical add treatment
+
+bstudy.rep ~ dnorm(alpha, mutau)
 for (i in 1:nt){
-  btrt[i] <- exp(mumu + d[basetrt, i]) / (1 + exp(mumu + d[basetrt, i]))
+  btrt[i] <- exp(alpha + d[basetrt, i]) / (1 + exp(alpha + d[basetrt, i]))
   btrt.pred[i] <- exp(bstudy.rep + d[basetrt, i]) / (1 + exp(bstudy.rep + d[basetrt, i]))
 }
-mumu ~ dlogis(0, 1)
+alpha ~ dlogis(0, 1)
+%s
 musd ~ dnorm(0, 10)T(0,)
 mutau <- 1 / (musd*musd)
 ",
-basetrt)
+
+basetrt,
+linpred,
+betapriors)
 }
 
 add.monitors.cjbinom.logit <- function(model) {
+    ncovs <- model$ncovs
     nt <- model$data$nt
     ns <- length(model$data$studies.a)
-    extras <- c("mumu",
+    extras <- c("alpha",
                 "mutau",
+                sprintf("beta[%d]",1:ncovs),
                 sprintf("mu[%d]",1:ns),
+                sprintf("bstudy[%d]",1:ns),
                 sprintf("btrt[%d]",1:nt),
                 sprintf("btrt.pred[%d]",1:nt),
                 sprintf("d[%d,%d]", rep(1:nt, nt), rep(1:nt, each=nt))
@@ -81,7 +99,8 @@ add.monitors.cjbinom.logit <- function(model) {
     model$monitors$enabled <- c(model$monitors$enabled, extras)
     for (i in 1:model$n.chain){ 
         model$inits[[i]]$mu <- NULL
-        model$inits[[i]]$mumu <- 0
+        model$inits[[i]]$alpha <- 0
+        if (ncovs > 0) model$inits[[i]]$beta <- rep(0, ncovs)
         model$inits[[i]]$musd <- 1
     }
     model

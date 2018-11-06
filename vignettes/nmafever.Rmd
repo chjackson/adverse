@@ -56,15 +56,15 @@ plotfn("FEVER")
 
 Consider four alternative groupings from finer to coarser: 
 
-1. Biphosphonate drug, dose and delivery method.   IV placebo, oral
+1. Bisphosphonate drug, dose and delivery method.   IV placebo, oral
    placebo and observation only distinguished. 
 
-2. Biphosphonate drug and delivery method.
+2. Bisphosphonate drug and delivery method.
 
-3. Biphosphonate drug.  IV and oral placebo grouped, but distinguished
+3. Bisphosphonate drug.  IV and oral placebo grouped, but distinguished
    from observation only. 
 
-4. Drug class, considering all nitrogenous biphosphonates together.
+4. Drug class, considering all nitrogenous bisphosphonates together.
    IV and oral placebo grouped, but distinguished from observation
    only.
 
@@ -77,7 +77,7 @@ Consider four alternative groupings from finer to coarser:
   if we decide to combine all placebos or all controls.
 
 * Two studies, ABCSG12 and HOBOE, included separate arms to compare a
-different kind of hormone therapy for the same biphosphonate ("main"
+different kind of hormone therapy for the same bisphosphonate ("main"
 treatment).  To start with, define these as different treatments. 
 
 
@@ -110,6 +110,24 @@ dat <- filter(dat, study != "NSABP B-34")
 dat
 dat[,c("study","treatment","addtrt","pcon","ncon","rcon","trtcon")]
 
+## Study-specific data 
+studies <- dat %>% select(study, addtrt, addtrtclass) %>% unique %>%
+  filter(!(study=="HOBOE" & addtrtclass=="hormoneaionly")) %>% 
+  filter(!(study=="ABCSG12" & addtrtclass=="hormoneaionly")) %>%
+  filter(!(study=="Conte 1996" & addtrt=="622")) %>%
+  mutate(chemo = as.numeric(addtrtclass %in% c("chemoonly", "mixed"))) %>%
+  mutate(addtrtclass = fct_collapse(addtrtclass,
+                                    "hormoneonly" = c("hormoneaionly","hormoneonly"))) %>% 
+  rename(t = addtrtclass) %>%
+  cbind(model.matrix(~t-1, data=.))
+studies 
+nrow(studies)
+
+## conte 1996 600 vs 622 ?
+## These are both chemotherapy.   Why coded 6? 
+## don't know whether control arm had additional hormone + trastuzumab.  Unlikely if trial was meant to evaluate eff of pamidronate?
+
+
 treatments <- bpcoding %>%
     select(-treatment) %>% 
     filter(id %in% dat$treatment) %>% 
@@ -137,16 +155,16 @@ lines.
 
 par(mfrow=c(2,2), mar=c(0,1,1,1))
 
-net.trt <- mtc.network(dat, treatments=treatments)
+net.trt <- mtc.network(dat, treatments=treatments, studies=studies)
 plot(net.trt, nstudies=TRUE, layout=NULL, use.description=TRUE, main="Drug, dose, delivery")
 
-net.drugdm <- dat %>% mutate(treatment=drugdm) %>% mtc.network
+net.drugdm <- dat %>% mutate(treatment=drugdm) %>% mtc.network(studies=studies)
 plot(net.drugdm, nstudies=TRUE, layout=NULL, main="Drug, delivery")
 
-net.drug <- dat %>% mutate(treatment=drug) %>% mtc.network
+net.drug <- dat %>% mutate(treatment=drug) %>% mtc.network(studies=studies)
 plot(net.drug, nstudies=TRUE, layout=NULL, main="Drug")
 
-net.drugclass <- dat %>% mutate(treatment=drugclass) %>% mtc.network
+net.drugclass <- dat %>% mutate(treatment=drugclass) %>% mtc.network(studies=studies)
 plot(net.drugclass, nstudies=TRUE, layout=NULL, main="Drug class")
 
 ```
@@ -173,7 +191,7 @@ zoledronic acid arm reported fever, compared to 0 / 137 in the
 ibandronate arm.  Unsure how to deal with this!  Is it clinically
 plausible?  We might be able to moderate this outlying result using
 some model which borrows information from other drugs which are
-similar to ibandronate?  Or just merge all nitrogenous biphosphonates?
+similar to ibandronate?  Or just merge all nitrogenous bisphosphonates?
 
 
 ```{r,cache=TRUE,results="hide"}
@@ -182,13 +200,13 @@ hy.prior <- mtc.hy.empirical.lor(outcome.type="semi-objective",
 # hy.prior=hy.prior, om.scale=1 in below? 
 
 #load_all("..")
-#load_all("../../gemtc/gemtc")
+load_all("../../gemtc/gemtc")
 #unload("../../gemtc/gemtc")
 
-mod.trt <- mtc.model(net.trt, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="103", groups="treatment")
-mod.drugdm <- mtc.model(net.drugdm, type="grouptreat", likelihood="cjbinom", link="logit", groups="drugdm", basetrt="Observation")
-mod.drug <- mtc.model(net.drug, type="grouptreat", likelihood="cjbinom", link="logit", groups="drug", basetrt="Observation")
-mod.drugclass <- mtc.model(net.drugclass, type="grouptreat", likelihood="cjbinom", link="logit", groups="drugclass", basetrt="Observation")
+mod.trt <- mtc.model(net.trt, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="103")
+mod.drugdm <- mtc.model(net.drugdm, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="Observation")
+mod.drug <- mtc.model(net.drug, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="Observation")
+mod.drugclass <- mtc.model(net.drugclass, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="Observation")
 
 fit.trt <- mtc.run(mod.trt)
 fit.drugdm <- mtc.run(mod.drugdm)
@@ -284,6 +302,9 @@ predicted new study is estimated
 
 * then the relative odds for each treatment is applied to this
 
+TODO did I forget to sample the random treatment effects. does this even matter? 
+haven't illustrated heterogeneity in treatment effects 
+
 Posterior mean and 95% credible intervals
 
 ```{r, warning=FALSE}
@@ -333,12 +354,69 @@ ggplotly(p)
   reflecting between study heterogeneity in baseline rates
 
 
+## Influence of additional treatment 
+
+The figure below illustrates the event rate under "observation only" for each study, with studies grouped in the plot according to the additional treatment(s) given.  The network meta-analysis model was used, so that estimates could be obtained for studies which did not include an "observation only" control group. 
+
+So we could calculate predicted baseline event rates either by
+
+* averaging over all additional treatments (as done above). 
+
+* modelling the contrast between "mixed", "hormone only" and/or "chemo only", then reporting the predicted rate for a specific additional treatment group.   The estimated contrast between (mixed or chemo only) vs (hormone only) is "statistically significant" (according to DIC) but it's driven by a small number of data points. 
+
+```{r}
+
+blabs <- sprintf("bstudy[%s]", 1:nrow(fit.trt$model$network$studies))
+sam <- as.matrix(fit.trt[["samples"]][,blabs])
+res <- as.data.frame(plogis(t(apply(sam, 2, quantile, c(0.025, 0.5, 0.975)))))
+colnames(res) <- c("l95","med","u95")
+res <- cbind(res, net.trt$studies) %>% arrange(t) 
+
+p <- ggplot(res, aes(y=med, ymin=l95, ymax=u95, x=t, label=study, label2=addtrt)) +
+  coord_flip() + 
+  geom_pointrange(position=position_jitter(width=0.15, height=0)) +
+  ylim(0,0.4) +
+  ylab("Predicted event rate under control") +
+  xlab("Additional treatment")
+ggplotly(p)
+```
+
+```{r,eval=FALSE,results="hide"}
+load_all("../../gemtc/gemtc")
+load_all("..")
+
+## Fit meta-regression model with covariate(s) on baseline rate 
+mod.trtcov <- mtc.model(net.trt, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="103", basereg=list(variables=c("chemo")))
+fit.trtcov <- mtc.run(mod.trtcov)
+
+## todo test extended code to put covariates on baseline 
+## Slightly better fit and DIC for model with covariate.
+## But why is pd not bigger?  tight prior? 
+sam <- exp(as.matrix(fit.trtcov[["samples"]][,"beta[1]"]))
+quantile(sam, c(0.025, 0.975))
+
+bayesplot::mcmc_trace(fit.trtcov[["samples"]], pars="beta[1]")
+
+blabs <- sprintf("bstudy[%s]", 1:nrow(fit.trt$model$network$studies))
+sam <- as.matrix(fit.trt[["samples"]][,blabs])
+
+dicres <- t(sapply(list(fit.trt, fit.trtcov),
+                   function(x){x$deviance[c("Dbar","pD","DIC")]}))
+rownames(dicres) <- c("trt", "trtcov")
+dicres
+
+```
+
+
 ## TODO 
 
 More cross checking of all these model results against raw data
 
-Study additional treatments 
+* assess if _relative_ effects vary between additional treatments.  illustrate heterogeneity in relative effects
 
-* check if variability in baseline event rate is explained by additional treatment.  Add regression term. 
 
-* assess if _relative_ effects vary between additional treatments. 
+more formal checking of NMA model assumptions 
+
+
+
+
