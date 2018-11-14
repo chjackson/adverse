@@ -37,7 +37,7 @@ p <-
     bpaearmtype %>%
     filter(aetype %in% aesel) %>% 
     ggplot(aes(x=prop, y=`Trial name`,
-           size=count, col=description, label=treatment, label2=count)) +
+           size=count, col=description, label=treatment, label2=N)) +
     facet_wrap(vars(aetype)) + 
     geom_point() +
     xlim(0,1) +
@@ -408,15 +408,71 @@ dicres
 ```
 
 
+
+## Between-study heterogeneity in relative effects
+
+Limited amount of information to investigate between-study heterogeneity in the relative treatment effects. There are 6 studies each which compared Zol 1 IV and observation, and Zol 2 IV and observation. Estimated odds ratios from these are plotted below.
+
+Heterogeneity here seems driven by small counts, unlikely to be enough information to determine any predictors of heterogeneity.
+
+Each other direct comparison has at most 2 studies (see network plots above).
+
+```{r}
+
+zdfn <- function(zname){ 
+    direct <- direct.comparisons(fit.trt)
+    oid <- match("Observation",net.trt$treatments$description)
+    zid <- match(zname,net.trt$treatments$description)
+    zdat <- direct %>% filter(con==oid & act==zid)
+    study <- net.trt$studies[zdat$sid,]
+    r0 <- zdat$conr + 0.5
+    r1 <- zdat$actr + 0.5
+    n0 <- zdat$conn + 0.5
+    n1 <- zdat$actn + 0.5
+    p1 <- r1/n1; p0 <- r0/n0
+    sd1 <- sqrt(1/r1 + 1/n1)
+    sd0 <- sqrt(1/r0 + 1/n0)
+    lor <- qlogis(p1) - qlogis(p0)
+    lorse <- sqrt(sd1^2 + sd0^2)
+    u95 <- exp(lor + qnorm(0.975)*lorse)
+    l95 <- exp(lor - qnorm(0.975)*lorse)
+    or <- exp(lor)
+    label <- sprintf("\n%s/%s treatment\n%s/%s control\naddtrt=%s:%s",
+                     zdat$actr, zdat$actn, zdat$conr, zdat$conn, study$addtrt, study$t)
+    data.frame(study, trt=zname, r1, r0, n1, n0, p1, p0, lor, or, l95, u95, label)
+}
+
+zdf <- rbind(zdfn("Zoledronic_acid_1_IV"), 
+             zdfn("Zoledronic_acid_2_IV")) %>% arrange(trt, study)
+
+p <- ggplot(zdf, aes(x=study, y=or, label=label, ymin=l95, ymax=u95)) +
+  coord_flip() +
+  facet_wrap(. ~ trt) + 
+  geom_hline(aes(yintercept=1), col="gray") + 
+  geom_pointrange() +
+  scale_y_continuous(trans="log", breaks=c(0.1,0.2,0.5,1,2,3,5,10,20,100)) +
+  ylab("Ratio in odds of fever, vs observation only") + 
+  xlab("")
+
+ggplotly(p, tooltip="label")
+
+```
+
+
+
 ## TODO 
 
-More cross checking of all these model results against raw data
+* More cross checking of all these model results against raw data
 
-* assess if _relative_ effects vary between additional treatments.  illustrate heterogeneity in relative effects
-
-
-more formal checking of NMA model assumptions 
+* consistency assumption 
 
 
-
-
+```{r}
+## Priors
+## * LOR scale 5. default data-based one 4.19 = max observed LOR
+## * prior SD for LOR set to 15 times scale.
+## * prior SD for reg coeffs set to scale.
+## * prior for REs on effects.
+## * logistic uniform for baseline log odds.
+## * cov effs for baseline? same as for drug effs, 15scale # # baseline REs: t_4(0,1) as in gelman wiki. N(0,1)T(0,) allows between study SD for baseline log OR between 0.03, 2.2. qlogis(c(0.05, 0.95)) is -3 to 3 on log OR scale. would be SD of 2.
+```

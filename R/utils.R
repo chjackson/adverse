@@ -2,15 +2,17 @@
 direct.comparisons <- function(fit.full, fit.grp=NULL, groups=NULL){
     dat <- fit.full$model$data
     ns <- nrow(dat$t)
-    trt <- r <- n <- vector(ns, mode="list")
+    trt <- r <- n <- sid <- vector(ns, mode="list")
     for (i in 1:ns){
         trt[[i]] <- combn(na.omit(dat$t[i,]), 2)
         r[[i]] <- combn(na.omit(dat$r[i,]), 2)
         n[[i]] <- combn(na.omit(dat$n[i,]), 2)
+        sid[[i]] <- rep(i, ncol(n[[i]]))
     }
     trt <- t(do.call("cbind", trt))
     r <- t(do.call("cbind", r))
     n <- t(do.call("cbind", n))
+    sid <- do.call("c", sid)
     con <- trt[,1]; act <- trt[,2]
     conr <- r[,1]; actr <- r[,2]
     conn <- n[,1]; actn <- n[,2]
@@ -19,7 +21,7 @@ direct.comparisons <- function(fit.full, fit.grp=NULL, groups=NULL){
     lab <- paste(desc[act], desc[con], sep=" / ")
     labno <- sprintf("%d,%d", con, act)
     compno <- match(lab, unique(lab))
-    res <- data.frame(con, act, conr, actr, conn, actn, lab, labno, compno)
+    res <- data.frame(sid, con, act, conr, actr, conn, actn, lab, labno, compno)
     if (!is.null(fit.grp)){
         treatments0 <- fit.grp$model$network$treatments
         gid <- match(treatments[,groups], treatments0$id)

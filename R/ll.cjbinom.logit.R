@@ -48,23 +48,19 @@ study.baseline.priors.cjbinom.logit <- function(basetrt=1, ncovs=0) {
     linpred <- if (ncovs==0)
                    "0" else
                            paste(sprintf("beta[%s]*x[i,%s]", sq, sq), collapse=" + ")
-    betapriors <- paste(paste(sprintf("beta[%s] ~ dt(0, reg.prior.prec, 1)", sq), collapse="\n"),"\nreg.prior.prec <- pow(om.scale, -2)")
+    betapriors <- paste(paste(sprintf("beta[%s] ~ dt(0, reg.prior.prec, 1)", sq), collapse="\n"),"\nreg.prior.prec <- pow(15*om.scale, -2)")
       
 sprintf("
 ## mu[i] is log odds in baseline arm of study i 
 ## bstudy[i] is log odds in treatment indexed `basetrt`, if that treatment had been given in study i
 ## model this as random effect to account for different reporting rates / baseline pops
 
-
-## Can we compare mu[i] with direct data from study i 
 basetrt <- %s
 for (i in studies.a) {
   mu[i] <- bstudy[i] + d[basetrt, t[i,1]] 
   bstudy[i] ~ dnorm(mumu[i], mutau)
   mumu[i] <- alpha + %s 
 }
-
-## TODO define covariate value we want to predict for, e.g. typical add treatment
 
 bstudy.rep ~ dnorm(alpha, mutau)
 for (i in 1:nt){
@@ -73,7 +69,7 @@ for (i in 1:nt){
 }
 alpha ~ dlogis(0, 1)
 %s
-musd ~ dnorm(0, 10)T(0,)
+musd ~ dt(0, 1, 4)T(0,)
 mutau <- 1 / (musd*musd)
 ",
 
@@ -84,17 +80,18 @@ betapriors)
 
 add.monitors.cjbinom.logit <- function(model) {
     ncovs <- model$ncovs
+    if (is.null(ncovs)) ncovs <- 0
     nt <- model$data$nt
     ns <- length(model$data$studies.a)
     extras <- c("alpha",
                 "mutau",
-                sprintf("beta[%d]",1:ncovs),
                 sprintf("mu[%d]",1:ns),
                 sprintf("bstudy[%d]",1:ns),
                 sprintf("btrt[%d]",1:nt),
                 sprintf("btrt.pred[%d]",1:nt),
                 sprintf("d[%d,%d]", rep(1:nt, nt), rep(1:nt, each=nt))
                 )
+    if (ncovs > 0) extras <- c(extras, sprintf("beta[%d]",1:ncovs))
     model$monitors$available <- c(model$monitors$available, extras)
     model$monitors$enabled <- c(model$monitors$enabled, extras)
     for (i in 1:model$n.chain){ 
