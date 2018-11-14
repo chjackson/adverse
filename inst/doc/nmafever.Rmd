@@ -28,7 +28,7 @@ nstudies_fever <- length(unique(bpaearmtype[bpaearmtype$aetype == "FEVER",]$"Tri
 `r {nstudies_fever}` out of `r {nstudies}` studies reported an outcome
 of Fever.  All grades combined.
 
-```{r}
+```{r,message=FALSE}
 library(plotly)
 library(ggplot2)
 

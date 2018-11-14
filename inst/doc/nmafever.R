@@ -9,7 +9,7 @@ library(adverse)
 nstudies <- length(unique(bpaearmtype$`Trial name`))
 nstudies_fever <- length(unique(bpaearmtype[bpaearmtype$aetype == "FEVER",]$"Trial name"))
 
-## ------------------------------------------------------------------------
+## ----message=FALSE-------------------------------------------------------
 library(plotly)
 library(ggplot2)
 
