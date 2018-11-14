@@ -203,7 +203,7 @@ ggplotly(p)
 #  load_all("..")
 #  
 #  ## Fit meta-regression model with covariate(s) on baseline rate
-#  mod.trtcov <- mtc.model(net.trt, type="grouptreat", likelihood="cjbinom", link="logit", basetrt="103", basereg=list(variables=c("chemo")))
+#  mod.trtcov <- mtc.model(net.trt, type="grouptreat", likelihood="cjbinom", link="logit", om.scale=scale, hy.prior=hy.prior, basetrt="103", basereg=list(variables=c("chemo")))
 #  fit.trtcov <- mtc.run(mod.trtcov)
 #  
 #  ## todo test extended code to put covariates on baseline
@@ -263,7 +263,53 @@ p <- ggplot(zdf, aes(x=study, y=or, label=label, ymin=l95, ymax=u95)) +
 ggplotly(p, tooltip="label")
 
 
+## ---- eval=FALSE---------------------------------------------------------
+#  
+#  load_all("../../gemtc/gemtc")
+#  
+#  ## split single node
+#  mod.trtsplit <- mtc.model(net.trt, type="nodesplitgrouptreat", likelihood="cjbinom", link="logit", om.scale=scale, hy.prior=hy.prior, t1="210", t2="220")
+#  cat(mod.trtsplit$code)
+#  fit.trtsplit <- mtc.run(mod.trtsplit)
+#  
+#  bayesplot::mcmc_trace(fit.trtsplit[["samples"]], pars=c("d.direct", "d.indirect"))
+#  bayesplot::mcmc_areas_ridges(fit.trtsplit[["samples"]], pars=c("d.direct", "d.indirect"))
+#  
+#  ## split all nodes with direct and indirect evidence
+#  nsc <- mtc.nodesplit.comparisons(net.trt)
+#  modall.trtsplit <- mtc.nodesplitgrouptreat(net.trt, comparisons=nsc, likelihood="cjbinom", om.scale=scale, hy.prior=hy.prior, link="logit")
+#  modall.trtsplit
+#  plot(modall.trtsplit)
+#  summary(modall.trtsplit)
+#  summ <- summary(modall.trtsplit)
+#  
+#  summ$cons.effect
+#  summ$p.value
+#  plot(summ)
+#  
+#  ## Examine the direct vs indirect OR itself
+#  d.direct <- sapply(modall.trtsplit[1:9], function(x){unlist(x$samples[,"d.direct"])})
+#  d.indirect <- sapply(modall.trtsplit[1:9], function(x){unlist(x$samples[,"d.indirect"])})
+#  dvsind <- apply(d.direct - d.indirect, 2, quantile, c(0.025, 0.5, 0.975))
+#  dvsind <- as.data.frame(t(exp(dvsind)))
+#  names(dvsind) <- c("l95","est","u95")
+#  dvsind$comp <- rownames(dvsind)
+#  
+#  ggplot(dvsind, aes(x=comp, y=est, ymin=l95, ymax=u95)) +
+#    geom_pointrange() +
+#    scale_y_continuous(trans="log", breaks=c(0.1, 0.5, 1, 2, 5, 10)) +
+#    ylab("Odds ratio (direct / indirect)") + xlab("") +
+#    coord_flip()
+#  
+#  dicres <- t(sapply(modall.trtsplit,
+#                     function(x){x$deviance[c("Dbar","pD","DIC")]}))
+#  dicres # small DIC improvements from some consistency models
+#  ## could also assess contribution of points to DIC
+#  
+#  
+
 ## ------------------------------------------------------------------------
+
 ## Priors
 ## * LOR scale 5. default data-based one 4.19 = max observed LOR
 ## * prior SD for LOR set to 15 times scale.
@@ -271,4 +317,7 @@ ggplotly(p, tooltip="label")
 ## * prior for REs on effects.
 ## * logistic uniform for baseline log odds.
 ## * cov effs for baseline? same as for drug effs, 15scale # # baseline REs: t_4(0,1) as in gelman wiki. N(0,1)T(0,) allows between study SD for baseline log OR between 0.03, 2.2. qlogis(c(0.05, 0.95)) is -3 to 3 on log OR scale. would be SD of 2.
+
+
+
 
