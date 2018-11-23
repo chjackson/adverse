@@ -49,7 +49,7 @@ dat <- bpaearmtype %>%
                                      Control=c("100","101","103","103_hormone_notai"))) %>%
     rename("study"="Trial name", "responders"="count", "sampleSize"="N") %>%
     filter(study != "Hershman 2007") %>% 
-    group_by(study, treatment, description, treatment0, drug, drug0, drugdm,
+    group_by(study, reporting, treatment, description, treatment0, drug, drug0, drugdm,
              drugclass, delivery, addtrt, addtrtclass,
              pcon, ncon, rcon, trtcon) %>%
     summarise(responders=sum(responders), sampleSize=sum(sampleSize)) %>%
@@ -62,7 +62,7 @@ dat
 dat[,c("study","treatment","addtrt","pcon","ncon","rcon","trtcon")]
 
 ## Study-specific data 
-studies <- dat %>% select(study, addtrt, addtrtclass) %>% unique %>%
+studies <- dat %>% select(study, reporting, addtrt, addtrtclass) %>% unique %>%
   filter(!(study=="HOBOE" & addtrtclass=="hormoneaionly")) %>% 
   filter(!(study=="ABCSG12" & addtrtclass=="hormoneaionly")) %>%
   filter(!(study=="Conte 1996" & addtrt=="622")) %>%
@@ -198,6 +198,15 @@ p <- ggplot(res, aes(y=med, ymin=l95, ymax=u95, x=t, label=study, label2=addtrt)
   xlab("Additional treatment")
 ggplotly(p)
 
+## ------------------------------------------------------------------------
+p <- ggplot(res, aes(y=med, ymin=l95, ymax=u95, x=reporting, label=study)) +
+  coord_flip() + 
+  geom_pointrange(position=position_jitter(width=0.15, height=0)) +
+  ylim(0,0.4) +
+  ylab("Predicted event rate under control") +
+  xlab("Reporting quality")
+ggplotly(p)
+
 ## ----eval=FALSE,results="hide"-------------------------------------------
 #  load_all("../../gemtc/gemtc")
 #  load_all("..")
@@ -317,7 +326,6 @@ ggplotly(p, tooltip="label")
 ## * prior for REs on effects.
 ## * logistic uniform for baseline log odds.
 ## * cov effs for baseline? same as for drug effs, 15scale # # baseline REs: t_4(0,1) as in gelman wiki. N(0,1)T(0,) allows between study SD for baseline log OR between 0.03, 2.2. qlogis(c(0.05, 0.95)) is -3 to 3 on log OR scale. would be SD of 2.
-
 
 
 

@@ -1,5 +1,6 @@
 NA
 NA
+1 = full, 2 = more than 5% patients, 3 = not full (eg. only those 'considered related' or no cut-off given for % patients affected
 1 = mainly academic, 2 = mixed, 3 = mainly industry
 1 = blinded/double-blinded; 2 = open label
 1 = acute; 2 = during medication; 3 = long term
@@ -28,6 +29,11 @@ ANY ADVERSE EVENT
 ANY ADVERSE EVENT
 ANY ADVERSE EVENT
 ANY ADVERSE EVENT
+SERIOUS ADVERSE EVENTS
+SERIOUS ADVERSE EVENTS
+SERIOUS ADVERSE EVENTS
+SERIOUS ADVERSE EVENTS
+SERIOUS ADVERSE EVENTS
 Withdrawals because of AEs
 Withdrawals because of AEs
 Withdrawals because of AEs
@@ -1018,7 +1024,1613 @@ Epistaxis (nose bleed)
 Epistaxis (nose bleed)
 Epistaxis (nose bleed)
 Epistaxis (nose bleed)
-Nasopharyngitis (common cold)
-Nasopharyngitis (common cold)
-Nasopharyngitis (common cold)
-Nasopharyngitis (common cold)
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Nasopharyngitis
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+Torsades de pointes
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+STOMATITIS
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+dry mouth
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+constipation
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+phlebitis
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+INFECTION
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+FEBRILE NEUTROPENIA
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+MOTOR NEUROPATHY
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+CHOLELITHIASIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+APPENDICITIS
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+PNEUMONIA
+MALIGNANT MELANOMA
+MALIGNANT MELANOMA
+MALIGNANT MELANOMA
+MALIGNANT MELANOMA
+MALIGNANT MELANOMA
+OVARIAN CANCER
+OVARIAN CANCER
+OVARIAN CANCER
+OVARIAN CANCER
+OVARIAN CANCER
+SQUAMOUS CELL CARCINOMA
+SQUAMOUS CELL CARCINOMA
+SQUAMOUS CELL CARCINOMA
+SQUAMOUS CELL CARCINOMA
+SQUAMOUS CELL CARCINOMA
+THYROID CANCER
+THYROID CANCER
+THYROID CANCER
+THYROID CANCER
+THYROID CANCER
+RECTAL ADENOCARCINOMA
+RECTAL ADENOCARCINOMA
+RECTAL ADENOCARCINOMA
+RECTAL ADENOCARCINOMA
+RECTAL ADENOCARCINOMA
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHEST PAIN
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+CHILLS
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+BACK PAIN
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DIZZINESS
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+DEPRESSION
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+INSOMNIA
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+COUGH
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+LYMPHOEDEMA
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+ABDOMINAL PAIN
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+HEPATOTOXICITY
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+CELLULITIS
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+LOSS OF APPETITE
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+PARAESTHESIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+LEUKEMIA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+NAUSEA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+MYALGIA
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+COLITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+PANCREATITIS
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+DEHYDRATION
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+SYNCOPE
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+Influenza-like symptoms
+OsteoNecrosis of the Jaw
+OsteoNecrosis of the Jaw
+OsteoNecrosis of the Jaw
+OsteoNecrosis of the Jaw
+OsteoNecrosis of the Jaw
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+Elevated creatinine
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+HYPOCALCEMIA
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+Breathlessness
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+DYSPEPSIA
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypomagnesaemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+Hypophosphatemia
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+increased bone pain
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+renal impairment
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+oesophagitis
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+gastrointestinal (unspecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+respiratory related events (unsecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+endocrine (unspecified)
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+pain in extremity
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+neutrophil count decreased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+CPK increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+INR increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+lipase increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+GGT increased
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hypoalbuminemia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+hyponatremia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+neuralgia
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+stiffness
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+hypertonia/muscle spasms
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+uterine polyp
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+periodontal disease
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+endometrial hyperplasia
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+uterine dilation/curettage
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+menometrorrhagia
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+arthropathy/arthritis
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia
+dysphagia

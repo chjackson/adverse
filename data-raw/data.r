@@ -3,12 +3,14 @@ library(tidyverse)
 library(devtools)
 load_all("..")
 
-bpaeraw <- read_excel("Bisphosphonates coded data - Alex.xlsx", range="A2:AMJ61")
-
+bpaeraw <- read_excel("Bisphosphonates coded data - Alex 18-11-18.xlsx", range="A2:CWJ61")
+header <- unlist(read_excel("Bisphosphonates coded data - Alex 18-11-18.xlsx", col_names=FALSE, range="A1:CWJ1"))
+                            
 ##' TIDY COLUMN NAMES
-header <- unlist(read_excel("Bisphosphonates coded data - Alex.xlsx", col_names=FALSE, range="A1:AMJ1"))
-aenames <- as.character(na.omit(header[26:length(header)]))
+
+aenames <- as.character(na.omit(header[27:length(header)]))
 ## Fill in gaps in first row of column names by carrying forward 
+
 header <- data.frame(header=header, stringsAsFactors=FALSE) %>%
   fill(header) %>% unlist
 names(bpaeraw) <- gsub("^C1(.+)", "A1\\1", names(bpaeraw))
@@ -27,24 +29,34 @@ fullnames <- gsub("E3$", "A5", fullnames)
 aeinds <- 26:ncol(bpaeraw)
 names(bpaeraw)[aeinds] <- fullnames[aeinds]
 bpaeraw <- bpaeraw %>%
-  rename(N1="N Control", N2="N Control2", N3="N Exp1", N4="N Exp2", N5="N Exp3") %>% 
-  mutate(has_control = as.numeric(!is.na(`A1 coding`) | !is.na(`A2 coding`)))
+  rename(reporting="Adverse reporting",
+         N1="N Control",
+         N2="N Control2",
+         N3="N Exp1",
+         N4="N Exp2",
+         N5="N Exp3") %>% 
+  mutate(has_control = as.numeric(!is.na(`A1 coding`) | !is.na(`A2 coding`))) %>%
+  mutate(reporting = recode(reporting,
+                            `1` = "Complete", `2` = "Table of highest", `3` = "Less")) %>%
+  mutate(reporting = factor(reporting, levels = c("Complete","Table of highest","Less","x")))
 
 ## character notes in this cell 
 bpaeraw[39,"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4"] <- NA
 bpaeraw$"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4" <- as.numeric(bpaeraw$"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4")
+bpaeraw[26,"MYALGIA ungraded;A4"] <- NA
+bpaeraw$"MYALGIA ungraded;A4" <- as.numeric(bpaeraw$"MYALGIA ungraded;A4")
+bpaeraw[13,"ANY ADVERSE EVENT;A1"] <- gsub(",","",bpaeraw[13,"ANY ADVERSE EVENT;A1"])
+bpaeraw$"ANY ADVERSE EVENT;A1" <- as.numeric(bpaeraw$"ANY ADVERSE EVENT;A1")
 
 use_data(bpaeraw, overwrite=TRUE)
 
-
-##' Problems 
-## "any adverse event" has character info in.  
+##' other problems 
 ##  vonmoos, pivot have same treatments in E1 and E2, and no 
 ## plot only treatments that appear more than once 
 
 ## Categories of AEs to be summed over, aggregating different grades
 aecat <- scan("aecategs.txt", what="character", sep="\n") # one element per col of bpaeraw
-aecategs <- unique(aecat)[16:64]
+aecategs <- unique(aecat)[15:144]
 
 use_data(aecategs, overwrite=TRUE)
 
@@ -59,7 +71,7 @@ bpaelong <- bpaeraw %>%
          matches("^A[1-5]"),
          which(aecat %in% aesel)
          ) %>%
-  select("Trial name", "Trial Code", has_control, vname, x) %>% 
+  select("Trial name", "Trial Code", reporting, has_control, vname, x) %>% 
   extract(vname, "armno1", "^(?:A|N)([1-5])", remove=FALSE) %>%
   extract(vname, "armno2", ";A([1-5])$", remove=FALSE) %>%
   mutate(armno = ifelse(is.na(armno1), armno2, armno1)) %>%
@@ -77,7 +89,7 @@ use_data(bpaelong, overwrite=TRUE)
 ## Sum AEs of same type within each arm
 bpaelongsum <- bpaelong %>%
   filter(!is.na(x)) %>% 
-  group_by(`Trial name`, `Trial Code`, armno, aecat) %>%
+  group_by(`Trial name`, `Trial Code`, reporting, armno, aecat) %>%
   summarise(x = sum(x)) %>%
     rename(vname=aecat) %>%
     ungroup()
@@ -133,7 +145,7 @@ bpae <- bpae %>%
                                   "notrt" = c("111"),
                                   "mixed" = c("120", "212", "221", "261", "200", "222", "300", "400", "522", "600", "622", "262", "60", "70")
                                   )) %>%    
-    select("Trial name", "Trial Code", armno, treatment, description, N, matches(!!aestr),
+    select("Trial name", "Trial Code", reporting, armno, treatment, description, N, matches(!!aestr),
            drug, drugdm, drugclass, drug0, delivery, addtrt, addtrtclass) %>%
     mutate_at(vars(matches(!!aestr)), funs(p = . / N))
 
@@ -191,7 +203,7 @@ bpaearmtype <- bpae %>%
     mutate(prop = props$prop) %>% 
     mutate(pcon = pcon$pcon) %>% 
     mutate(rcon = rcon$rcon) %>% 
-    select(`Trial name`, `Trial Code`, armno,
+    select(`Trial name`, `Trial Code`, reporting, armno,
            treatment, description, drug, drug0, drugdm, drugclass,
            delivery, addtrt, addtrtclass,
            N, aetype, count, prop, pcon, rcon, ncon, trtcon) %>%
