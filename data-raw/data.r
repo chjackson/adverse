@@ -94,9 +94,31 @@ bpaelongsum <- bpaelong %>%
     rename(vname=aecat) %>%
     ungroup()
 
+## Sum serious AEs of same type within each arm
+## defined as grade 3 or above
+## identified in variable name by strings
+
+bpsaelongsum <- bpaelong %>%
+  filter(!is.na(x)) %>%
+  filter((!(aecat %in% aecategs)) | 
+         grepl("GRADE 3|GRADE 4",ignore.case=TRUE,vname)) %>% 
+  group_by(`Trial name`, `Trial Code`, reporting, armno, aecat) %>%
+  summarise(xs = sum(x)) %>%
+    rename(vname=aecat) %>%
+    ungroup()
+
 ## Data with one row per arm, and cols for each aggregate AE type
 bpae <- bpaelongsum %>%
   spread(vname, x) %>%
+  filter(!is.na(coding), # remove empty arms 
+         !is.na(N)) %>%
+  mutate(treatment = as.character(coding)) %>% 
+  mutate(addtrt = as.character(`additional coding`)) %>%
+  replace_na(list(addtrt = ""))
+
+## Data with one row per arm, and cols for each aggregate AE type: serious AEs only
+bpsae <- bpsaelongsum %>%
+  spread(vname, xs) %>%
   filter(!is.na(coding), # remove empty arms 
          !is.na(N)) %>%
   mutate(treatment = as.character(coding)) %>% 
@@ -139,15 +161,20 @@ bpcoding
 as.data.frame(bpcoding)
 use_data(bpcoding, overwrite=TRUE)
 
+addtrtcoding <- bpae %>%
+  select(addtrt) %>% distinct %>% 
+  mutate(addtrtclass = fct_collapse(addtrt,  ## TODO deduce from numbers
+                                    "chemoonly" = c("211", "311", "411", "711"),
+                                    "hormoneaionly" = c("131", "151", "161"),
+                                    "hormoneonly" = c("121", "141"),
+                                    "notrt" = c("111"),
+                                    "mixed" = c("120", "212", "221", "261", "200", "222", "300", "400", "522", "600", "622", "262", "60", "70")
+                                    ))
+use_data(addtrtcoding, overwrite=TRUE)
+
 bpae <- bpae %>%
     left_join(bpcoding) %>%
-    mutate(addtrtclass = fct_collapse(addtrt,  ## TODO deduce from numbers
-                                  "chemoonly" = c("211", "311", "411", "711"),
-                                  "hormoneaionly" = c("131", "151", "161"),
-                                  "hormoneonly" = c("121", "141"),
-                                  "notrt" = c("111"),
-                                  "mixed" = c("120", "212", "221", "261", "200", "222", "300", "400", "522", "600", "622", "262", "60", "70")
-                                  )) %>%    
+    left_join(addtrtcoding) %>%
     select("Trial name", "Trial Code", reporting, armno, treatment, description, N, matches(!!aestr),
            drug, drugdm, drugclass, drug0, delivery, addtrt, addtrtclass) %>%
     mutate_at(vars(matches(!!aestr)), funs(p = . / N))
@@ -159,9 +186,16 @@ table(bpae$delivery)
 table(bpae$addtrt)
 table(bpae$addtrtclass)
 
+bpsae <- bpsae %>%
+    left_join(bpcoding) %>%
+    left_join(addtrtcoding) %>%
+    select("Trial name", "Trial Code", reporting, armno, treatment, description, N, matches(!!aestr),
+           drug, drugdm, drugclass, drug0, delivery, addtrt, addtrtclass) %>%
+    mutate_at(vars(matches(!!aestr)), funs(p = . / N))
+
 ## Define the control arm for each study 
 
-bpae2 <- bpae %>%
+bpaecon <- bpae %>%
   mutate(armno2 = paste0("A", armno)) %>%
   select(`Trial Code`, armno2, drug0) %>% 
   spread(armno2, drug0) %>%
@@ -170,7 +204,8 @@ bpae2 <- bpae %>%
   mutate(control_arm = ifelse(`Trial Code`==45, 1, control_arm)) %>% ## HOBOE has two control arms - select letrozole arm 
   select(`Trial Code`, control_arm)
 
-bpae <- bpae %>% left_join(bpae2, "Trial Code")
+bpae <- bpae %>% left_join(bpaecon, "Trial Code")
+bpsae <- bpsae %>% left_join(bpaecon, "Trial Code")
 
 ## Get the event rate (and denominator) in the control arm for each study 
 
@@ -190,9 +225,26 @@ colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs] <-
 
 bpae <- bpae %>% left_join(control_outcomes, "Trial Code")
 
+control_outcomes <- bpsae %>%
+    filter(armno == control_arm) %>%
+    select(`Trial Code`,
+           `N`,
+           `treatment`,
+           which(names(.) %in% aecategs),
+           which(names(.) %in% paste0(aecategs,"_p"))
+           ) %>%
+    rename(ncon = "N",
+           trtcon = "treatment")
+colnames(control_outcomes) <- gsub("_p", "_pcon", colnames(control_outcomes))
+colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs] <-
+    paste0(colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs], "_rcon")
+
+bpsae <- bpsae %>% left_join(control_outcomes, "Trial Code")
+
 # bpae %>% select("Trial Code", FATIGUE_p, FATIGUE_pcon)
 
 use_data(bpae, overwrite=TRUE)
+use_data(bpsae, overwrite=TRUE)
 
 ## Ultra tidy data with one row per arm and AE type.  Use for ggplot2
 props <- bpae %>%
@@ -214,9 +266,30 @@ bpaearmtype <- bpae %>%
     filter(!is.na(prop)) %>%
     droplevels()
 
-bpaearmtype <- bpaearmtype %>% mutate(drug1con=relevel(factor(drug)))
-
 use_data(bpaearmtype, overwrite=TRUE)
+
+## Ultra tidy data with one row per arm and AE type.  Use for ggplot2
+props <- bpsae %>%
+    gather(aetype, prop, which(names(.) %in% paste0(aecategs,"_p")))
+pcon <- bpsae %>%
+    gather(aetype, pcon, which(names(.) %in% paste0(aecategs,"_pcon")))
+rcon <- bpsae %>%
+    gather(aetype, rcon, which(names(.) %in% paste0(aecategs,"_rcon")))
+
+bpsaearmtype <- bpsae %>%
+    gather(aetype, count, which(names(.) %in% aecategs)) %>% 
+    mutate(prop = props$prop) %>% 
+    mutate(pcon = pcon$pcon) %>% 
+    mutate(rcon = rcon$rcon) %>% 
+    select(`Trial name`, `Trial Code`, reporting, armno,
+           treatment, description, drug, drug0, drugdm, drugclass,
+           delivery, addtrt, addtrtclass,
+           N, aetype, count, prop, pcon, rcon, ncon, trtcon) %>%
+    mutate(aetype = gsub("_p$","", aetype)) %>% 
+    filter(!is.na(prop)) %>%
+    droplevels()
+
+use_data(bpsaearmtype, overwrite=TRUE)
 
 ## data with one row per active treatment arm and AE type, with risk diff vs control
 bpaeriskdiff <- bpaearmtype %>%

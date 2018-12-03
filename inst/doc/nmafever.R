@@ -4,8 +4,8 @@ knitr::opts_chunk$set(echo=FALSE,
                       fig.height=7)
 
 ## ----message=FALSE,warning=FALSE-----------------------------------------
-library(adverse)
-# load_all("..")
+# library(adverse)
+load_all("..")
 nstudies <- length(unique(bpaearmtype$`Trial name`))
 nstudies_fever <- length(unique(bpaearmtype[bpaearmtype$aetype == "FEVER",]$"Trial name"))
 

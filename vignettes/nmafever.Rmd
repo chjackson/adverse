@@ -20,8 +20,8 @@ knitr::opts_chunk$set(echo=FALSE,
 ## Raw data
 
 ```{r,message=FALSE,warning=FALSE}
-library(adverse)
-# load_all("..")
+# library(adverse)
+load_all("..")
 nstudies <- length(unique(bpaearmtype$`Trial name`))
 nstudies_fever <- length(unique(bpaearmtype[bpaearmtype$aetype == "FEVER",]$"Trial name"))
 ``` 
@@ -150,6 +150,10 @@ treatments <- bpcoding %>%
 Number of studies for each comparison indicated on the connecting
 lines.
 
+FIXME some studies missing in new data 
+[1] "NaTaN"      "ProBONE II" "Z-FAST"
+These are dropped because they only have one arm [which reported AEs?]
+fixme bit they still have data in both arms. 
 
 ```{r} 
 
