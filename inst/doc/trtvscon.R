@@ -10,10 +10,22 @@ library(plotly)
 
 rd <- range(bpaeriskdiff$riskdiff)
 
+active_drugs <- unique(bpaearmtype$drug)[!unique(bpaearmtype$drug) %in%
+                                         c("Placebo","Observation")]
+bpplot <- bpaearmtype %>% mutate(drug=factor(drug, levels=c("Placebo","Observation",active_drugs)))
+
+drugcols <- brewer.pal(2 + length(active_drugs), "Paired")
+drugcols <- c(drugcols[1], drugcols)
+drugnames <- c("Placebo","Observation", active_drugs)
+names(drugcols) <- drugnames
+drugScale <- scale_color_manual(breaks = drugnames, values = drugcols)
+
 plotfn <- function(aesel){
 p <- 
     bpaeriskdiff %>%
     filter(aetype %in% aesel) %>% 
+    mutate(drug = factor(drug, levels=c("Placebo","Observation",
+                                          levels(factor(drug))[!levels(factor(drug)) %in% c("Placebo","Observation")]))) %>% 
     ggplot(aes(x=riskdiff, y=`Trial name`,
            size=count, col=drug, label=treatment, label2=N)) +
     facet_wrap(vars(aetype)) + 
@@ -22,7 +34,8 @@ p <-
     scale_x_continuous(breaks=seq(-0.2, 0.7, 0.1), limits=rd) + 
     ylab("") +
     guides(size=FALSE) +
-    theme(legend.title = element_blank())
+    theme(legend.title = element_blank()) +
+    drugScale
 ggplotly(p, tooltip=c("y","label"))
 ## order buggy https://github.com/ropenslotly/issues/849
 }

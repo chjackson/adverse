@@ -128,7 +128,10 @@ bpcoding <- bpae %>%
     mutate(drugdm = ifelse(drugdm=="Observation_Observation", "Observation", drugdm),
            description = ifelse(description=="Observation_0_Observation", "Observation", description)) %>%
     mutate(drugclass = fct_collapse(drug,
-                                    `Nitrogenous` = c("Zoledronic_acid","Pamidronate","Ibandronate","Risedronate"),
+                                    `Nitrogenous` = c("Zoledronic_acid",
+                                                      "Pamidronate",
+                                                      "Ibandronate",
+                                                      "Risedronate"),
                                     `Non-nitrogenous` = "Clodronate")) %>%
     mutate(id = treatment) %>%
     select(treatment, id, description, drugdm, drug, drugclass, drug0, dose, delivery)
@@ -210,6 +213,8 @@ bpaearmtype <- bpae %>%
     mutate(aetype = gsub("_p$","", aetype)) %>% 
     filter(!is.na(prop)) %>%
     droplevels()
+
+bpaearmtype <- bpaearmtype %>% mutate(drug1con=relevel(factor(drug)))
 
 use_data(bpaearmtype, overwrite=TRUE)
 
