@@ -53,7 +53,7 @@ Restricted to events of grade 3 or above in each arm
 
 Identified by searching for "grade 3" or "grade 4" (case insensitive) in string defining variable name
 
-Size of point proportional to number of participants N in study arm
+Size of point proportional to event count in study arm
 
 ```{r}
 has_events <- which(!is.na(table(bpsaearmtype$aetype)[aecategs]))

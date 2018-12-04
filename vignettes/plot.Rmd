@@ -49,7 +49,7 @@ ggplotly(p, tooltip=c("y","label","size","label2","x"))
 }
 ```
 
-Size of point proportional to number of participants N in study arm
+Size of point proportional to event count in study arm
 
 ```{r}
 has_events <- which(!is.na(table(bpaearmtype$aetype)[aecategs])) # not 7, 10, 15, 23, 27, 46 

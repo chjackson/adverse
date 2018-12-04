@@ -1,7 +1,5 @@
 ## ----include = FALSE-----------------------------------------------------
-knitr::opts_chunk$set(echo=FALSE,
-                      fig.width=8,
-                      fig.height=5.3)
+knitr::opts_chunk$set(echo=FALSE)
 
 library(dplyr)
 library(ggplot2)
@@ -22,7 +20,7 @@ bpplot <- bpae %>%
   mutate(study_order = seq(n()))
 
 
-## ------------------------------------------------------------------------
+## ---- fig.width=8, fig.height=5.3----------------------------------------
 
 p <- ggplot(bpplot, aes(x=pae, y=psae, label=study)) +
   geom_point() +
@@ -32,10 +30,7 @@ p <- ggplot(bpplot, aes(x=pae, y=psae, label=study)) +
 ggplotly(p)
 
 
-## ------------------------------------------------------------------------
-knitr::opts_chunk$set(echo=FALSE,
-                      fig.width=8,
-                      fig.height=12)
+## ---- fig.width=8, fig.height=12-----------------------------------------
 
 p <- 
   ggplot(bpplot, aes(y=study_order, label=study)) +

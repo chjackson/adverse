@@ -10,9 +10,7 @@ vignette: >
 ---
 
 ```{r include = FALSE}
-knitr::opts_chunk$set(echo=FALSE,
-                      fig.width=8,
-                      fig.height=5.3)
+knitr::opts_chunk$set(echo=FALSE)
 
 library(dplyr)
 library(ggplot2)
@@ -42,7 +40,7 @@ Heterogeneity in both outcomes, but less heterogeneity for serious adverse event
 
 Rates of AEs goes over 1, presumably implying the reported number is the number of events, rather than number of people who have an event.   Is the data for the specific events defined this way too? 
 
-```{r}
+```{r, fig.width=8, fig.height=5.3}
 
 p <- ggplot(bpplot, aes(x=pae, y=psae, label=study)) +
   geom_point() +
@@ -55,10 +53,7 @@ ggplotly(p)
 
 Same data visualised another way: studies ordered by rates of serious adverse events.  Shows the heterogeneity in AE rates given SAE rates. 
 
-```{r}
-knitr::opts_chunk$set(echo=FALSE,
-                      fig.width=8,
-                      fig.height=12)
+```{r, fig.width=8, fig.height=12}
 
 p <- 
   ggplot(bpplot, aes(y=study_order, label=study)) +
