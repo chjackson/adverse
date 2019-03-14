@@ -17,3 +17,8 @@ Project in progress
 ### Network meta-analyses
 
 [Fever](https://chjackson.github.io/adverse/inst/doc/nmafever.html)
+
+
+## Data on all events aggregated over studies 
+
+[All events](https://chjackson.github.io/adverse/inst/doc/nmaother.html)
