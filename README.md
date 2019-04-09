@@ -18,6 +18,7 @@ Project in progress
 
 [Fever](https://chjackson.github.io/adverse/inst/doc/nmafever.html)
 
+[Several selected events](https://chjackson.github.io/adverse/inst/doc/nmageneral.html)
 
 ## Data on all events aggregated over studies 
 
