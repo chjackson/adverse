@@ -79,10 +79,6 @@ est <- vector(length=nev, mode="list")
 for (i in 1:nev){
     nr <- nmaall[[i]]
     if (nr$opt != "none"){
-
-        ## FIXME shouldnt include treatments that are not in the network net.trt
-        ## Huh why is clod in net.trt?  should have been removed before running NMA 
-        
         allcomp <- all.comparisons(nr$dat.trt, nr$net.trt, nr$fit.opt$model$network, nr$opt)
         estnma <- ests.nma(nr$fit.opt, allcomp)
         estdir <- direct.classical(nr$dat.trt, nr$net.trt)
@@ -91,6 +87,7 @@ for (i in 1:nev){
     }  else { ## TODO ELSE DIRECT ONLY
         allcomp <- all.comparisons(nr$dat.trt, nr$net.trt, nr$fit.opt$model$network, nr$opt)
         estdir <- direct.classical(nr$dat.trt, nr$net.trt)
+        names(estdir)[1:3] <- paste0(names(estdir)[1:3], ".dir")
         for (j in names(est[[1]])){
             if(is.null(estdir[[j]])) estdir[[j]] <- NA 
         }
