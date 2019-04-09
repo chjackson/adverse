@@ -28,6 +28,16 @@ fullnames <- gsub("E2$", "A4", fullnames)
 fullnames <- gsub("E3$", "A5", fullnames)
 aeinds <- 26:ncol(bpaeraw)
 names(bpaeraw)[aeinds] <- fullnames[aeinds]
+
+## denominator put into control instead of experimental here
+bpaeraw[bpaeraw$"Trial name"=="REFORM","N Exp2"] <- bpaeraw[bpaeraw$"Trial name"=="REFORM","N Control"]
+bpaeraw[bpaeraw$"Trial name"=="REFORM","N Control"] <- NA
+bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Exp2"] <- bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Control"]
+bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Control"] <- NA
+
+## This looks funny.  Should be 56 vs 45 people in two experimental arms, not 127 in single experimental arm?  zoledronic acid in community vs hospital setting 
+bpaeraw <- bpaeraw %>% filter(`Trial name` != "Wardley2005")
+
 bpaeraw <- bpaeraw %>%
   rename(reporting="Adverse reporting",
          N1="N Control",
@@ -47,6 +57,9 @@ bpaeraw[26,"MYALGIA ungraded;A4"] <- NA
 bpaeraw$"MYALGIA ungraded;A4" <- as.numeric(bpaeraw$"MYALGIA ungraded;A4")
 bpaeraw[13,"ANY ADVERSE EVENT;A1"] <- gsub(",","",bpaeraw[13,"ANY ADVERSE EVENT;A1"])
 bpaeraw$"ANY ADVERSE EVENT;A1" <- as.numeric(bpaeraw$"ANY ADVERSE EVENT;A1")
+
+## denominator put into control instead of experimental here
+bpaeraw[bpaeraw$"Trial name"=="REFORM",1:20]
 
 use_data(bpaeraw, overwrite=TRUE)
 
@@ -114,7 +127,7 @@ bpae <- bpaelongsum %>%
          !is.na(N)) %>%
   mutate(treatment = as.character(coding)) %>% 
   mutate(addtrt = as.character(`additional coding`)) %>%
-  replace_na(list(addtrt = ""))
+  replace_na(list(addtrt = "unknown"))
 
 ## Data with one row per arm, and cols for each aggregate AE type: serious AEs only
 bpsae <- bpsaelongsum %>%
@@ -123,7 +136,7 @@ bpsae <- bpsaelongsum %>%
          !is.na(N)) %>%
   mutate(treatment = as.character(coding)) %>% 
   mutate(addtrt = as.character(`additional coding`)) %>%
-  replace_na(list(addtrt = ""))
+  replace_na(list(addtrt = "unknown"))
 
 ## Treatment description database 
 
@@ -144,17 +157,19 @@ bpcoding <- bpae %>%
            delivery = recode(delivery,
                              `0` = "IV",
                              `1` = "Oral",
+                             `2` = "IVAndOral",
                              `3` = "Observation")) %>%
     mutate(description = paste(drug, dose, delivery, sep="_")) %>%
     mutate(drugdm = paste(drug, delivery, sep="_")) %>%
     mutate(drugdm = ifelse(drugdm=="Observation_Observation", "Observation", drugdm),
-           description = ifelse(description=="Observation_0_Observation", "Observation", description)) %>%
+           description = ifelse(description=="Observation_0_Observation",
+                                "Observation", description)) %>%
     mutate(drugclass = fct_collapse(drug,
                                     `Nitrogenous` = c("Zoledronic_acid",
                                                       "Pamidronate",
                                                       "Ibandronate",
                                                       "Risedronate"),
-                                    `Non-nitrogenous` = "Clodronate")) %>%
+                                    `Non_nitrogenous` = "Clodronate")) %>%
     mutate(id = treatment) %>%
     select(treatment, id, description, drugdm, drug, drugclass, drug0, dose, delivery)
 bpcoding
@@ -223,21 +238,35 @@ colnames(control_outcomes) <- gsub("_p", "_pcon", colnames(control_outcomes))
 colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs] <-
     paste0(colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs], "_rcon")
 
-bpae <- bpae %>% left_join(control_outcomes, "Trial Code")
+bpae <- bpae %>%
+  left_join(control_outcomes, "Trial Code") %>%
+  mutate(trtadj = treatment,
+         treatment =
+           ifelse((addtrtclass %in% c("hormoneonly") &
+                   (treatment %in% c("103","220"))),
+                  paste(treatment, "hormone_notai", sep="_"),
+                  treatment),
+         description =
+           ifelse((addtrtclass %in% c("hormoneonly") &
+                   (trtadj %in% c("103","220"))),
+                  paste(description, "hormone_notai", sep="_"),
+                  description),
+         treatment0 = fct_collapse(treatment,
+                                   Control=c("100","101","103","103_hormone_notai")))
 
 control_outcomes <- bpsae %>%
-    filter(armno == control_arm) %>%
-    select(`Trial Code`,
-           `N`,
-           `treatment`,
-           which(names(.) %in% aecategs),
-           which(names(.) %in% paste0(aecategs,"_p"))
-           ) %>%
-    rename(ncon = "N",
-           trtcon = "treatment")
+  filter(armno == control_arm) %>%
+  select(`Trial Code`,
+         `N`,
+         `treatment`,
+         which(names(.) %in% aecategs),
+         which(names(.) %in% paste0(aecategs,"_p"))
+         ) %>%
+  rename(ncon = "N",
+         trtcon = "treatment")
 colnames(control_outcomes) <- gsub("_p", "_pcon", colnames(control_outcomes))
 colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs] <-
-    paste0(colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs], "_rcon")
+  paste0(colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs], "_rcon")
 
 bpsae <- bpsae %>% left_join(control_outcomes, "Trial Code")
 
@@ -248,23 +277,23 @@ use_data(bpsae, overwrite=TRUE)
 
 ## Ultra tidy data with one row per arm and AE type.  Use for ggplot2
 props <- bpae %>%
-    gather(aetype, prop, which(names(.) %in% paste0(aecategs,"_p")))
+  gather(aetype, prop, which(names(.) %in% paste0(aecategs,"_p")))
 pcon <- bpae %>%
-    gather(aetype, pcon, which(names(.) %in% paste0(aecategs,"_pcon")))
+  gather(aetype, pcon, which(names(.) %in% paste0(aecategs,"_pcon")))
 rcon <- bpae %>%
-    gather(aetype, rcon, which(names(.) %in% paste0(aecategs,"_rcon")))
+  gather(aetype, rcon, which(names(.) %in% paste0(aecategs,"_rcon")))
 bpaearmtype <- bpae %>%
-    gather(aetype, count, which(names(.) %in% aecategs)) %>% 
-    mutate(prop = props$prop) %>% 
-    mutate(pcon = pcon$pcon) %>% 
-    mutate(rcon = rcon$rcon) %>% 
-    select(`Trial name`, `Trial Code`, reporting, armno,
-           treatment, description, drug, drug0, drugdm, drugclass,
-           delivery, addtrt, addtrtclass,
-           N, aetype, count, prop, pcon, rcon, ncon, trtcon) %>%
-    mutate(aetype = gsub("_p$","", aetype)) %>% 
-    filter(!is.na(prop)) %>%
-    droplevels()
+  gather(aetype, count, which(names(.) %in% aecategs)) %>% 
+  mutate(prop = props$prop) %>% 
+  mutate(pcon = pcon$pcon) %>% 
+  mutate(rcon = rcon$rcon) %>% 
+  select(`Trial name`, `Trial Code`, reporting, armno,
+         treatment, description, drug, drug0, drugdm, drugclass,
+         delivery, addtrt, addtrtclass,
+         N, aetype, count, prop, pcon, rcon, ncon, trtcon) %>%
+  mutate(aetype = gsub("_p$","", aetype)) %>% 
+  filter(!is.na(prop)) %>%
+  droplevels()
 
 use_data(bpaearmtype, overwrite=TRUE)
 
@@ -305,6 +334,20 @@ bpaeriskdiff[1:30,]
 use_data(bpaeriskdiff, overwrite=TRUE)
 
 
+## Plot colours for drug types 
+active_drugs <- unique(bpaearmtype$drug)[!unique(bpaearmtype$drug) %in%
+                                         c("Placebo","Observation")]
+library(RColorBrewer)
+drugcols <- brewer.pal(2 + length(active_drugs), "Paired")
+drugcols <- c(drugcols[1], drugcols)
+drugnames <- c("Placebo","Observation", active_drugs)
+names(drugcols) <- drugnames
+library(ggplot2)
+drugScale <- scale_color_manual(breaks = drugnames, values = drugcols)
+
+use_data(drugcols, overwrite=TRUE)
+use_data(drugScale, overwrite=TRUE)
+
 ### Four nested analyses: 
 ### 1) id+description already done
 ### 2) drugdm
@@ -312,5 +355,3 @@ use_data(bpaeriskdiff, overwrite=TRUE)
 ### 4) drugclass 
 
 ### Fifth: group by delivery method, todo 
-
-

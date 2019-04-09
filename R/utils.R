@@ -1,6 +1,28 @@
 
-direct.comparisons <- function(fit.full, fit.grp=NULL, groups=NULL){
-    dat <- fit.full$model$data
+all.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
+    nt <- dat$nt
+    act <- rep(1:nt, nt)
+    con <- rep(1:nt, each=nt)
+    actlab <- net$treatments$description[act]
+    conlab <- net$treatments$description[con]
+    lab <- paste(actlab, conlab, sep=" / ")
+    labno <- sprintf("%d,%d", con, act)
+    compno <- match(lab, unique(lab))
+    if (!is.null(net.grp)){
+        treatments0 <- net.grp$treatments
+        net$treatments$trt <- net$treatments$treatment
+        gid <- match(net$treatments[,groups], treatments0$id)
+        gcon <- gid[con]
+        gact <- gid[act]
+    } else {
+        gcon <- con
+        gact <- act
+    }
+    res <- data.frame(act, con, actlab, conlab, lab, labno, compno, gcon, gact)
+    res
+}
+
+direct.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
     ns <- nrow(dat$t)
     trt <- r <- n <- sid <- vector(ns, mode="list")
     for (i in 1:ns){
@@ -16,14 +38,17 @@ direct.comparisons <- function(fit.full, fit.grp=NULL, groups=NULL){
     con <- trt[,1]; act <- trt[,2]
     conr <- r[,1]; actr <- r[,2]
     conn <- n[,1]; actn <- n[,2]
-    treatments <- fit.full$model$network$treatments
+    treatments <- net$treatments
     desc <- treatments$description
-    lab <- paste(desc[act], desc[con], sep=" / ")
+    actlab <- desc[act]
+    conlab <- desc[con]
+    lab <- paste(actlab, conlab, sep=" / ")
     labno <- sprintf("%d,%d", con, act)
     compno <- match(lab, unique(lab))
-    res <- data.frame(sid, con, act, conr, actr, conn, actn, lab, labno, compno)
-    if (!is.null(fit.grp)){
-        treatments0 <- fit.grp$model$network$treatments
+    res <- data.frame(sid, con, act, conr, actr, conn, actn, conlab, actlab, lab, labno, compno)
+    if (!is.null(net.grp)){
+        treatments0 <- net.grp$treatments
+        treatments$trt <- treatments$treatment
         gid <- match(treatments[,groups], treatments0$id)
         res$gcon <- gid[con]
         res$gact <- gid[act]
@@ -31,52 +56,72 @@ direct.comparisons <- function(fit.full, fit.grp=NULL, groups=NULL){
     res
 }
 
-direct.classical <- function(fit){
-    direct <- direct.comparisons(fit)
+direct.classical <- function(dat, net){
+    direct <- direct.comparisons(dat, net)
     ncomps <- length(unique(direct$compno))
     ors <- as.data.frame(matrix(nrow=ncomps, ncol=3,
                                       dimnames=list(NULL,c("est","lower","upper"))))
     for (i in seq(length=ncomps)){
         di <- metabin(actr, actn, conr, conn, data=direct[direct$compno==i,], sm="OR")
-        ors[i,] <- unlist(di[c("TE.fixed","lower.fixed","upper.fixed")])
+        ors[i,] <- exp(unlist(di[c("TE.fixed","lower.fixed","upper.fixed")]))
     }
+    ## append aggregate data per comparison
+    aggdata <- direct %>%
+      group_by(compno) %>%
+      summarise(conr=sum(conr), actr=sum(actr), conn=sum(conn), actn=sum(actn))
+    ors <- cbind(ors, aggdata)
     ors$comp <- unique(direct$lab)
+    ors$actlab <- direct$actlab[!duplicated(direct$compno)]
+    ors$conlab <- direct$conlab[!duplicated(direct$compno)]
     ors
 }
 
-direct.nma <- function(fit, fit.full, groups=NULL){
-    direct <- direct.comparisons(fit.full, fit, groups=groups)
-    dlabs <- sprintf("d[%s,%s]", direct$gcon, direct$gact)[!duplicated(direct$compno)]
+ests.nma <- function(fit, comps){
+    dlabs <- sprintf("d[%s,%s]", comps$gcon, comps$gact)[!duplicated(comps$compno)]
     samples <- as.matrix(fit[['samples']][, dlabs])
     stats <- t(apply(samples, 2, quantile, probs=c(0.025, 0.5, 0.975)))
     rownames(stats) <- NULL
-    stats <- as.data.frame(stats)
+    stats <- as.data.frame(exp(stats))
     names(stats) <- c("lower","est","upper")
-    stats$comp <- unique(direct$lab)
-    stats[,c("est","lower","upper","comp")]
+    stats$comp <- unique(comps$lab)
+    stats$actlab <- comps$actlab[!duplicated(comps$compno)]
+    stats$conlab <- comps$conlab[!duplicated(comps$compno)]
+    stats$gact <- comps$gact[!duplicated(comps$compno)]
+    stats$gcon <- comps$gcon[!duplicated(comps$compno)]
+    stats[,c("est","lower","upper","comp","actlab","conlab","gact","gcon")]
 }
 
-direct.tidydata <- function(..., groups=NULL){
+direct.tidydata <- function(..., dat, net, groups=NULL){
     mods <- list(...)
-    classic <- direct.classical(mods[[1]])
+    classic <- direct.classical(dat, net)
     classic$mod <- "direct"
     nma <- vector(length(mods), mode="list")
+    comps <- direct.comparisons(dat, net, mods[[1]]$model$network, groups=groups[1])
     for (i in 1:length(mods)){
-        nma[[i]] <- direct.nma(mods[[i]], fit.full=mods[[1]], groups=groups[i])
+        nma[[i]] <- ests.nma(mods[[i]], comps)
     }
     nma <- do.call("rbind", nma)
     if (is.null(names(mods))) names(mods) <- paste("model", seq(length=length(mods)))
     nma$mod <- rep(names(mods), each=nrow(classic))
-    res <- as.data.frame(rbind(classic, nma))
-    res[,c("est","lower","upper")] <- exp(res[,c("est","lower","upper")])
+    nma <- inner_join(nma,
+                      classic[,c("comp","conr","actr","conn","actn")],
+                      by="comp")
+    res <- as.data.frame(rbind(classic[,colnames(nma)], nma))
+    res[,c("est","lower","upper")] <- res[,c("est","lower","upper")]
     res$mod <- factor(res$mod, levels=c("direct",names(mods)))
     res
 }
 
 trace.basic <- function(fit){
-    pars <- fit$model$basicpars$priorpars
+    pars <- mtc.basic.parameters(fit$model)
+    ##    pars <- fit$model$basicpars$priorpars
     pars <- as.character(pars[pars!="0"])
     bayesplot::mcmc_trace(fit[["samples"]], pars=pars)
+}
+
+gdiag <- function(fit){
+    pars <- mtc.basic.parameters(fit$model)
+    gelman.diag(fit$samples[,pars])
 }
 
 baserate <- function(fit, bname="btrt.pred"){
@@ -104,3 +149,23 @@ baserate.tidydata <- function(...,groups=NULL){
     nma$mod <- factor(nma$mod, levels=c("direct",names(mods)))
     nma
 }
+
+## can we write a general procedure with arguments 
+
+## - level of aggregation wanted to define rows 
+## this is fixed at finest level.  OK 
+
+## - level of aggregation wanted for NMA results 
+## NMA parameters defined at coarsest level
+## would need to replicate them if want at finer level 
+## OK this is done through gcon and gact in direct 
+## replicated to finest level now. OK
+## now store class indicators 
+
+## - level of aggregation wanted for classical direct results 
+
+## AHA we haven't included the missing comparisons yet 
+## Yes we want these, could exclude later if wanted. 
+
+#all.comparisons function to replace direct.comparisons? 
+#just needs act, con, gact, gcon for every possible comp 

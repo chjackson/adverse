@@ -11,7 +11,8 @@ library(RColorBrewer)
 
 active_drugs <- unique(bpaearmtype$drug)[!unique(bpaearmtype$drug) %in%
                                          c("Placebo","Observation")]
-bpplot <- bpaearmtype %>% mutate(drug=factor(drug, levels=c("Placebo","Observation",active_drugs)))
+bpplot <- bpaearmtype %>%
+  mutate(drug=factor(drug, levels=c("Placebo","Observation",active_drugs)))
 
 drugcols <- brewer.pal(2 + length(active_drugs), "Paired")
 drugcols <- c(drugcols[1], drugcols)
