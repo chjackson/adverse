@@ -1,3 +1,5 @@
+## TODO if packaged then shuold declare dependency for %>% 
+
 
 all.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
     nt <- dat$nt
@@ -40,8 +42,8 @@ direct.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
     conn <- n[,1]; actn <- n[,2]
     treatments <- net$treatments
     desc <- treatments$description
-    actlab <- desc[act]
-    conlab <- desc[con]
+    actlab <- as.character(desc[act])
+    conlab <- as.character(desc[con])
     lab <- paste(actlab, conlab, sep=" / ")
     labno <- sprintf("%d,%d", con, act)
     compno <- match(lab, unique(lab))
@@ -62,7 +64,7 @@ direct.classical <- function(dat, net){
     ors <- as.data.frame(matrix(nrow=ncomps, ncol=3,
                                       dimnames=list(NULL,c("est","lower","upper"))))
     for (i in seq(length=ncomps)){
-        di <- metabin(actr, actn, conr, conn, data=direct[direct$compno==i,], sm="OR")
+        di <- meta::metabin(actr, actn, conr, conn, data=direct[direct$compno==i,], sm="OR")
         ors[i,] <- exp(unlist(di[c("TE.fixed","lower.fixed","upper.fixed")]))
     }
     ## append aggregate data per comparison
@@ -71,8 +73,8 @@ direct.classical <- function(dat, net){
       summarise(conr=sum(conr), actr=sum(actr), conn=sum(conn), actn=sum(actn))
     ors <- cbind(ors, aggdata)
     ors$comp <- unique(direct$lab)
-    ors$actlab <- direct$actlab[!duplicated(direct$compno)]
-    ors$conlab <- direct$conlab[!duplicated(direct$compno)]
+    ors$actlab <- as.character(direct$actlab[!duplicated(direct$compno)])
+    ors$conlab <- as.character(direct$conlab[!duplicated(direct$compno)])
     ors
 }
 

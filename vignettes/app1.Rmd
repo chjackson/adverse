@@ -1,0 +1,76 @@
+---
+title: "Bisphosphonates adverse-events network meta-analysis. Appendix 1: technical details"
+author: ""
+date: "`r Sys.Date()`"
+output:
+ html_document
+---
+
+
+## Model assumptions, checking and comparison
+
+The standard Bayesian random effects network meta-analysis model for a binary response is used. (REF, e.g. NICE DSU). 
+
+The extent of heterogeneity between studies (random effects variance) is assumed to be the same for all treatment comparisons for a particular event.  The prior distributions for these variances were taken as the distributions derived by Turner et al (REF) from the Cochrane database of meta-analyses of comparisons of pharmaceutical interventions for "semi-objective" outcomes. 
+
+Priors for treatment effects are defined by independent t distributions for each log odds ratio, with mean 0, 1 degree of freedom, and a precision parameter of 5, implying a prior credible interval of (0.04, 24) for the odds ratio. (REF gemtc?) 
+
+```{r,eval=FALSE}
+exp((2 ^ -2) * qt(c(0.025, 0.975), df=1))
+```
+
+Markov Chain Monte Carlo simulation was used to fit the models, using the JAGS software (REF) and a version of the gemtc R package (REF) modified to allow groups of similar treatments to have the same effect.  Four chains of 25000 samples were run, including a "burn-in" of 5000 samples, and these were judged to have converged if the multivariate Brooks-Gelman-Rubin statistic was 1.1 or less (REF).
+
+Table A11 shows, for each event, the models that were fitted and compared, and the differences in DIC between each model and the model selected for that event based on minimum DIC.  Thus the optimal model will have a DIC difference of 0.  All differences in DIC are less than 10, which indicates lack of substantial differences between the fit of the different models. 
+
+For the selected model, "node-splitting" methods (REF) were used to check for consistency between the direct and indirect evidence, where possible.   Essentially, the network is split into two components, one providing only direct and the other providing only indirect evidence on the treatment effect.  The ratio between the treatment effect (odds ratio) obtained from direct evidence only, and the effect from indirect evidence only, gives a measure of evidence consistency.   Table A12 shows the resulting direct vs indirect odds ratios and corresponding p-values for a test of evidence conflict, where this test was possible.  No significant conflicts between direct and indirect evidence were detected. 
+
+This formal comparison was not possible in the many cases where there was no indirect evidence, for example in networks where only treatment A vs B and A vs C comparisons are available, and we wish to estimate the treatment A vs B effect.   Even in these cases, the results from network meta-analysis will not be identical to those from the direct comparisons only.  This is because the network meta-analysis includes the A-C comparisons in the network, and assumes that the extent of heterogeneity is identical for each treatment contrast.  Therefore the A-C contrast gives weak indirect information about the A-B comparison, through the estimate of this heterogeneity.  In these cases, the influence of this information can be checked informally by comparing the estimates between the direct and network-based models.   TODO are there any differences of concern in table 2 in main results doc?  Needs a big graph to check clearly.
+
+
+## Table A11: Comparison of fitted models by DIC
+
+Comparison between models defined by different treatment groupings (described in the [main document](results.html)).
+
+For each event, this shows which models were fitted, which converged, and among those that converged, the DIC minus the DIC of the best-fitting model.   Thus the best-fitting model is indicated by a DIC difference of 0.00.
+
+Also indicated is whether observation-only and placebo controls were considered together. 
+
+```{r}
+modcomp %>%
+  select(-opt) %>%
+  ## ugh why is this factor
+  mutate(merge_controls=ifelse(merge_controls=="TRUE", "Yes", "No")) %>% 
+  flextable %>%
+  set_header_labels(event="",
+                    merge_controls="Controls merged",
+                    drugdose="Dose",
+                    drugdm="Delivery method",
+                    drugname="Drug name",
+                    drugnitro="Nitrogenous",
+                    drugbp="Bisphosphonate")
+```
+
+
+
+## Table A12:  Comparison of direct and indirect evidence 
+
+Also given in the [main document](results.html).
+
+```{r, size='footnotesize'}
+
+rowgrps <- as.list(table(ortab$categ))
+orft <- ortab %>%
+  as_tibble %>%
+  select(categ, event, actlab, direct, NMA, dir_ind_or) %>%
+  as_grouped_data(groups="categ") %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Drug",
+                    direct="Direct OR", NMA="NMA OR", dir_ind_or="Direct/indirect OR (p)") %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  width(width = 1) %>%
+  flextable::bold(part = "header", bold = TRUE )
+orft
+
+```

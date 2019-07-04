@@ -1,0 +1,161 @@
+---
+title: "Bisphosphonates adverse-events meta-analysis results"
+author: ""
+date: "`r Sys.Date()`"
+output:
+ html_document
+---
+
+
+```{r,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      fig.width=50,
+                      fig.height=100)
+library(knitr)
+library(dplyr)
+filter <- dplyr::filter
+library(flextable)
+load(file="ors.rda")
+```	
+
+
+# Overview
+
+This report describes the meta-analysis of aggregate data on adverse effects of bisphosphonates. 
+
+55 studies are considered, which in total reported 111 distinctly-named adverse events.   Among these events, there are 103 distinct events for which there is at least one study comparing incidence of that event between a bisphosphonate treatment group and a no-bisphosphonate control group.
+
+For each of these 103 events, the data were analysed in the same way.  The methods, and highlighted results, are given in in this document.  Results for each of the 103 analyses are reported in [Appendix 2](app2_index.html). 
+
+Events might be grouped into categories corresponding to similar physiological systems (as advised by a clinician REF), though here they are analysed independently. 
+
+
+## Treatment groupings
+
+For each event, there is a different set of trials that reported data on that event, giving a different network of comparisons between treatments, shown in [Appendix 2](app2_index.html). 
+
+Five alternative models for network meta-analysis are compared, defined by different groupings of treatments.  From the finest to the coarsest grouping, these are: 
+
+1. Different doses and delivery methods of different drugs considered as different treatments.
+
+2. Different delivery methods considered as different treatments, but different doses of the same drug considered as the same treatment. 
+
+3. Different drugs considered as different treatments, but different doses and delivery methods of the same drug considered as the same treatment.
+
+4. Nitrogenous bisphosphonates and non-nitrogenous bisphosphonates (LIST) considered as different treatments. 
+
+5. All bisphosphonates considered as the same treatment. 
+
+Non-bisphosphonate control groups were classified as either placebo, observation-only or denosumab.
+
+In two studies, treatment arms were distinguished by the different hormone therapies given.  These are modelled in the same way as different doses of the same drug.  (In Appendix 2, the arm given a hormone therapy that is not an aromatase inhibitor is labelled "notai"). 
+
+
+## Network meta-analysis procedure
+
+A network meta-analysis model was obtained for each event using the following procedure. 
+
+1. If the treatment network is disconnected under the finest model (grouping 1), but becomes connected when placebo and observation-only controls are considered to be the same treatment, then these two control groups are considered to be the same.  Otherwise these controls are separated.
+
+2. Starting with the finest model (grouping 1), the treatments are grouped until the resulting treatment network is connected. 
+
+3. All network meta-analysis models ranging from the finest connected model to the coarsest are fitted. 
+
+4. The optimal model is selected from among those which fitted successfully, using the deviance information criterion (DIC REF), a measure of model fit and predictive ability.   The network diagram for the selected model is shown in [Appendix 2](app2_index.html). 
+
+5. If no network meta-analysis model fitted successfully, then the results for that event are reported from direct-data meta-analysis only.  Unsuccessful fits are generally due to sparsity of information. 
+
+Technical details of the network meta-analysis models, and the model comparison and checking procedure, are reported in [Appendix 1](app1.html). 
+
+For the selected model, a corresponding classical meta-analysis is also performed based on the direct comparisons alone.  (TODO why not use Bayesian methods for this, for consistency with the model checking procedure?) 
+
+
+# Results 
+
+## Table 1: events affected most by bisphosphonate treatment 
+
+This table lists the events and treatments for which either direct comparison or network meta-analysis produced a practically and statistically significant treatment effect, defined as an odds ratio with a posterior median of 1.5 or greater and lower 95% credible limit greater than 1.  The odds ratio is the ratio of the odds of the event between the treatment group (as defined in the table) and an "observation only" control group. 
+
+```{r}
+
+orft <- ortab %>%
+  as_tibble %>%
+  filter(!is.na(sig) & sig) %>%
+  select(categ, event, actlab, direct, NMA) %>%
+  as_grouped_data(groups="categ") %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Treatment",
+                    direct="Direct OR", NMA="NMA OR") %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  width(width = 1) %>%
+  flextable::bold(part = "header", bold = TRUE )
+orft
+
+```
+
+Note the reported "treatment" in these tables depends on the selected model - this could refer to all bisphosphonates, or the dose and delivery method of a particular drug, or some categorisation in between.   If the selected model distinguishes between doses, the dose categories are labelled with a number.  TODO document these from Alex's spreadsheet. 
+
+
+```{r,eval=FALSE,warning=FALSE}
+orplot <- ors %>%
+  dplyr::filter(!is.na(sig) & sig) %>% 
+  arrange(desc(y)) 
+orplot$datstr[duplicated(paste(orplot$categ,orplot$event))] <- ""
+
+ggplot(orplot, aes(y=est, x=y, col=model)) +
+  coord_flip(ylim=c(0.08, 20)) +
+  ylab("Odds ratio") +
+  xlab("") + 
+  geom_point(position=position_dodge(-0.4)) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper),
+                position=position_dodge(-0.4),
+                width=0) +
+  geom_hline(aes(yintercept=1), col="gray") + 
+  geom_text(aes(y=0, label=datstr), col="black", hjust="left") + 
+  scale_y_continuous(trans="log", 
+                     breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10)) +
+  facet_grid(categ  ~ ., scales="free_y", space="free_y") +
+  theme(text = element_text(size=100))
+
+```
+
+# Table 2: Summary of results for every event
+
+Table 2 gives odds ratios from direct and selected network meta-analysis models for all events, sorted by clinical category.  Effects significant under either model, as listed in Table 1, are shown here in red. 
+
+Even more detailed results, for all 103 events, are given in [Appendix 2](appendix2_index.html).   
+
+```{r, size='footnotesize'}
+
+rowgrps <- as.list(table(ortab$categ))
+orft <- ortab %>%
+  as_tibble %>%
+  select(categ, event, actlab, direct, NMA, sig) %>%
+  as_grouped_data(groups="categ")
+sigs <- (!is.na(orft$sig) & orft$sig)
+orft$sig <- NULL
+
+orft <- orft %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Drug",
+                    direct="Direct OR", NMA="NMA OR")  %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  flextable::color(i = sigs, color="red") %>%
+  width(width = 1) %>%
+  flextable::bold(part = "header", bold = TRUE )
+orft
+
+```
+
+
+# TODO 
+
+Absolute treatment effects - e.g. risk differences.  For this, we need to define a baseline group. 
+
+Haven't considered potential study biases 
+
+Connect to AZURE individual-level analysis, reported in another document (tidy up)
+
+Connect to healthy women analysis (not completed)

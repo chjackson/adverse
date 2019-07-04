@@ -62,13 +62,15 @@ netp
 
 # Network meta-analyses for specific events 
 
-The events selected for analysis are the ones which have 
+Consider as separate events those which have 
 
 * point estimate for odds ratio > 1.5 or risk difference > 0.02 
 
 * and are also "statistically significant" (either for OR or risk difference)
 
 from fixed-effects meta-analysis from comparisons of any bisphosphonate with a no-treatment control.
+
+For all other events, merge those which are clinically related into the same category
 
 ```{r, warning=FALSE}
 zolevents %>%
@@ -79,13 +81,10 @@ zolevents %>%
   select(aetype, RD, OR, events)
 ```
 
+TODO check what happens with "Influenza-like symptoms" 
+
 Excluding "Influenza-like symptoms" for the moment because the network of trials reporting this event is awkwardly in three pieces, and we will probably merge this with some other symptoms.
 
-Eventually should also 
-
-* include events with prior clinical evidence of an association with bisphosphonates.  Haven't yet formally identified those among the events as categorised in the literature extraction.
-
-* merge some of the similar kinds of symptoms, before applying these selection criteria again.
 
 
 ```{r, warning=FALSE}

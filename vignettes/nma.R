@@ -1,3 +1,61 @@
+library(meta)
+
+## Models defined by different classifications of drugs
+mods <- c("drugdose","drugdm", "drugname", "drugnitro", "drugbp")
+
+## additional models with placebo and observation-only merged
+mods0 <- paste0(mods, "0") 
+mods_check <- c("drugdose","drugdose0",
+                 "drugdm", "drugname", "drugnitro", "drugbp")
+
+control_names <- unique(unlist(bpcoding[bpcoding$drugdose0=="Control",mods_check])) # should be c("Observation","Placebo","Control")
+
+
+## Find treatment comparison network for a given event and model 
+
+events <- unique(nmadata$aetype)
+notevents <- c("ANY ADVERSE EVENT","SERIOUS ADVERSE EVENTS", "Withdrawals because of AEs")
+events <- setdiff(events, notevents)
+nev <- length(events)
+
+## Return the network that would result from using a particular treatment definition model for a particular event
+## Also return the event, study and treatment datasets corresponding to a NMA on that network.
+## That network should be connected 
+
+getnet <- function(event, model){
+    filter <- dplyr::filter
+    dat <- nmadata %>%
+        mutate(treatment = nmadata[,model]) %>% 
+      filter(.data$aetype == event)
+    dat <- dat %>% 
+        ## drop duplicated arms after merging treatments 
+        mutate(sid = paste(.data$study, .data$treatment)) %>%
+        filter(!duplicated(.data$sid))
+    dat <- dat %>% 
+        ## then drop studies with only one arm remaining
+        mutate(narm = table(.data$study)[.data$study])
+    graph <- NULL
+    if (any(dat$narm == 1)) { 
+        dat <- dat %>% filter(.data$narm > 1)
+        if (nrow(dat) == 0)
+            graph <- "no_data"
+    }
+    stu <- studies %>%
+      filter(.data$aetype == event) %>%
+      filter(.data$study %in% dat$study)
+    trt <- treatments %>%
+      mutate(id = treatments[,model]) %>%
+      filter(!duplicated(.data$id)) %>% 
+      filter(id %in% dat$treatment)
+    if (is.null(graph)) { 
+        net <- mtc.network(dat, treatments=trt, studies=stu)
+        graph <- mtc.network.graph(fix.network(net), TRUE)
+    } 
+    list(net=net, graph=graph, dat=dat, stu=stu, trt=trt)
+}
+
+
+
 run.nma <- function(net, basetrt, dat=FALSE){
     set.seed(1) 
     hy.prior <- mtc.hy.empirical.lor(outcome.type="semi-objective",
@@ -12,59 +70,101 @@ run.nma <- function(net, basetrt, dat=FALSE){
     if (dat) mod[["data"]] else fit
 }
 
-nma <- function(event, dat=NULL, stu=NULL, trt=NULL){
+get_control <- function(trts){
+    if (any(trts == "Observation"))
+        control <- "Observation"
+    else if (any(trts == "Placebo"))
+        control <- "Placebo"
+    else if (any(trts == "Control"))
+        control <- "Control"
+    else control <- NA
+    control
+}
 
-    if (is.null(dat)) dat <- nmadata
-    if (is.null(stu)) stu <- studies
-    dat <- dat %>% filter(aetype == event)
-    stu <- stu %>% filter(aetype == event)
-    if (is.null(trt)) trt <- treatments %>% filter(id %in% dat$treatment)
+get_actives <- function(trts){
+    setdiff(trts, c("Observation","Placebo","Control","Denosumab"))
+}
 
-    net.trt <- mtc.network(dat, treatments=trt, studies=stu)
-    net.drugdm <- dat %>% mutate(treatment=drugdm) %>% mtc.network(studies=stu)
-    net.drug <- dat %>% mutate(treatment=drug) %>% mtc.network(studies=stu)
-    net.drugclass <- dat %>% mutate(treatment=drugclass) %>% mtc.network(studies=stu)
-
-    ## save disaggregated data in nice format produced by gemtc, for use in plots 
-    dat.trt <- run.nma(net.trt, "103", dat=TRUE)
-    fit.trt <- run.nma(net.trt, "103")
-    fit.drugdm <- run.nma(net.drugdm, "Observation")
-    fit.drug <- run.nma(net.drug, "Observation")
-    fit.drugclass <- run.nma(net.drugclass, "Observation")
-
-    modlist <- list(trt=fit.trt, drugdm=fit.drugdm,
-                    drug=fit.drug, drugclass=fit.drugclass)
-    comp <- as.data.frame(t(sapply(
-        modlist,
-        function(x){
-        if (!is.null(x)) {
-            BGR <- if (is.null(gdiag(x)$mpsrf)) gdiag(x)$psrf[,"Point est."] else gdiag(x)$mpsrf
-            c(
-                unlist(x$deviance[c("Dbar","pD","DIC")]),
-                BGR = BGR 
-            )
-        } else rep(NA, 4)
-    })))
+nma <- function(event, models, dat, stu, trt){
+    
+    ## named list with names defined by "models", each element initialised to NULL
+    net.models <- fit.models <- Map(as.null, models) 
+    comp <- as.data.frame(matrix(nrow=length(models), ncol=4))
     colnames(comp) <- c("Dbar","pD","DIC","BGR")
+    rownames(comp) <- models
+    
+    for (i in seq_along(models)){
+        dati <- dat
+        dati$treatment <- dat[,models[i]]
+        
+        trti <- treatments %>%
+          mutate(id = treatments[,models[i]])
+        trti <- trti[trti$id %in% dati$treatment, ] 
+        net.models[[i]] <- mtc.network(dati, studies=stu) # treatments argument should be omitted under grouptreat fork 
+        basetrt <- get_control(dati$treatment)
+        if (is.na(basetrt))
+            stop("No control group found in network")
+        fit.models[[i]] <- run.nma(net.models[[i]], basetrt)
 
-    optmodel <- function(comp){
-        if (all(is.na(comp$BGR) | (comp$BGR > 1.1) ))
-            res <- "none"
-        else { 
-            comp2 <- comp[(comp$BGR<1.1) & (!is.na(comp$BGR)),]
-            res <- rownames(comp2)[which.min(comp2$DIC)]
-        }
-        res
+        ## FIXME if Placebo but not Observation in the network, use Control 
+
+        fit.models[[i]]$model$data
+        
+        gd <- gdiag(fit.models[[i]])
+        BGR <- if (is.null(gd$mpsrf)) gd$psrf[,"Point est."] else gd$mpsrf
+        dev <- unlist(fit.models[[i]]$deviance[c("Dbar","pD","DIC")])
+        if (is.null(fit.models[[i]])){
+            comp[i,] <- rep(NA, 4)
+        } else 
+            comp[i,] <- c(dev, BGR) 
     }
-    opt <- optmodel(comp)
-    fit.opt <- if (opt=="none") NULL else get(paste("fit", opt, sep="."))
+
+    if (all(is.na(comp$BGR) | (comp$BGR > 1.1) )){
+        opt <- "none"
+        dvsind <- NULL
+    }
+    else { 
+        comp2 <- comp[(comp$BGR<1.1) & (!is.na(comp$BGR)),]
+        opt <- rownames(comp2)[which.min(comp2$DIC)]
+        optmodel <- net.models[[opt]]
+        
+        ## Consistency check for best fitting model 
+        ## Runs set of models with direct and indirect evidence separated by node split
+        ## for comparisons of active vs obs only
+        ## Returns OR between direct and indirect evidence 
+        trts <- optmodel$treatments$description 
+        act <- get_actives(trts)
+        ctrl <- get_control(trts)
+        nsc <- mtc.nodesplit.comparisons(optmodel)
+        nsc <- nsc[(nsc$t1 %in% ctrl & nsc$t2 %in% act)|
+                   (nsc$t2 %in% ctrl & nsc$t1 %in% act),]
+        ## FIXME rerun to include convergence info
+        if (nrow(nsc) > 0) {
+            cat("RUNNING NODESPLIT...\n")
+            nmods <- nrow(nsc)
+
+            modall.trtsplit <- mtc.nodesplitgrouptreat(optmodel, comparisons=nsc, likelihood="cjbinom", om.scale=5,
+                                                       hy.prior = mtc.hy.empirical.lor(outcome.type="semi-objective", comparison.type="pharma-pharma"), link="logit")
+
+
+            conv <- sapply(modall.trtsplit, function(x)gdiag(x)$mpsrf)[1:nmods] < 1.1
+            d.direct <- sapply(modall.trtsplit[1:nmods], function(x){unlist(x$samples[,"d.direct"])})
+            d.indirect <- sapply(modall.trtsplit[1:nmods], function(x){unlist(x$samples[,"d.indirect"])})
+            dvsind <- apply(d.direct - d.indirect, 2, quantile, c(0.025, 0.5, 0.975))
+            dvsind <- as.data.frame(t(exp(dvsind)))
+            names(dvsind) <- c("l95","est","u95")
+            dvsind$p <- apply(d.direct - d.indirect, 2, function(x){p <- mean(x>0); 2*min(p, 1-p)})
+            dvsind$comp <- rownames(dvsind)
+            dvsind$conv <- conv
+        } else dvsind <- NULL 
+    }
+    fit.opt <- if (opt=="none") fit.models[[1]] else fit.models[[opt]]
 
     list(event = event,
          opt = opt,
          fit.opt = fit.opt,
-         net.trt = net.trt,
-         dat.trt = dat.trt,
-         comp = comp)
+         comp = comp,
+         dvsind = dvsind)
 }
 
 res.nma <- function(nmares){
