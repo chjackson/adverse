@@ -30,4 +30,6 @@ Project in progress
 
 [Main results](https://chjackson.github.io/adverse/vignettes/results.html)
 
-[Appendix 1](https://chjackson.github.io/adverse/inst/doc/app1.html)
+[Appendix 1](https://chjackson.github.io/adverse/vignettes/app1.html)
+
+[Appendix 2](https://chjackson.github.io/adverse/vignettes/app2_index.html)
