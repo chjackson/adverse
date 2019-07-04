@@ -7,7 +7,7 @@ output:
 ---
 
 
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE,echo=FALSE}
 knitr::opts_chunk$set(echo=FALSE,
                       fig.width=50,
                       fig.height=100)
@@ -25,35 +25,33 @@ This report describes the meta-analysis of aggregate data on adverse effects of 
 
 55 studies are considered, which in total reported 111 distinctly-named adverse events.   Among these events, there are 103 distinct events for which there is at least one study comparing incidence of that event between a bisphosphonate treatment group and a no-bisphosphonate control group.
 
-For each of these 103 events, the data were analysed in the same way.  The methods, and highlighted results, are given in in this document.  Results for each of the 103 analyses are reported in [Appendix 2](app2_index.html). 
+For each of these 103 events, the data were analysed in the same way.  The methods, and highlighted results, are given in in this document.  Extra details for each of the 103 analyses are reported in [Appendix 2](app2_index.html). 
 
-Events might be grouped into categories corresponding to similar physiological systems (as advised by a clinician REF), though here they are analysed independently. 
+Events might be grouped into categories corresponding to similar physiological systems (as advised by a clinician REF).  Here they are analysed independently, though the results are presented in groups. 
 
 
 ## Treatment groupings
 
-For each event, there is a different set of trials that reported data on that event, giving a different network of comparisons between treatments, shown in [Appendix 2](app2_index.html). 
+For each event, there is a different set of trials that reported data on that event, giving a different network of comparisons between treatments.   Five alternative models for network meta-analysis are compared, defined by different groupings of treatments.  From the finest to the coarsest grouping, these are: 
 
-Five alternative models for network meta-analysis are compared, defined by different groupings of treatments.  From the finest to the coarsest grouping, these are: 
+1. Different _doses and delivery methods_ of different drugs considered as different treatments.  The network corresponding to this model is shown as the "full network of comparisons" in [Appendix 2](app2_index.html). 
 
-1. Different doses and delivery methods of different drugs considered as different treatments.
+2. Different _delivery methods_ considered as different treatments, but different doses of the same drug considered as the same treatment. 
 
-2. Different delivery methods considered as different treatments, but different doses of the same drug considered as the same treatment. 
+3. Different _drugs_ considered as different treatments, but different doses and delivery methods of the same drug considered as the same treatment.
 
-3. Different drugs considered as different treatments, but different doses and delivery methods of the same drug considered as the same treatment.
+4. _Nitrogenous_ bisphosphonates and non-nitrogenous bisphosphonates (LIST) considered as different treatments. 
 
-4. Nitrogenous bisphosphonates and non-nitrogenous bisphosphonates (LIST) considered as different treatments. 
+5. _All bisphosphonates_ considered as the same treatment. 
 
-5. All bisphosphonates considered as the same treatment. 
+Non-bisphosphonate control groups were distinguished as either placebo, observation-only or denosumab.
 
-Non-bisphosphonate control groups were classified as either placebo, observation-only or denosumab.
-
-In two studies, treatment arms were distinguished by the different hormone therapies given.  These are modelled in the same way as different doses of the same drug.  (In Appendix 2, the arm given a hormone therapy that is not an aromatase inhibitor is labelled "notai"). 
+In two studies, treatment arms are distinguished by the different hormone therapies given.  These are modelled in the same way as different doses of the same drug.  (In Appendix 2, the arm given a hormone therapy that is not an aromatase inhibitor is labelled "notai"). 
 
 
 ## Network meta-analysis procedure
 
-A network meta-analysis model was obtained for each event using the following procedure. 
+A network meta-analysis model was obtained for each event using the following procedure.  This procedure aims to find the best-fitting model which uses all potentially-relevant data, which requires a "connected network" of treatments.
 
 1. If the treatment network is disconnected under the finest model (grouping 1), but becomes connected when placebo and observation-only controls are considered to be the same treatment, then these two control groups are considered to be the same.  Otherwise these controls are separated.
 
@@ -61,20 +59,20 @@ A network meta-analysis model was obtained for each event using the following pr
 
 3. All network meta-analysis models ranging from the finest connected model to the coarsest are fitted. 
 
-4. The optimal model is selected from among those which fitted successfully, using the deviance information criterion (DIC REF), a measure of model fit and predictive ability.   The network diagram for the selected model is shown in [Appendix 2](app2_index.html). 
+4. The optimal model is selected from among those which fitted successfully, using the deviance information criterion (DIC REF), a measure of model fit or predictive ability.   The network diagram for the selected model is shown in [Appendix 2](app2_index.html). 
 
 5. If no network meta-analysis model fitted successfully, then the results for that event are reported from direct-data meta-analysis only.  Unsuccessful fits are generally due to sparsity of information. 
 
 Technical details of the network meta-analysis models, and the model comparison and checking procedure, are reported in [Appendix 1](app1.html). 
 
-For the selected model, a corresponding classical meta-analysis is also performed based on the direct comparisons alone.  (TODO why not use Bayesian methods for this, for consistency with the model checking procedure?) 
+For the selected model, a corresponding classical meta-analysis is also performed based on the direct comparisons alone.  (TODO might be nicer to use Bayesian methods for this, for consistency with the model checking procedure?) 
 
 
 # Results 
 
 ## Table 1: events affected most by bisphosphonate treatment 
 
-This table lists the events and treatments for which either direct comparison or network meta-analysis produced a practically and statistically significant treatment effect, defined as an odds ratio with a posterior median of 1.5 or greater and lower 95% credible limit greater than 1.  The odds ratio is the ratio of the odds of the event between the treatment group (as defined in the table) and an "observation only" control group. 
+This table lists the events and treatments for which either the direct comparison or the selected network meta-analysis model produced a practically and statistically significant treatment effect, defined as an odds ratio with a posterior median of 1.5 or greater and lower 95% credible limit greater than 1.  The odds ratio is the ratio of the odds of the event between the treatment group (as defined in the table) and an "observation only" control group. 
 
 ```{r}
 
@@ -122,9 +120,9 @@ ggplot(orplot, aes(y=est, x=y, col=model)) +
 
 # Table 2: Summary of results for every event
 
-Table 2 gives odds ratios from direct and selected network meta-analysis models for all events, sorted by clinical category.  Effects significant under either model, as listed in Table 1, are shown here in red. 
+Table 2 gives odds ratios from direct and selected network meta-analysis models for all events, sorted by clinical category, including non-significant results.  Effects significant under either model, as listed in Table 1, are shown here in red. 
 
-Even more detailed results, for all 103 events, are given in [Appendix 2](appendix2_index.html).   
+More detailed results, for all 103 events, including network diagrams, raw data and "forest plots" of meta-analysis results, are given in [Appendix 2](appendix2_index.html).
 
 ```{r, size='footnotesize'}
 
@@ -139,10 +137,11 @@ orft$sig <- NULL
 orft <- orft %>%
   flextable %>% 
   set_header_labels(categ="", event="",
-                    actlab="Drug",
+                    actlab="Treatment",
                     direct="Direct OR", NMA="NMA OR")  %>% 
   flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
   flextable::color(i = sigs, color="red") %>%
+  flextable::bold(i = sigs, bold=TRUE) %>%
   width(width = 1) %>%
   flextable::bold(part = "header", bold = TRUE )
 orft
@@ -152,10 +151,10 @@ orft
 
 # TODO 
 
-Absolute treatment effects - e.g. risk differences.  For this, we need to define a baseline group. 
+* Absolute treatment effects - e.g. risk differences.  For this, we need to define a baseline group. 
 
-Haven't considered potential study biases 
+* Haven't considered potential study biases 
 
-Connect to AZURE individual-level analysis, reported in another document (tidy up)
+* Connect to AZURE individual-level analysis, reported in another document (tidy up)
 
-Connect to healthy women analysis (not completed)
+* Connect to healthy women analysis (not completed)

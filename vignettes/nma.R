@@ -60,7 +60,7 @@ run.nma <- function(net, basetrt, dat=FALSE){
     set.seed(1) 
     hy.prior <- mtc.hy.empirical.lor(outcome.type="semi-objective",
                                      comparison.type="pharma-pharma")
-    scale <- 5
+    scale <- 2
     mod <- mtc.model(net, type="grouptreat", likelihood="cjbinom", 
                      link="logit", om.scale=scale, hy.prior=hy.prior, basetrt=basetrt)
     ## may break if disconnected network
@@ -143,7 +143,7 @@ nma <- function(event, models, dat, stu, trt){
             cat("RUNNING NODESPLIT...\n")
             nmods <- nrow(nsc)
 
-            modall.trtsplit <- mtc.nodesplitgrouptreat(optmodel, comparisons=nsc, likelihood="cjbinom", om.scale=5,
+            modall.trtsplit <- mtc.nodesplitgrouptreat(optmodel, comparisons=nsc, likelihood="cjbinom", om.scale=2,
                                                        hy.prior = mtc.hy.empirical.lor(outcome.type="semi-objective", comparison.type="pharma-pharma"), link="logit")
 
 
