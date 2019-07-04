@@ -48,12 +48,16 @@ load(file="app2_plotarr.Rdata")
 
 ## Generate HTML link for each event to appear in index file 
 
+evname_clean <- events
+for (i in 1:nev){
+    evname_clean[i] <- gsub(" ", "_", events[i])
+    evname_clean[i] <- gsub("/", "_", evname_clean[i])
+}
+
 ifname <- "app2_index.Rmd"
 cat(scan("app2_index_header.Rmd", what="char", sep="\n"), file=ifname, sep="\n")
 for (i in 1:nev){
-    evname_clean <- gsub(" ", "_", events[i])
-    evname_clean <- gsub("/", "_", evname_clean)
-    fname <- sprintf("app2events/app2_event%s_%s.html", i, evname_clean)
+    fname <- sprintf("app2events/app2_event%s_%s.html", i, evname_clean[i])
     cat(sprintf("[%s](%s)\n\n", events[i], fname), file=ifname, append=TRUE)
 }
 render(ifname)
@@ -61,9 +65,7 @@ render(ifname)
 ## Generate Rmd file for each event 
 
 for (i in 1:nev){
-    evname_clean <- gsub(" ", "_", events[i])
-    evname_clean <- gsub("/", "_", evname_clean)
-    fname <- sprintf("app2events/app2_event%s_%s.Rmd", i, evname_clean)
+    fname <- sprintf("app2events/app2_event%s_%s.Rmd", i, evname_clean[i])
     cat(scan("app2_event_header.Rmd", what="char", sep="\n"), file=fname, sep="\n")
     cat(sprintf("## %s\n\n", events[i]),
         file=fname, append=TRUE)
@@ -74,8 +76,6 @@ for (i in 1:nev){
 ## Process Rmd to generate HTML file for each event
 
 for (i in 1:10){
-    evname_clean <- gsub(" ", "_", events[i])
-    evname_clean <- gsub("/", "_", evname_clean)
-    fname <- sprintf("app2events/app2_event%s_%s.Rmd", i, evname_clean)
+    fname <- sprintf("app2events/app2_event%s_%s.Rmd", i, evname_clean[i])
     render(fname)
 }
