@@ -23,3 +23,11 @@ Project in progress
 ## Data on all events aggregated over studies 
 
 [All events](https://chjackson.github.io/adverse/inst/doc/nmaother.html)
+
+
+
+## Full analysis of all events (July 2019) 
+
+[Main results](https://chjackson.github.io/adverse/inst/doc/results.html)
+
+[Appendix 1](https://chjackson.github.io/adverse/inst/doc/app1.html)
