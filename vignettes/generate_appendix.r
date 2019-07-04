@@ -73,7 +73,7 @@ for (i in 1:nev){
 
 ## Process Rmd to generate HTML file for each event
 
-for (i in 1:nev){
+for (i in 1:10){
     evname_clean <- gsub(" ", "_", events[i])
     evname_clean <- gsub("/", "_", evname_clean)
     fname <- sprintf("app2events/app2_event%s_%s.Rmd", i, evname_clean)
