@@ -28,6 +28,6 @@ Project in progress
 
 ## Full analysis of all events (July 2019) 
 
-[Main results](https://chjackson.github.io/adverse/inst/doc/results.html)
+[Main results](https://chjackson.github.io/adverse/vignettes/results.html)
 
 [Appendix 1](https://chjackson.github.io/adverse/inst/doc/app1.html)
