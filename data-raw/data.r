@@ -8,8 +8,8 @@ filter <- dplyr::filter
 
 # for(i in list.files("../data", full.names=TRUE, include.dirs=TRUE)) load(i)
 
-bpaeraw <- read_excel("Bisphosphonates coded data - Alex 18-11-18.xlsx", range="A2:CWJ61")
-header <- unlist(read_excel("Bisphosphonates coded data - Alex 18-11-18.xlsx", col_names=FALSE, range="A1:CWJ1"))
+bpaeraw <- read_excel("Bisphosphonates DOUBLE CHECKED MASTER 12-7-19.xlsx", range="A2:CWJ61")
+header <- unlist(read_excel("Bisphosphonates DOUBLE CHECKED MASTER 12-7-19.xlsx", col_names=FALSE, range="A1:CWJ1"))
 
 ##' TIDY COLUMN NAMES
 
@@ -41,8 +41,9 @@ bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Exp2"] <- bpaeraw[bpaeraw$"Trial n
 bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Control"] <- NA
 
 ## This looks funny.  Should be 56 vs 45 people in two experimental arms, not 127 in single experimental arm?  zoledronic acid in community vs hospital setting 
-bpaeraw %>% select(`Trial name`)
-bpaeraw <- bpaeraw %>% filter(`Trial name` != "Wardley2005")
+#bpaeraw %>% select(`Trial name`)
+#bpaeraw <- bpaeraw %>% filter(`Trial name` != "Wardley2005")
+# Single arm study shouldn't be problem for the NMA. Include this for now 
 
 bpaeraw <- bpaeraw %>%
   rename(reporting="Adverse reporting",
@@ -56,16 +57,23 @@ bpaeraw <- bpaeraw %>%
                             `1` = "Complete", `2` = "Table of highest", `3` = "Less")) %>%
   mutate(reporting = factor(reporting, levels = c("Complete","Table of highest","Less","x")))
 
-## character notes in this cell 
-bpaeraw[39,"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4"] <- NA
-bpaeraw$"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4" <- as.numeric(bpaeraw$"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4")
-bpaeraw[26,"MYALGIA ungraded;A4"] <- NA
-bpaeraw$"MYALGIA ungraded;A4" <- as.numeric(bpaeraw$"MYALGIA ungraded;A4")
-bpaeraw[13,"ANY ADVERSE EVENT;A1"] <- gsub(",","",bpaeraw[13,"ANY ADVERSE EVENT;A1"])
-bpaeraw$"ANY ADVERSE EVENT;A1" <- as.numeric(bpaeraw$"ANY ADVERSE EVENT;A1")
+## Remove character notes in numeric cells
 
-## denominator put into control instead of experimental here
-bpaeraw[bpaeraw$"Trial name"=="REFORM",1:20]
+## AZURE. Spreadsheet reports "Myalgia" but AZURE reports "Myalgia/arthralgia"
+## NCT00376740 classifies myalgia under arthralgia/joint pain
+## Arbirtrarily assign these to myalgia, arthralgia/joint pain respectively 
+bpaeraw[39,"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4...161"] <- NA
+bpaeraw[,"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4...161"] <-
+  as.numeric(bpaeraw$"ARTHRALGIA/JOINT PAIN (ungraded or grade 1/2);A4...161")
+mcol <- grep("MYALGIA ungraded;A4",colnames(bpaeraw))
+bpaeraw[26,mcol] <- NA
+bpaeraw$"MYALGIA ungraded;A4...1733" <-
+  as.numeric(bpaeraw$"MYALGIA ungraded;A4...1733")
+
+# Remove extraneous comma 
+acol <- grep("ANY ADVERSE EVENT;A1",colnames(bpaeraw))
+bpaeraw[13,acol] <- gsub(",","",bpaeraw[13,acol])
+bpaeraw$"ANY ADVERSE EVENT;A1...30" <- as.numeric(bpaeraw$"ANY ADVERSE EVENT;A1...30")
 
 use_data(bpaeraw, overwrite=TRUE)
 
@@ -78,40 +86,69 @@ aecat <- scan("aecategs.txt", what="character", sep="\n") # one element per col 
 aecategs <- unique(aecat)[15:144]
 use_data(aecategs, overwrite=TRUE)
 
-##' RESHAPE DATA INTO ONE ROW PER ARM 
+bpaeraw[1:2,1:20]
+
+##' Reshape data into one row per arm and event
 bpaelong <- bpaeraw %>%
   gather(vname, x,
-         matches("^N[1-5]"),
-         matches("A[1-5]"),
-         matches(";A[1-5]")
+         matches("^N[[:digit:]]"),
+         matches("A[[:digit:]]"),
+         matches(";A[[:digit:]]")
          ) %>%
   select("Trial name", "Trial Code", reporting, has_control, vname, x) %>% 
-  extract(vname, "armno1", "^(?:A|N)([1-5])", remove=FALSE) %>%
-  extract(vname, "armno2", ";A([1-5])$", remove=FALSE) %>%
+  extract(vname, "armno1", "^(?:A|N)([[:digit:]]).*", remove=FALSE) %>%
+  extract(vname, "armno2", ";A([[:digit:]]).*$", remove=FALSE) %>%
   mutate(armno = ifelse(is.na(armno1), armno2, armno1)) %>%
   select(-armno1, -armno2) %>% 
   mutate(armno = as.numeric(armno),
-         vname = gsub("N[1-5]","N",vname),
-         vname = gsub("A[1-5] (additional coding)", "\\1", vname), 
-         vname = gsub("A[1-5] (coding)", "\\1", vname), 
-         vname = gsub(";A[1-5]$","",vname)) %>%
+         vname = gsub("N[[:digit:]]","N",vname),
+         vname = gsub("A[[:digit:]] (additional coding)", "\\1", vname), 
+         vname = gsub("A[[:digit:]] (coding)", "\\1", vname), 
+         vname = gsub(";A[[:digit:]]$","",vname)) %>%
   mutate(aecat = aecat[match(vname, gsub(";A[0-9]$","",names(bpaeraw)))],
-         aecat = ifelse(is.na(aecat), vname, aecat)) 
+         aecat = ifelse(is.na(aecat), vname, aecat)) #%>%
+  ## AZURE. Spreadsheet reports "Myalgia" but AZURE reports "Myalgia/arthralgia"
+  ## NCT00376740 classifies myalgia under arthralgia/joint pain
+#  mutate(x = gsub("(combined w/ arthraligia)","",x)) %>% 
+  ## these two should already have been fixed above in bpaeraw
+#  mutate(x = gsub("(combined with myalgia)","",x)) %>%
+#  mutate(x = as.numeric(x))
+
+## add a severity indicator for each arm x event 
+bpaelong <- bpaelong %>%
+    mutate(vname = gsub("Grade", "GRADE", vname)) %>% 
+    mutate(vname = gsub("UNGRADED", "ungraded", vname)) %>% 
+    mutate(vname = gsub("Ungraded", "ungraded", vname))
+
+bpaelong <- bpaelong %>%
+  mutate(grade = gsub(".+GRADE ([1-4]).*", "\\1", vname)) %>% 
+  mutate(grade = ifelse(grepl("ungraded", grade), NA, grade)) %>%
+  mutate(grade = ifelse(vname %in% aecategs[-(1:3)], NA, grade)) %>%
+  mutate(grade = as.numeric(ifelse(grade %in% c(1,2,3,4), grade, NA)))
 
 use_data(bpaelong, overwrite=TRUE)
 
+
 ## Sum AEs of same type within each arm
+
 bpaelongsum <- bpaelong %>%
   filter(!is.na(x)) %>% 
   group_by(`Trial name`, `Trial Code`, reporting, armno, aecat) %>%
-  summarise(x = sum(x)) %>%
+    summarise(
+        xser = sum(x[!is.na(grade) & grade>=3]),
+        xgraded = sum(x[!is.na(grade) & grade>=1]),
+        x = sum(x)
+    ) %>%
     rename(vname=aecat) %>%
     ungroup()
+
+use_data(bpaelongsum, overwrite=TRUE)
 
 ## Sum serious AEs of same type within each arm
 ## defined as grade 3 or above
 ## identified in variable name by strings
 
+## TODO we may not need separate datasets for SAE, since we include xser, xgraded above
 bpsaelongsum <- bpaelong %>%
   filter(!is.na(x)) %>%
   filter((!(aecat %in% aecategs)) | 
@@ -123,6 +160,7 @@ bpsaelongsum <- bpaelong %>%
 
 ## Data with one row per arm, and cols for each aggregate AE type
 bpae <- bpaelongsum %>%
+    select(-xser, -xgraded) %>% 
   spread(vname, x) %>%
   filter(!is.na(coding), # remove empty arms 
          !is.na(N)) %>%
@@ -206,8 +244,6 @@ drugclasses <- c("treatment", "description", "dose", "delivery",
 bpcoding <- bpcoding %>% 
   select(drugclasses)
 
-bpcoding
-as.data.frame(bpcoding)
 use_data(bpcoding, overwrite=TRUE)
 
 addtrtcoding <- bpae %>%
@@ -238,21 +274,14 @@ bpae <- bpae %>%
     left_join(bpcoding) %>%
     left_join(addtrtcoding) %>%
   select("Trial name", "Trial Code", reporting, armno, drugclasses, N, matches(!!aestr), addtrt, addtrtclass) %>%
-  mutate_at(vars(matches(!!aestr)), funs(p = . / N))
-
-table(bpae$drugname)
-table(bpae$drugdm)
-table(bpae$drugnitro)
-table(bpae$delivery)
-table(bpae$addtrt)
-table(bpae$addtrtclass)
+  mutate_at(vars(matches(!!aestr)), list(p = ~ . / N))
 
 bpsae <- bpsae %>%
   left_join(bpcoding) %>%
   left_join(addtrtcoding) %>%
   select("Trial name", "Trial Code", reporting, armno, N, drugclasses, matches(!!aestr),
          addtrt, addtrtclass) %>%
-  mutate_at(vars(matches(!!aestr)), funs(p = . / N))
+  mutate_at(vars(matches(!!aestr)), list(p = ~ . / N))
 
 ## Define the control arm for each study 
 
@@ -304,8 +333,6 @@ bpsae <- bpsae %>% left_join(control_outcomes, "Trial Code")
 
 use_data(bpae, overwrite=TRUE)
 use_data(bpsae, overwrite=TRUE)
-
-
 
 ## Different classes of AEs based on clinical advice 
 library(readxl)
@@ -379,6 +406,7 @@ bpaearmtype <- bpae %>%
   droplevels()
 
 use_data(bpaearmtype, overwrite=TRUE)
+
 
 props <- bpsae %>%
     gather(aetype, prop, which(names(.) %in% paste0(aecategs,"_p")))
@@ -490,3 +518,8 @@ use_data(treatments, overwrite=TRUE)
 
 ## Then we go to nmacall.R to run NMA
 ## this calls functions in nma.R 
+
+
+#bpaearmtype %>%
+#    filter(count > N) %>%
+#    select("Trial name", armno,treatment,"description", aetype, count, N)

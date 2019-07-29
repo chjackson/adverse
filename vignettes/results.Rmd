@@ -148,13 +148,50 @@ orft
 
 ```
 
+# DONE 
+
+* Put serious AE counts in ortab 
 
 # TODO 
 
 * Absolute treatment effects - e.g. risk differences.  For this, we need to define a baseline group. 
 
+	- Women with breast cancer who might be recommended bisphosphonates 
+	- ie similar to those included in studies of bisphosphonates 
+	- though reported rates in control groups are highly variable 
+	- take baseline rates from selected higher quality studies with good reporting, eg AZURE? 
+	- paper:  two baselines, one for healthy women, one for cancer. 
+	- select baseline from control pops of highest quality studies. top bin. 
+	- single number for low risk and high risk baseline 
+
 * Haven't considered potential study biases 
+- sensitivity analysis including data high quality
+
+Right so for both of these need to identify high quality studies. 
+
+table(bpaeraw$reporting == "Complete") # 23 out of 58 of them 
+
+Right so shall we do this SA, and at the same time extract estimates of baseline rates for obs only. Posterior median. 
+Or just a simple MA? just cos wwe need a reasonable single number not a dist. 
+Yes.  Studies that has obs-only controls 
+
+what about healthy women - from horizon and fit? But they don't have all events. 
 
 * Connect to AZURE individual-level analysis, reported in another document (tidy up)
 
-* Connect to healthy women analysis (not completed)
+	- qualitatively, similar kinds of events are important
+
+
+* Upload healthy women analysis
+
+* Me to check funny numbers against double checked spreadsheet 
+
+
+# Presentation for paper 
+
+1.  talk through how we did FEVER
+
+2.  forest plots for table 1 and 2 data
+
+
+
