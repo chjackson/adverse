@@ -83,6 +83,7 @@ The odds ratio is the ratio of the odds of the event between the treatment group
 
 The risk difference is the estimated absolute risk for patients given the active treatment, minus a constant baseline risk.  These baseline risks are listed in the table below.  For cancer patients they are obtained from classical meta-analysis of the direct data from the "observation-only" arms of the bisphosphonate trials.  For "healthy" patients they are obtained from the placebo arm of the NCT00083174 study of exemestane v placebo for postmenopausal women at high risk of breast cancer.   The risk differences are (currently) only calculated under the network meta-analysis model.
 
+Where there is no baseline risk / risk difference for healthy women, this is because the event was not reported in the NCT00083174 study.  If the baseline risk is close to zero, then the risk difference will also be negligible. 
 
 ```{r}
 
@@ -132,7 +133,8 @@ orft_complete <- ortab_complete %>%
                     brc="Baseline risk (cancer)",
                     rdc="Risk difference (cancer)",
                     brh="Baseline risk (healthy)",
-                    rdh="Risk difference (healthy)"
+                    rdh="Risk difference (healthy)",
+                    pser="Proportion of events that are serious"
                     ) %>% 
   flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
   width(width = 1) %>%
