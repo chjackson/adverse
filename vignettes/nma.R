@@ -22,19 +22,22 @@ nev <- length(events)
 ## Also return the event, study and treatment datasets corresponding to a NMA on that network.
 ## That network should be connected 
 
-getnet <- function(event, model){
+getnet <- function(event, model, complete=FALSE){
     filter <- dplyr::filter
     dat <- nmadata %>%
-        mutate(treatment = nmadata[,model]) %>% 
+      mutate(treatment = nmadata[,model]) %>% 
       filter(.data$aetype == event)
+    if (complete)
+        dat <- dat %>% filter(reporting=="Complete")
     dat <- dat %>% 
-        ## drop duplicated arms after merging treatments 
-        mutate(sid = paste(.data$study, .data$treatment)) %>%
-        filter(!duplicated(.data$sid))
+      ## drop duplicated arms after merging treatments 
+      mutate(sid = paste(.data$study, .data$treatment)) %>%
+      filter(!duplicated(.data$sid))
     dat <- dat %>% 
-        ## then drop studies with only one arm remaining
-        mutate(narm = table(.data$study)[.data$study])
+      ## then drop studies with only one arm remaining
+      mutate(narm = table(.data$study)[.data$study])
     graph <- NULL
+    if (nrow(dat) == 0) graph <- "no_data"
     if (any(dat$narm == 1)) { 
         dat <- dat %>% filter(.data$narm > 1)
         if (nrow(dat) == 0)
@@ -50,7 +53,7 @@ getnet <- function(event, model){
     if (is.null(graph)) { 
         net <- mtc.network(dat, treatments=trt, studies=stu)
         graph <- mtc.network.graph(fix.network(net), TRUE)
-    } 
+    } else net <- NULL
     list(net=net, graph=graph, dat=dat, stu=stu, trt=trt)
 }
 
@@ -105,8 +108,6 @@ nma <- function(event, models, dat, stu, trt){
         if (is.na(basetrt))
             stop("No control group found in network")
         fit.models[[i]] <- run.nma(net.models[[i]], basetrt)
-
-        ## FIXME if Placebo but not Observation in the network, use Control 
 
         fit.models[[i]]$model$data
         

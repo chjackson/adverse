@@ -11,7 +11,7 @@ library(tidyverse)
 events <- names(models_all)
 nev <- length(events)
 
-for (i in 1:nev){
+for (i in 6:nev){
     event <- events[i]
     cat(sprintf("EVENT %s = %s\n", i, event))
     dl <- getnet(event, models_all[[i]][[1]])
@@ -21,4 +21,16 @@ for (i in 1:nev){
                 stu = dl$stu,
                 trt = dl$trt)
     save(nmai, file=sprintf("/scratch/chris/winton/nmares/nmaall%s.rda", i))
+
+    ## sensitivity analysis using only high quality data 
+    cat(sprintf("EVENT %s = %s, complete reporting\n", i, event))
+    if (!is.null(models_complete[[event]])){
+        dlc <- getnet(event, models_complete[[event]][[1]], complete=TRUE)
+        nmai <- nma(event,
+                    models = models_complete[[event]],
+                    dat = dlc$dat,
+                    stu = dlc$stu,
+                    trt = dlc$trt)
+        save(nmai, file=sprintf("/scratch/chris/winton/nmares_complete/nmaall%s.rda", i))
+    }
 }
