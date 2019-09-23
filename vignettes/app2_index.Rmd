@@ -20,197 +20,195 @@ output:
 
 [ARTHRALGIA](app2events/app2_event7_ARTHRALGIA.html)
 
-[ARTHRALGIA/JOINT PAIN](app2events/app2_event8_ARTHRALGIA_JOINT_PAIN.html)
+[arthropathy/arthritis](app2events/app2_event8_arthropathy_arthritis.html)
 
-[arthropathy/arthritis](app2events/app2_event9_arthropathy_arthritis.html)
+[ASPARTATE AMINOTRANSFERASE](app2events/app2_event9_ASPARTATE_AMINOTRANSFERASE.html)
 
-[ASPARTATE AMINOTRANSFERASE](app2events/app2_event10_ASPARTATE_AMINOTRANSFERASE.html)
+[ASTHENIA](app2events/app2_event10_ASTHENIA.html)
 
-[ASTHENIA](app2events/app2_event11_ASTHENIA.html)
+[BACK PAIN](app2events/app2_event11_BACK_PAIN.html)
 
-[BACK PAIN](app2events/app2_event12_BACK_PAIN.html)
+[BILIRUBIN](app2events/app2_event12_BILIRUBIN.html)
 
-[BILIRUBIN](app2events/app2_event13_BILIRUBIN.html)
+[CARDIAC: CONGESTIVE HEART FAILURE](app2events/app2_event13_CARDIAC__CONGESTIVE_HEART_FAILURE.html)
 
 [CARDIAC EVENTS](app2events/app2_event14_CARDIAC_EVENTS.html)
 
-[CARDIAC: CONGESTIVE HEART FAILURE](app2events/app2_event15_CARDIAC__CONGESTIVE_HEART_FAILURE.html)
+[CATARACT](app2events/app2_event15_CATARACT.html)
 
-[CATARACT](app2events/app2_event16_CATARACT.html)
+[CELLULITIS](app2events/app2_event16_CELLULITIS.html)
 
-[CELLULITIS](app2events/app2_event17_CELLULITIS.html)
+[CHEST PAIN](app2events/app2_event17_CHEST_PAIN.html)
 
-[CHEST PAIN](app2events/app2_event18_CHEST_PAIN.html)
+[CHILLS](app2events/app2_event18_CHILLS.html)
 
-[CHILLS](app2events/app2_event19_CHILLS.html)
+[COLITIS](app2events/app2_event19_COLITIS.html)
 
-[COLITIS](app2events/app2_event20_COLITIS.html)
+[constipation](app2events/app2_event20_constipation.html)
 
-[constipation](app2events/app2_event21_constipation.html)
+[COUGH](app2events/app2_event21_COUGH.html)
 
-[COUGH](app2events/app2_event22_COUGH.html)
+[CPK increased](app2events/app2_event22_CPK_increased.html)
 
-[CPK increased](app2events/app2_event23_CPK_increased.html)
+[DECREASED APPETITE](app2events/app2_event23_DECREASED_APPETITE.html)
 
-[DECREASED APPETITE](app2events/app2_event24_DECREASED_APPETITE.html)
+[DEHYDRATION](app2events/app2_event24_DEHYDRATION.html)
 
-[DEHYDRATION](app2events/app2_event25_DEHYDRATION.html)
+[DEPRESSION](app2events/app2_event25_DEPRESSION.html)
 
-[DEPRESSION](app2events/app2_event26_DEPRESSION.html)
+[DIARRHOEA](app2events/app2_event26_DIARRHOEA.html)
 
-[DIARRHOEA](app2events/app2_event27_DIARRHOEA.html)
+[DIZZINESS](app2events/app2_event27_DIZZINESS.html)
 
-[DIZZINESS](app2events/app2_event28_DIZZINESS.html)
+[dry mouth](app2events/app2_event28_dry_mouth.html)
 
-[dry mouth](app2events/app2_event29_dry_mouth.html)
+[DYSGEUSIA](app2events/app2_event29_DYSGEUSIA.html)
 
-[DYSGEUSIA](app2events/app2_event30_DYSGEUSIA.html)
+[DYSPEPSIA](app2events/app2_event30_DYSPEPSIA.html)
 
-[DYSPEPSIA](app2events/app2_event31_DYSPEPSIA.html)
+[dysphagia](app2events/app2_event31_dysphagia.html)
 
-[dysphagia](app2events/app2_event32_dysphagia.html)
+[DYSPNOEA](app2events/app2_event32_DYSPNOEA.html)
 
-[DYSPNOEA](app2events/app2_event33_DYSPNOEA.html)
+[Elevated creatinine](app2events/app2_event33_Elevated_creatinine.html)
 
-[Elevated creatinine](app2events/app2_event34_Elevated_creatinine.html)
+[endometrial hyperplasia](app2events/app2_event34_endometrial_hyperplasia.html)
 
-[endometrial hyperplasia](app2events/app2_event35_endometrial_hyperplasia.html)
+[FATIGUE](app2events/app2_event35_FATIGUE.html)
 
-[FATIGUE](app2events/app2_event36_FATIGUE.html)
+[FEBRILE NEUTROPENIA](app2events/app2_event36_FEBRILE_NEUTROPENIA.html)
 
-[FEBRILE NEUTROPENIA](app2events/app2_event37_FEBRILE_NEUTROPENIA.html)
+[FEVER](app2events/app2_event37_FEVER.html)
 
-[FEVER](app2events/app2_event38_FEVER.html)
+[GGT increased](app2events/app2_event38_GGT_increased.html)
 
-[GGT increased](app2events/app2_event39_GGT_increased.html)
+[HAND-FOOT SYNDROME](app2events/app2_event39_HAND-FOOT_SYNDROME.html)
 
-[HAND-FOOT SYNDROME](app2events/app2_event40_HAND-FOOT_SYNDROME.html)
+[HEADACHE](app2events/app2_event40_HEADACHE.html)
 
-[HEADACHE](app2events/app2_event41_HEADACHE.html)
+[HEPATOTOXICITY](app2events/app2_event41_HEPATOTOXICITY.html)
 
-[HEPATOTOXICITY](app2events/app2_event42_HEPATOTOXICITY.html)
+[HOT FLUSHES](app2events/app2_event42_HOT_FLUSHES.html)
 
-[HOT FLUSHES](app2events/app2_event43_HOT_FLUSHES.html)
+[HYPERGLYCAEMIA](app2events/app2_event43_HYPERGLYCAEMIA.html)
 
-[HYPERGLYCAEMIA](app2events/app2_event44_HYPERGLYCAEMIA.html)
+[HYPERTENSION](app2events/app2_event44_HYPERTENSION.html)
 
-[HYPERTENSION](app2events/app2_event45_HYPERTENSION.html)
+[hypertonia/muscle spasms](app2events/app2_event45_hypertonia_muscle_spasms.html)
 
-[hypertonia/muscle spasms](app2events/app2_event46_hypertonia_muscle_spasms.html)
+[hypoalbuminemia](app2events/app2_event46_hypoalbuminemia.html)
 
-[hypoalbuminemia](app2events/app2_event47_hypoalbuminemia.html)
+[HYPOCALCEMIA](app2events/app2_event47_HYPOCALCEMIA.html)
 
-[HYPOCALCEMIA](app2events/app2_event48_HYPOCALCEMIA.html)
+[HYPOKALAEMIA](app2events/app2_event48_HYPOKALAEMIA.html)
 
-[HYPOKALAEMIA](app2events/app2_event49_HYPOKALAEMIA.html)
+[hyponatremia](app2events/app2_event49_hyponatremia.html)
 
-[hyponatremia](app2events/app2_event50_hyponatremia.html)
+[Hypophosphatemia](app2events/app2_event50_Hypophosphatemia.html)
 
-[Hypophosphatemia](app2events/app2_event51_Hypophosphatemia.html)
+[increased bone pain](app2events/app2_event51_increased_bone_pain.html)
 
-[increased bone pain](app2events/app2_event52_increased_bone_pain.html)
+[INFECTION](app2events/app2_event52_INFECTION.html)
 
-[INFECTION](app2events/app2_event53_INFECTION.html)
+[Influenza-like symptoms](app2events/app2_event53_Influenza-like_symptoms.html)
 
-[Influenza-like symptoms](app2events/app2_event54_Influenza-like_symptoms.html)
+[INR increased](app2events/app2_event54_INR_increased.html)
 
-[INR increased](app2events/app2_event55_INR_increased.html)
+[INSOMNIA](app2events/app2_event55_INSOMNIA.html)
 
-[INSOMNIA](app2events/app2_event56_INSOMNIA.html)
+[IRREGULAR MENSTRUATION](app2events/app2_event56_IRREGULAR_MENSTRUATION.html)
 
-[IRREGULAR MENSTRUATION](app2events/app2_event57_IRREGULAR_MENSTRUATION.html)
+[ISCHAEMIC CARDIOVASCULAR DISEASE](app2events/app2_event57_ISCHAEMIC_CARDIOVASCULAR_DISEASE.html)
 
-[ISCHAEMIC CARDIOVASCULAR DISEASE](app2events/app2_event58_ISCHAEMIC_CARDIOVASCULAR_DISEASE.html)
+[ISCHAEMIC CEREBROVASCULAR EVENT](app2events/app2_event58_ISCHAEMIC_CEREBROVASCULAR_EVENT.html)
 
-[ISCHAEMIC CEREBROVASCULAR EVENT](app2events/app2_event59_ISCHAEMIC_CEREBROVASCULAR_EVENT.html)
+[LEUCOCYTOPAENIA](app2events/app2_event59_LEUCOCYTOPAENIA.html)
 
-[LEUCOCYTOPAENIA](app2events/app2_event60_LEUCOCYTOPAENIA.html)
+[lipase increased](app2events/app2_event60_lipase_increased.html)
 
-[lipase increased](app2events/app2_event61_lipase_increased.html)
+[LIVER PROBLEMS](app2events/app2_event61_LIVER_PROBLEMS.html)
 
-[LIVER PROBLEMS](app2events/app2_event62_LIVER_PROBLEMS.html)
+[LOSS OF APPETITE](app2events/app2_event62_LOSS_OF_APPETITE.html)
 
-[LOSS OF APPETITE](app2events/app2_event63_LOSS_OF_APPETITE.html)
+[LYMPHOEDEMA](app2events/app2_event63_LYMPHOEDEMA.html)
 
-[LYMPHOEDEMA](app2events/app2_event64_LYMPHOEDEMA.html)
+[LYMPHOPAENIA](app2events/app2_event64_LYMPHOPAENIA.html)
 
-[LYMPHOPAENIA](app2events/app2_event65_LYMPHOPAENIA.html)
+[menometrorrhagia](app2events/app2_event65_menometrorrhagia.html)
 
-[menometrorrhagia](app2events/app2_event66_menometrorrhagia.html)
+[MOOD DISTRUBANCES](app2events/app2_event66_MOOD_DISTRUBANCES.html)
 
-[MOOD DISTRUBANCES](app2events/app2_event67_MOOD_DISTRUBANCES.html)
+[MOTOR NEUROPATHY](app2events/app2_event67_MOTOR_NEUROPATHY.html)
 
-[MOTOR NEUROPATHY](app2events/app2_event68_MOTOR_NEUROPATHY.html)
+[MUCOSITIS](app2events/app2_event68_MUCOSITIS.html)
 
-[MUCOSITIS](app2events/app2_event69_MUCOSITIS.html)
+[MUSCULOSKELETAL PAIN/EVENT](app2events/app2_event69_MUSCULOSKELETAL_PAIN_EVENT.html)
 
-[MUSCULOSKELETAL PAIN/EVENT](app2events/app2_event70_MUSCULOSKELETAL_PAIN_EVENT.html)
+[MYALGIA](app2events/app2_event70_MYALGIA.html)
 
-[MYALGIA](app2events/app2_event71_MYALGIA.html)
+[NAIL CHANGES](app2events/app2_event71_NAIL_CHANGES.html)
 
-[NAIL CHANGES](app2events/app2_event72_NAIL_CHANGES.html)
+[Nasopharyngitis](app2events/app2_event72_Nasopharyngitis.html)
 
-[Nasopharyngitis](app2events/app2_event73_Nasopharyngitis.html)
+[NAUSEA](app2events/app2_event73_NAUSEA.html)
 
-[NAUSEA](app2events/app2_event74_NAUSEA.html)
+[neuralgia](app2events/app2_event74_neuralgia.html)
 
-[neuralgia](app2events/app2_event75_neuralgia.html)
+[NEUROSENSORY PROBLEMS](app2events/app2_event75_NEUROSENSORY_PROBLEMS.html)
 
-[NEUROSENSORY PROBLEMS](app2events/app2_event76_NEUROSENSORY_PROBLEMS.html)
+[NEUTROPENIA](app2events/app2_event76_NEUTROPENIA.html)
 
-[NEUTROPENIA](app2events/app2_event77_NEUTROPENIA.html)
+[neutrophil count decreased](app2events/app2_event77_neutrophil_count_decreased.html)
 
-[neutrophil count decreased](app2events/app2_event78_neutrophil_count_decreased.html)
+[OEDEMA](app2events/app2_event78_OEDEMA.html)
 
-[OEDEMA](app2events/app2_event79_OEDEMA.html)
+[oesophagitis](app2events/app2_event79_oesophagitis.html)
 
-[oesophagitis](app2events/app2_event80_oesophagitis.html)
+[ORAL MUCOSITIS](app2events/app2_event80_ORAL_MUCOSITIS.html)
 
-[ORAL MUCOSITIS](app2events/app2_event81_ORAL_MUCOSITIS.html)
+[OsteoNecrosis of the Jaw](app2events/app2_event81_OsteoNecrosis_of_the_Jaw.html)
 
-[OsteoNecrosis of the Jaw](app2events/app2_event82_OsteoNecrosis_of_the_Jaw.html)
+[OTHER EYE DISORDERS](app2events/app2_event82_OTHER_EYE_DISORDERS.html)
 
-[OTHER EYE DISORDERS](app2events/app2_event83_OTHER_EYE_DISORDERS.html)
+[pain in extremity](app2events/app2_event83_pain_in_extremity.html)
 
-[pain in extremity](app2events/app2_event84_pain_in_extremity.html)
+[PANCREATITIS](app2events/app2_event84_PANCREATITIS.html)
 
-[PANCREATITIS](app2events/app2_event85_PANCREATITIS.html)
+[PARAESTHESIA](app2events/app2_event85_PARAESTHESIA.html)
 
-[PARAESTHESIA](app2events/app2_event86_PARAESTHESIA.html)
+[periodontal disease](app2events/app2_event86_periodontal_disease.html)
 
-[periodontal disease](app2events/app2_event87_periodontal_disease.html)
+[phlebitis](app2events/app2_event87_phlebitis.html)
 
-[phlebitis](app2events/app2_event88_phlebitis.html)
+[PNEUMONIA](app2events/app2_event88_PNEUMONIA.html)
 
-[PNEUMONIA](app2events/app2_event89_PNEUMONIA.html)
+[PULMONARY EMBOLUS](app2events/app2_event89_PULMONARY_EMBOLUS.html)
 
-[PULMONARY EMBOLUS](app2events/app2_event90_PULMONARY_EMBOLUS.html)
+[renal impairment](app2events/app2_event90_renal_impairment.html)
 
-[renal impairment](app2events/app2_event91_renal_impairment.html)
+[SKIN DISORDER](app2events/app2_event91_SKIN_DISORDER.html)
 
-[SKIN DISORDER](app2events/app2_event92_SKIN_DISORDER.html)
+[stiffness](app2events/app2_event92_stiffness.html)
 
-[stiffness](app2events/app2_event93_stiffness.html)
+[STOMATITIS](app2events/app2_event93_STOMATITIS.html)
 
-[STOMATITIS](app2events/app2_event94_STOMATITIS.html)
+[SYNCOPE](app2events/app2_event94_SYNCOPE.html)
 
-[SYNCOPE](app2events/app2_event95_SYNCOPE.html)
+[THROMBOEMBOLIC EVENTS](app2events/app2_event95_THROMBOEMBOLIC_EVENTS.html)
 
-[THROMBOEMBOLIC EVENTS](app2events/app2_event96_THROMBOEMBOLIC_EVENTS.html)
+[THROMBOPAENIA](app2events/app2_event96_THROMBOPAENIA.html)
 
-[THROMBOPAENIA](app2events/app2_event97_THROMBOPAENIA.html)
+[THYROID CANCER](app2events/app2_event97_THYROID_CANCER.html)
 
-[THYROID CANCER](app2events/app2_event98_THYROID_CANCER.html)
+[TRAUMATIC FRACTURES](app2events/app2_event98_TRAUMATIC_FRACTURES.html)
 
-[TRAUMATIC FRACTURES](app2events/app2_event99_TRAUMATIC_FRACTURES.html)
+[uterine dilation/curettage](app2events/app2_event99_uterine_dilation_curettage.html)
 
-[uterine dilation/curettage](app2events/app2_event100_uterine_dilation_curettage.html)
+[uterine polyp](app2events/app2_event100_uterine_polyp.html)
 
-[uterine polyp](app2events/app2_event101_uterine_polyp.html)
+[VAGINAL BLEEDING](app2events/app2_event101_VAGINAL_BLEEDING.html)
 
-[VAGINAL BLEEDING](app2events/app2_event102_VAGINAL_BLEEDING.html)
+[VAGINAL DISCHARGE](app2events/app2_event102_VAGINAL_DISCHARGE.html)
 
-[VAGINAL DISCHARGE](app2events/app2_event103_VAGINAL_DISCHARGE.html)
-
-[VOMITING](app2events/app2_event104_VOMITING.html)
+[VOMITING](app2events/app2_event103_VOMITING.html)
 

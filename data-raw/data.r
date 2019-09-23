@@ -1,10 +1,11 @@
 library(readxl)
 library(tidyverse)
+filter <- dplyr::filter
+matches <- dplyr::matches
 library(devtools)
 load_all("../../gemtc/gemtc")
 load_all("..")
 
-filter <- dplyr::filter
 
 # for(i in list.files("../data", full.names=TRUE, include.dirs=TRUE)) load(i)
 
@@ -75,15 +76,16 @@ acol <- grep("ANY ADVERSE EVENT;A1",colnames(bpaeraw))
 bpaeraw[13,acol] <- gsub(",","",bpaeraw[13,acol])
 bpaeraw$"ANY ADVERSE EVENT;A1...30" <- as.numeric(bpaeraw$"ANY ADVERSE EVENT;A1...30")
 
+## Recode ABCSG12 as two trials 
+bpaeraw$"Trial name"[bpaeraw$"Trial Code"=="8.1"] <- "ABCSG12_B"
+
 use_data(bpaeraw, overwrite=TRUE)
 
-##' other problems 
-##  vonmoos, pivot have same treatments in E1 and E2, and no 
-## plot only treatments that appear more than once 
+## Note vonmoos, pivot have same treatments in E1 and E2.  
 
 ## Categories of AEs to be summed over, aggregating different grades
 aecat <- scan("aecategs.txt", what="character", sep="\n") # one element per col of bpaeraw
-aecategs <- unique(aecat)[15:144]
+aecategs <- unique(aecat)[15:143]
 use_data(aecategs, overwrite=TRUE)
 
 bpaeraw[1:2,1:20]
@@ -106,7 +108,9 @@ bpaelong <- bpaeraw %>%
          vname = gsub("A[[:digit:]] (coding)", "\\1", vname), 
          vname = gsub(";A[[:digit:]]$","",vname)) %>%
   mutate(aecat = aecat[match(vname, gsub(";A[0-9]$","",names(bpaeraw)))],
-         aecat = ifelse(is.na(aecat), vname, aecat)) #%>%
+         aecat = ifelse(is.na(aecat), vname, aecat)) %>%
+  mutate(vname = gsub("ungraded or grade 1/2", "grade 1/2", vname, ignore.case=TRUE))
+
   ## AZURE. Spreadsheet reports "Myalgia" but AZURE reports "Myalgia/arthralgia"
   ## NCT00376740 classifies myalgia under arthralgia/joint pain
 #  mutate(x = gsub("(combined w/ arthraligia)","",x)) %>% 
@@ -115,14 +119,15 @@ bpaelong <- bpaeraw %>%
 #  mutate(x = as.numeric(x))
 
 ## add a severity indicator for each arm x event 
-bpaelong <- bpaelong %>%
-    mutate(vname = gsub("Grade", "GRADE", vname)) %>% 
-    mutate(vname = gsub("UNGRADED", "ungraded", vname)) %>% 
-    mutate(vname = gsub("Ungraded", "ungraded", vname))
+#bpaelong <- bpaelong %>%
+#  mutate(vname = gsub("grade", "GRADE", vname)) %>% 
+#  mutate(vname = gsub("Grade", "GRADE", vname)) %>% 
+#  mutate(vname = gsub("UNGRADED", "ungraded", vname)) %>% 
+#  mutate(vname = gsub("Ungraded", "ungraded", vname)) %>% 
 
 bpaelong <- bpaelong %>%
-  mutate(grade = gsub(".+GRADE ([1-4]).*", "\\1", vname)) %>% 
-  mutate(grade = ifelse(grepl("ungraded", grade), NA, grade)) %>%
+  mutate(grade = gsub(".+GRADE ([1-4]).*", "\\1", vname, ignore.case=TRUE)) %>% 
+  mutate(grade = ifelse(grepl("ungraded", grade, ignore.case=TRUE), NA, grade)) %>%
   mutate(grade = ifelse(vname %in% aecategs[-(1:3)], NA, grade)) %>%
   mutate(grade = as.numeric(ifelse(grade %in% c(1,2,3,4), grade, NA)))
 
@@ -143,6 +148,8 @@ bpaelongsum <- bpaelong %>%
     ungroup()
 
 use_data(bpaelongsum, overwrite=TRUE)
+
+
 
 ## Sum serious AEs of same type within each arm
 ## defined as grade 3 or above
@@ -269,11 +276,14 @@ bpae <- bpae %>%
 #         treatment0 = fct_collapse(treatment,
 #                                   Control=c("100","101","103","103notai")))
 
+## FIXME why is NA at end of aecategs 
+
 aestr <- paste(aecategs, collapse="|")
 bpae <- bpae %>%
     left_join(bpcoding) %>%
     left_join(addtrtcoding) %>%
-  select("Trial name", "Trial Code", reporting, armno, drugclasses, N, matches(!!aestr), addtrt, addtrtclass) %>%
+  select("Trial name", "Trial Code", reporting, armno, drugclasses, N, matches(!!aestr), addtrt, addtrtclass)
+bpae <- bpae %>%
   mutate_at(vars(matches(!!aestr)), list(p = ~ . / N))
 
 bpsae <- bpsae %>%
@@ -459,20 +469,11 @@ use_data(drugScale, overwrite=TRUE)
 
 
 ## Datasets for network meta-analysis
-## Don't aggregate clinically-similar events
-## TODO does this even need group_by ? 
 
 nmadata <- bpaearmtype %>%
   rename("study"="Trial name", "responders"="count", "sampleSize"="N") %>%
 #  filter(!is.na(aetype)) %>%
   select(-pcon, -ncon, -rcon, -trtcon) %>% 
-#  group_by(aetype, study, reporting,
-#           treatment, description, dose, delivery,
-#           drugdose, drugdm, drugname, drugnitro, drugbp,
-#           drugdose0, drugdm0, drugname0, drugnitro0, drugbp0,
-#           addtrt, addtrtclass, sampleSize) %>%
-#  summarise(responders=sum(responders)) %>%
-#  mutate(prop = responders / sampleSize) %>%
   droplevels() %>% 
   as.data.frame
 
