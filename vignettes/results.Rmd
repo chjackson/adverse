@@ -90,7 +90,6 @@ Where there is no baseline risk / risk difference for healthy women, this is bec
 orft <- ortab %>%
   as_tibble %>%
   filter(!is.na(sig) & sig) %>%
-  
   select(categ, event, actlab, direct, NMA, brc, rdc, brh, rdh, pser) %>%
   as_grouped_data(groups="categ") %>%
   flextable %>% 
@@ -102,10 +101,9 @@ orft <- ortab %>%
                     rdc="Risk difference (cancer)",
                     brh="Baseline risk (healthy)",
                     rdh="Risk difference (healthy)",
-                    pser="Proportion of events that are serious"
+                    pser="Proportion of graded events that are serious"
                     ) %>% 
   flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
-  width(width = 1) %>%
   flextable::bold(part = "header", bold = TRUE )
 orft
 
