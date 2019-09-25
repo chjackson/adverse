@@ -25,9 +25,11 @@ knitr::opts_chunk$set(echo=FALSE,
                       fig.width=15,
                       fig.height=15)
 
+library(flextable)
 library(meta)
 library(plotly)
 library(binom) 
+library(dplyr) 
 load_all("..")
 
 hae <- unique(bpaeprevma$aetype) 
@@ -54,23 +56,55 @@ bpcma <-
 
 ```
 
+The table below compares the odds ratios from the network meta-analysis of bisphosphonates in women with cancer with the equivalent odds ratios from a simple meta-analysis of HORIZON and FIT, for the events that are significant in the cancer analysis and also reported in HORIZON and FIT. 
 
-For all event types where there is data from both women with and without cancer, the estimated odds ratios, from all available studies comparing a bisphosphonate with a placebo or observation-only control, are plotted.
+```{r,warning=FALSE,message=FALSE}
 
-Osteonecrosis of the jaw is excluded due to very small counts: in HORIZON there was one case in the control group and one in the treatment group.   Note also in the OPTIMIZE2 study there were two bisphosphonate arms and one control arms, therefore two comparisons are presented for this study. 
+eventsh <- bpaeprevma %>% filter(rcon>0|ract>0) %>% select(aetype) %>% unlist %>% as.vector %>% unique
+mares <- data.frame(event=eventsh)
+mares$or <- mares$orl <- mares$oru <- NA
 
-For each event, the odds ratios from the HORIZON studies are consistent with the other studies, though there is a lot of variability between studies.
+for (i in seq(along=eventsh)){ 
+    bpma <- bpaeprevma %>% filter(aetype==eventsh[i])
+    if (nrow(bpma) > 0){
+        mres <- metabin(ract, nact, rcon, ncon, studlab=`Trial name`, data=bpma, sm="OR")
+        mares[i,c("or","orl","oru")] <- exp(unlist(mres[c("TE.fixed","lower.fixed","upper.fixed")]))
+    }
+}
+mares <- mares %>%
+  mutate(orhealthy = sprintf("%s (%s, %s)", round(or,2), round(orl,2), round(oru,2))) %>%
+  mutate(treatmenth = "Bisphosphonate") %>%
+  select(event, orhealthy, treatmenth)
+
+load("ors.rda")
+
+orsh <- ortab %>% filter(sig) %>% select(categ, event, actlab, NMA) %>%
+  left_join(mares, by="event") %>% filter(!is.na(orhealthy)) %>% 
+  as_tibble %>%
+  select(categ, event, actlab, NMA, treatmenth, orhealthy) %>%
+  as_grouped_data(groups="categ") %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Treatment (cancer NMA)",
+                    NMA="OR (Cancer, NMA)",
+                    treatmenth="Treatment (healthy MA)",
+                    orhealthy="OR (healthy MA)"
+                    ) %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  flextable::bold(part = "header", bold = TRUE )
+orsh
+
+
+```
+
+The study-specific odds ratios underlying these results are shown below.  
+
+For each event, the odds ratios from HORIZON and FIT are not surprising given the variability between studies.
 
 ```{r}
 
-selected_events  <- c("ARTHRALGIA/JOINT PAIN", "CARDIAC EVENTS", "CHILLS", "FEVER", "FATIGUE", "HEADACHE", "DIARRHOEA", "MYALGIA", "Influenza-like symptoms")
-
-#bpcma %>%
-#  filter(aetype %in% selected_events) %>%
-#  filter(!(`Trial name` %in% c("FIT","FIT_sub"))) %>%  
-#  select(rcon, ncon, ract, nact, or, selogor, orl, oru) 
-
-p <- bpcma %>% # filter(aetype %in% selected_events) %>%  filter(!(`Trial name` %in% c("FIT","FIT_sub"))) %>%  
+p <- bpcma %>%
+  filter(aetype %in% unique(ortab$event[ortab$sig])) %>% 
 ggplot(aes(y=or, x=`Trial name`, col=patient, label=Events)) +
                                         #  coord_flip(ylim=c(0.1, 15)) +
   coord_flip(ylim=c(0.1, 20)) +
@@ -86,4 +120,3 @@ ggplot(aes(y=or, x=`Trial name`, col=patient, label=Events)) +
 ggplotly(p, tooltip=c("label"), height=5000)
 
 ```
-
