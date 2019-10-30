@@ -1,25 +1,18 @@
 load_all("..")
 load_all("../../gemtc/gemtc")
-if (0) {
-## Run this when getting new data. 
-## Determines network models to fit for each event 
-source("nmamodels.R")
-}
-source("nma.R")
 library(tidyverse)
 
+events <- names(models_all)
+nev <- length(events)
 
 ## Run all network meta-analysis models for all events with valid data
 ## Valid events and models selected in nmamodels.R
 ## Needs connected network including a control.
 
-events <- names(models_all)
-nev <- length(events)
-
 for (i in 1:nev){
     event <- events[i]
     cat(sprintf("EVENT %s = %s\n", i, event))
-    dl <- getnet(event, models_all[[i]][[1]])
+    dl <- getnet(event, "drugdose") # most detailed data 
     nmai <- nma(event,
                 models = models_all[[i]],
                 dat = dl$dat,

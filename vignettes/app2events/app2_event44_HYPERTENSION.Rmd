@@ -9,15 +9,17 @@ output:
 [Back to Appendix 2](../app2_index.html)
 ```{r, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo=FALSE,
-                      fig.width=50,
-                      fig.height=100)
+                      fig.width=15,
+                      fig.height=15)
 library(knitr)
 library(dplyr)
 filter <- dplyr::filter
 library(flextable)
+library(rlang)
+library(ggplot2)
 library(gridExtra)
 library(plotly)
-setwd("/home/chris/winton/adverse/vignettes")
+setwd("~/work/winton/adverse/vignettes")
 load_all("..")
 events <- names(models_all)
 nev <- length(events)
@@ -27,6 +29,61 @@ load(file="ors.rda")
 
 ```{r, warning=FALSE}
 arrfn("HYPERTENSION")
+```
+
+### Network geometry summary
+
+Proportion of potential comparisons with direct data: 0.24
+
+Proportion of treatments compared to more than one other: 0.6
+
+Median number of studies per direct comparison: 1 (interquartile range 1-1)
+
+Proportion of direct comparisons informed by more than one study: 0.18
+
+## Meta analysis results
+Estimates (and 95% credible intervals) of the odds ratio of each bisphosphonate treatment, versus observation only, under
+
+* (green) the best-fitting network meta-analysis model (if feasible)
+
+* (blue) an equivalent meta-analysis of direct comparisons of the same treatment versus an observation-only control, and
+
+* (red) all study-specific direct comparisons odds ratios corresponding to direct comparisons of the treatment with a no-treatment control.  Placebo controls (dotted lines) are distinguished from observation-only controls (solid lines).
+
+The panels distinguish the treatment categories under the best-fitting network meta-analysis model.
+
+Note:
+
+* there is one red line for each active study arm in each study containing a placebo or observation-only control.  Note that this excludes comparisons of one bisphosphonate against another, which contribute to the network-meta analysis pooled estimates along with the direct comparisons.  
+
+* the blue line (direct-data pooled estimate) is the weighted average of all solid red lines (study-specific comparisons against observation-only).  If there is no blue line on a particular panel, there were no studies that directly compared that treatment against an observation-only control.
+
+* the green line (network meta-analysis pooled estimate) will not necessarily appear to be the average of the red lines, since the network meta-analysis also includes indirect data from the bisphosphonate-bisphosponate comparisons that are not illustrated 
+
+* there is no green line if no network meta-analysis was feasible.
+
+```{r, warning=FALSE}
+plotarr[[44]]$ests
+
+```
+
+
+## Comparison of different treatment groupings
+
+
+Network meta-analysis models defined on different groupings of treatments are compared.
+
+*  The treatment groupings compared for this symptom are those for which there is a connected network of trials reporting that symptom.
+
+* Lines indicated pooled estimates of the odds ratio for each treatment against observation only, under the network meta-analysis model on that treatment grouping.
+
+* The statistical fit of the models on different treatment groupings is compared using the deviance information criterion (DIC).  DIC are presented relative to the best-fitting model (DIC = 0), and higher DIC indicate worse fit.
+
+For the event HYPERTENSION, observation-only and placebo are considered separately.
+
+```{r, warning=FALSE}
+plotarr[[44]]$modcomp
+
 ```
 
 

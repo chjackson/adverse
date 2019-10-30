@@ -277,10 +277,42 @@ orft
 
 ## Other things to include in the paper 
 
+* Simple meta-analysis 
+
+Should it be odds ratio, not risk difference, until we've discussed baseline? 
+Discuss heterogeneity in ORs vs RDs  To illustrate this, just point to forest plot ORs for homogeneity.  Can we discuss het in baselines when choosing a baseline. 
+Question whether we should be discussing risk differences here at all - as we want to make the baselines transparent.  Could mention baseilne het as a motivator for picking a constant baseline. Just needs quick summary using direct-only data to motivate. 
+
+Group symptoms by class as in NMA results? 
+Show number of studies contributing to the result in the row label 
+
+The data extracted from the 59 trials that fulfilled our criteria is shown in Supplementary Data 1. What is this? 
+
+Table 1 shows the study chars.  Where is this?  Should include blinding, follow up, any other data extracted 
+
+Subset analysis done for direct as well as NMA?  [ suggest no! ] 
+
+
+* NMA 
+
+notAI - indicate in supp Table 1 - is this table in there? 
+
+Appendix plots in progress. Adding more transparent direct data and model comparison 
+
+
+
+* AZURE 
+
+both risk ratio and risk difference? 
+
+point out which are sig in azure alone
+
+
+Methods
+
 1.  Talk through how we did FEVER
 
 2.  Forest plots for selected odds ratios
 
-3. AZURE individual-level analysis?
+Healthy women analysis
 
-4. Healthy women analysis? 

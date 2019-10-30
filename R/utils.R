@@ -24,7 +24,8 @@ all.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
     res
 }
 
-direct.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
+direct.comparisons <- function(dat, net, event, net.grp=NULL, groups=NULL){
+    
     ns <- nrow(dat$t)
     trt <- r <- n <- sid <- vector(ns, mode="list")
     for (i in 1:ns){
@@ -47,7 +48,8 @@ direct.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
     lab <- paste(actlab, conlab, sep=" / ")
     labno <- sprintf("%d,%d", con, act)
     compno <- match(lab, unique(lab))
-    res <- data.frame(sid, con, act, conr, actr, conn, actn, conlab, actlab, lab, labno, compno)
+    study <- net$studies$study[sid]
+    res <- data.frame(sid, study, con, act, conr, actr, conn, actn, conlab, actlab, lab, labno, compno)
     if (!is.null(net.grp)){
         treatments0 <- net.grp$treatments
         treatments$trt <- treatments$treatment

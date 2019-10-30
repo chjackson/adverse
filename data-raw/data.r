@@ -26,6 +26,7 @@ names(bpaeraw) <- gsub("^E2(.+)", "A4\\1", names(bpaeraw))
 names(bpaeraw) <- gsub("^E3(.+)", "A5\\1", names(bpaeraw))
 ## Prepend the adverse event names to the arm numbers
 fullnames <- paste(header, names(bpaeraw), sep=";")
+bpaeraw <- rename(bpaeraw, study=`Trial name`, studyid=`Trial Code`)
 fullnames <- gsub("__[0-9]+$", "", fullnames)
 fullnames <- gsub("C1$", "A1", fullnames)
 fullnames <- gsub("C2$", "A2", fullnames)
@@ -36,10 +37,10 @@ aeinds <- 26:ncol(bpaeraw)
 names(bpaeraw)[aeinds] <- fullnames[aeinds]
 
 ## denominator put into control instead of experimental here
-bpaeraw[bpaeraw$"Trial name"=="REFORM","N Exp2"] <- bpaeraw[bpaeraw$"Trial name"=="REFORM","N Control"]
-bpaeraw[bpaeraw$"Trial name"=="REFORM","N Control"] <- NA
-bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Exp2"] <- bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Control"]
-bpaeraw[bpaeraw$"Trial name"=="Pivot 2011","N Control"] <- NA
+bpaeraw[bpaeraw$study=="REFORM","N Exp2"] <- bpaeraw[bpaeraw$study=="REFORM","N Control"]
+bpaeraw[bpaeraw$study=="REFORM","N Control"] <- NA
+bpaeraw[bpaeraw$study=="Pivot 2011","N Exp2"] <- bpaeraw[bpaeraw$study=="Pivot 2011","N Control"]
+bpaeraw[bpaeraw$study=="Pivot 2011","N Control"] <- NA
 
 ## This looks funny.  Should be 56 vs 45 people in two experimental arms, not 127 in single experimental arm?  zoledronic acid in community vs hospital setting 
 #bpaeraw %>% select(`Trial name`)
@@ -76,8 +77,9 @@ acol <- grep("ANY ADVERSE EVENT;A1",colnames(bpaeraw))
 bpaeraw[13,acol] <- gsub(",","",bpaeraw[13,acol])
 bpaeraw$"ANY ADVERSE EVENT;A1...30" <- as.numeric(bpaeraw$"ANY ADVERSE EVENT;A1...30")
 
-## Recode ABCSG12 as two trials 
-bpaeraw$"Trial name"[bpaeraw$"Trial Code"=="8.1"] <- "ABCSG12_B"
+## Recode 2x2arm studies as two trials 
+bpaeraw$study[bpaeraw$studyid=="8.1"] <- "ABCSG12_B"
+bpaeraw$study[bpaeraw$studyid=="30.1"] <- "Kristensen 2008_B"
 
 use_data(bpaeraw, overwrite=TRUE)
 
@@ -97,7 +99,7 @@ bpaelong <- bpaeraw %>%
          matches("A[[:digit:]]"),
          matches(";A[[:digit:]]")
          ) %>%
-  select("Trial name", "Trial Code", reporting, has_control, vname, x) %>% 
+  select(study, studyid, reporting, has_control, vname, x) %>% 
   extract(vname, "armno1", "^(?:A|N)([[:digit:]]).*", remove=FALSE) %>%
   extract(vname, "armno2", ";A([[:digit:]]).*$", remove=FALSE) %>%
   mutate(armno = ifelse(is.na(armno1), armno2, armno1)) %>%
@@ -138,7 +140,7 @@ use_data(bpaelong, overwrite=TRUE)
 
 bpaelongsum <- bpaelong %>%
   filter(!is.na(x)) %>% 
-  group_by(`Trial name`, `Trial Code`, reporting, armno, aecat) %>%
+  group_by(study, studyid, reporting, armno, aecat) %>%
     summarise(
         xser = sum(x[!is.na(grade) & grade>=3]),
         xgraded = sum(x[!is.na(grade) & grade>=1]),
@@ -160,7 +162,7 @@ bpsaelongsum <- bpaelong %>%
   filter(!is.na(x)) %>%
   filter((!(aecat %in% aecategs)) | 
          grepl("GRADE 3|GRADE 4",ignore.case=TRUE,vname)) %>% 
-  group_by(`Trial name`, `Trial Code`, reporting, armno, aecat) %>%
+  group_by(study, studyid, reporting, armno, aecat) %>%
   summarise(xs = sum(x)) %>%
     rename(vname=aecat) %>%
     ungroup()
@@ -282,14 +284,14 @@ aestr <- paste(aecategs, collapse="|")
 bpae <- bpae %>%
     left_join(bpcoding) %>%
     left_join(addtrtcoding) %>%
-  select("Trial name", "Trial Code", reporting, armno, drugclasses, N, matches(!!aestr), addtrt, addtrtclass)
+  select(study, studyid, reporting, armno, drugclasses, N, matches(!!aestr), addtrt, addtrtclass)
 bpae <- bpae %>%
   mutate_at(vars(matches(!!aestr)), list(p = ~ . / N))
 
 bpsae <- bpsae %>%
   left_join(bpcoding) %>%
   left_join(addtrtcoding) %>%
-  select("Trial name", "Trial Code", reporting, armno, N, drugclasses, matches(!!aestr),
+  select(study, studyid, reporting, armno, N, drugclasses, matches(!!aestr),
          addtrt, addtrtclass) %>%
   mutate_at(vars(matches(!!aestr)), list(p = ~ . / N))
 
@@ -297,21 +299,21 @@ bpsae <- bpsae %>%
 
 bpaecon <- bpae %>%
   mutate(armno2 = paste0("A", armno)) %>%
-  select(`Trial Code`, armno2, drugdose0) %>%
+  select(studyid, armno2, drugdose0) %>%
   spread(armno2, drugdose0) %>%
-  select(`Trial Code`, A1:A5) %>% 
+  select(studyid, A1:A5) %>% 
   mutate(control_arm = ifelse(is.na(A2), ifelse(is.na(A1), NA, 1), 2)) %>%
-  mutate(control_arm = ifelse(`Trial Code`==45, 1, control_arm)) %>% ## HOBOE has two control arms - select letrozole arm 
-  select(`Trial Code`, control_arm)
+  mutate(control_arm = ifelse(studyid==45, 1, control_arm)) %>% ## HOBOE has two control arms - select letrozole arm 
+  select(studyid, control_arm)
 
-bpae <- bpae %>% left_join(bpaecon, "Trial Code")
-bpsae <- bpsae %>% left_join(bpaecon, "Trial Code")
+bpae <- bpae %>% left_join(bpaecon, by="studyid")
+bpsae <- bpsae %>% left_join(bpaecon, by="studyid")
 
 ## Get the event rate (and denominator) in the control arm for each study 
 
 control_outcomes <- bpae %>%
     filter(armno == control_arm) %>%
-    select(`Trial Code`,
+    select(studyid,
            `N`,
            `treatment`,
            which(names(.) %in% aecategs),
@@ -324,11 +326,11 @@ colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs] <-
     paste0(colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs], "_rcon")
 
 bpae <- bpae %>%
-  left_join(control_outcomes, "Trial Code")
+  left_join(control_outcomes, "studyid")
 
 control_outcomes <- bpsae %>%
   filter(armno == control_arm) %>%
-  select(`Trial Code`,
+  select(studyid,
          `N`,
          `treatment`,
          which(names(.) %in% aecategs),
@@ -339,7 +341,7 @@ control_outcomes <- bpsae %>%
 colnames(control_outcomes) <- gsub("_p", "_pcon", colnames(control_outcomes))
 colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs] <-
   paste0(colnames(control_outcomes)[colnames(control_outcomes) %in% aecategs], "_rcon")
-bpsae <- bpsae %>% left_join(control_outcomes, "Trial Code")
+bpsae <- bpsae %>% left_join(control_outcomes, "studyid")
 
 use_data(bpae, overwrite=TRUE)
 use_data(bpsae, overwrite=TRUE)
@@ -407,7 +409,7 @@ bpaearmtype <- bpae %>%
   mutate(pcon = pcon$pcon) %>% 
   mutate(rcon = rcon$rcon) %>% 
   mutate(aecateg = aetypes$cat3[match(aetype, aetypes$name)]) %>%
-  select(`Trial name`, `Trial Code`, reporting, armno,
+  select(study, studyid, reporting, armno,
          drugclasses, 
          addtrt, addtrtclass,
          N, aetype, aecateg, count, prop, pcon, rcon, ncon, trtcon) %>%
@@ -424,12 +426,13 @@ pcon <- bpsae %>%
     gather(aetype, pcon, which(names(.) %in% paste0(aecategs,"_pcon")))
 rcon <- bpsae %>%
     gather(aetype, rcon, which(names(.) %in% paste0(aecategs,"_rcon")))
+
 bpsaearmtype <- bpsae %>%
     gather(aetype, count, which(names(.) %in% aecategs)) %>% 
     mutate(prop = props$prop) %>% 
     mutate(pcon = pcon$pcon) %>% 
     mutate(rcon = rcon$rcon) %>% 
-    select(`Trial name`, `Trial Code`, reporting, armno,
+    select(study, studyid, reporting, armno,
            treatment, description, drugname, drugname0, drugdm, drugnitro,
            delivery, addtrt, addtrtclass,
            N, aetype, count, prop, pcon, rcon, ncon, trtcon) %>%
@@ -440,6 +443,9 @@ bpsaearmtype <- bpsae %>%
 use_data(bpsaearmtype, overwrite=TRUE)
 
 ## data with one row per active treatment arm and AE type, with risk diff vs control
+
+## TODO indicate whether control is obs only or placebo
+
 bpaeriskdiff <- bpaearmtype %>%
   filter(!is.na(pcon)) %>%
   filter(armno >= 3) %>%
@@ -471,7 +477,7 @@ use_data(drugScale, overwrite=TRUE)
 ## Datasets for network meta-analysis
 
 nmadata <- bpaearmtype %>%
-  rename("study"="Trial name", "responders"="count", "sampleSize"="N") %>%
+  rename("study"=study, "responders"="count", "sampleSize"="N") %>%
 #  filter(!is.na(aetype)) %>%
   select(-pcon, -ncon, -rcon, -trtcon) %>% 
   droplevels() %>% 
@@ -486,6 +492,8 @@ narmdata <- nmadata %>%
 nmadata <- nmadata %>%
   left_join(narmdata, by=c("aetype","study")) %>%
   filter(narm > 1)
+
+setdiff(bpaearmtype$study, nmadata$study)
 
 use_data(nmadata, overwrite=TRUE)
 
@@ -523,4 +531,4 @@ use_data(treatments, overwrite=TRUE)
 
 #bpaearmtype %>%
 #    filter(count > N) %>%
-#    select("Trial name", armno,treatment,"description", aetype, count, N)
+#    select(study, armno,treatment,"description", aetype, count, N)

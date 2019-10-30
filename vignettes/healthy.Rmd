@@ -19,11 +19,10 @@ Just two studies of bisphosphonates for preventing osteoperosis in "healthy" wom
 
 * FIT: two papers, one reporting the full trial population and the other reporting a subgroup.  The only events reported were abdominal pain, oesophagitis, dyspepsia, gastrointestinal (unspecified) and nausea.  
 
+
+
+
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
-knitr::opts_chunk$set(echo=FALSE,
-                      message=FALSE,
-                      fig.width=15,
-                      fig.height=15)
 
 library(flextable)
 library(meta)
@@ -31,6 +30,8 @@ library(plotly)
 library(binom) 
 library(dplyr) 
 load_all("..")
+source("paper_theme.R")
+load("ors.rda")
 
 hae <- unique(bpaeprevma$aetype) 
 bpaeprevma$patient <- "Healthy"
@@ -42,7 +43,7 @@ bpcma <-
   mutate(patient = "Cancer") %>% 
   select(names(bpaeprevma)) %>% 
   rbind(bpaeprevma) %>%
-  arrange(patient, `Trial name`, aetype) %>%
+  arrange(patient, study, aetype) %>%
   mutate(p0 = (rcon+0.5)/(ncon+1),
          p1 = (ract+0.5)/(nact+1),
          or = p1/(1-p1) / (p0/(1-p0)),
@@ -58,6 +59,14 @@ bpcma <-
 
 The table below compares the odds ratios from the network meta-analysis of bisphosphonates in women with cancer with the equivalent odds ratios from a simple meta-analysis of HORIZON and FIT, for the events that are significant in the cancer analysis and also reported in HORIZON and FIT. 
 
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      fig.width=15,
+                      fig.height=10)
+```
+
+
 ```{r,warning=FALSE,message=FALSE}
 
 eventsh <- bpaeprevma %>% filter(rcon>0|ract>0) %>% select(aetype) %>% unlist %>% as.vector %>% unique
@@ -67,19 +76,55 @@ mares$or <- mares$orl <- mares$oru <- NA
 for (i in seq(along=eventsh)){ 
     bpma <- bpaeprevma %>% filter(aetype==eventsh[i])
     if (nrow(bpma) > 0){
-        mres <- metabin(ract, nact, rcon, ncon, studlab=`Trial name`, data=bpma, sm="OR")
+        mres <- metabin(ract, nact, rcon, ncon, studlab=study, data=bpma, sm="OR")
         mares[i,c("or","orl","oru")] <- exp(unlist(mres[c("TE.fixed","lower.fixed","upper.fixed")]))
     }
 }
+
 mares <- mares %>%
-  mutate(orhealthy = sprintf("%s (%s, %s)", round(or,2), round(orl,2), round(oru,2))) %>%
-  mutate(treatmenth = "Bisphosphonate") %>%
-  select(event, orhealthy, treatmenth)
+  mutate(actlab = "Bisphosphonate",
+         patient = "Healthy",
+         event_trt = sprintf("%s: Bisphosphonate", event))
 
-load("ors.rda")
+sigevents <- ortab %>% filter(sig) %>% pull(event) %>% unique
+sigevent_trts <- ortab %>% filter(sig) %>% mutate(event_trt = paste(event, actlab, sep=": ")) %>% pull(event_trt) %>% unique
 
+orsh <- ors %>%
+  filter(measure=="or" & model=="NMA") %>%
+  mutate(event_trt = paste(event, actlab, sep=": ")) %>%
+  filter(event_trt %in% sigevent_trts) %>% 
+  select(event, actlab, est, lower, upper) %>%
+  mutate(patient="Cancer") %>%
+  rename(or=est, orl=lower, oru=upper) %>%
+  mutate(event_trt = sprintf("%s: %s",event, actlab))
+
+mares <- mares %>% filter(event %in% sigevents)
+orsh <- orsh %>% filter(event %in% pull(mares, event))
+mares <- mares %>% filter(event %in% pull(orsh, event))
+orsh <- orsh %>% full_join(mares)
+
+## FIXME why no ONJ, cancer
+## Cos that's only sig under direct
+## Just remove it then. 
+
+ggplot(orsh, aes(y=or, x=event, col=patient, lty=actlab)) +
+  coord_flip(ylim=c(0.7,30)) +
+  geom_hline(yintercept=1, col="gray") + 
+  geom_point(position=position_dodge(0.2), size=4) +
+  geom_errorbar(aes(ymin = orl, ymax=oru), position=position_dodge(0.2), size=2) +
+  scale_y_continuous(trans="log", breaks=c(0.7, 1, 1.5, 2, 5, 10, 20, 30)) +
+  ylab("Odds ratio") +
+  xlab("") +
+  labs(col="Patients", lty="Bisphosphonate treatment") +
+  paper_theme +
+  theme(plot.margin = margin(t = 0, r = 100, b = 0, l = 0, unit = "pt"),
+        legend.key.width = unit(3, "cm"))
+
+marestab <- mares %>%
+  mutate(orhealthy = sprintf("%s (%s, %s)", round(or,2), round(orl,2), round(oru,2)))
 orsh <- ortab %>% filter(sig) %>% select(categ, event, actlab, NMA) %>%
-  left_join(mares, by="event") %>% filter(!is.na(orhealthy)) %>% 
+  left_join(marestab, by="event") %>% filter(!is.na(orhealthy)) %>%
+  rename(actlab="actlab.x", treatmenth="actlab.y") %>% 
   as_tibble %>%
   select(categ, event, actlab, NMA, treatmenth, orhealthy) %>%
   as_grouped_data(groups="categ") %>%
@@ -95,17 +140,25 @@ orsh <- ortab %>% filter(sig) %>% select(categ, event, actlab, NMA) %>%
 orsh
 
 
+
 ```
 
 The study-specific odds ratios underlying these results are shown below.  
 
 For each event, the odds ratios from HORIZON and FIT are not surprising given the variability between studies.
 
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      fig.width=15,
+                      fig.height=40)
+```
+
 ```{r}
 
 p <- bpcma %>%
   filter(aetype %in% unique(ortab$event[ortab$sig])) %>% 
-ggplot(aes(y=or, x=`Trial name`, col=patient, label=Events)) +
+ggplot(aes(y=or, x=study, col=patient, label=Events)) +
                                         #  coord_flip(ylim=c(0.1, 15)) +
   coord_flip(ylim=c(0.1, 20)) +
   geom_hline(yintercept = 1, col="gray") + 
@@ -116,7 +169,9 @@ ggplot(aes(y=or, x=`Trial name`, col=patient, label=Events)) +
                      breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10, 20)) +
   ylab("Odds ratio (bisphosphonates / control)") +
   xlab("") +
-  scale_colour_manual(values=c("black","red")) 
-ggplotly(p, tooltip=c("label"), height=5000)
+  scale_colour_manual(values=c("black","red")) +
+  paper_theme
 
+#ggplotly(p, tooltip=c("label"), height=5000)
+p
 ```
