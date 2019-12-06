@@ -33,9 +33,9 @@ arrfn("ABDOMINAL PAIN")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.17
+Proportion of potential comparisons with direct data: 0.19
 
-Proportion of treatments compared to more than one other: 0.6
+Proportion of treatments compared to more than one other: 0.67
 
 Median number of studies per direct comparison: 2 (interquartile range 1-2)
 

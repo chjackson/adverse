@@ -23,9 +23,9 @@ load(file="ors.rda")
 
 This report describes the meta-analysis of aggregate data on adverse effects of bisphosphonates. 
 
-55 studies are considered, which in total reported 111 distinctly-named adverse events.   Among these events, there are 103 distinct events for which there is at least one study comparing incidence of that event between a bisphosphonate treatment group and a no-bisphosphonate control group.
+`r length(unique(nmadata))` studies are considered, which in total reported `r length(unique(nmadata$aetype))` distinctly-named adverse events.   Among these events, there are `r length(models_all)` distinct events for which there is at least one study comparing incidence of that event between a bisphosphonate treatment group and a no-bisphosphonate control group.
 
-For each of these 103 events, the data were analysed in the same way.  The methods, and highlighted results, are given in in this document.  Extra details for each of the 103 analyses are reported in [Appendix 2](app2_index.html). 
+For each of these `r length(models_all)` events, the data were analysed in the same way.  The methods, and highlighted results, are given in in this document.  Extra details for each of these analyses are reported in [Appendix 2](app2_index.html). 
 
 Events might be grouped into categories corresponding to similar physiological systems (as advised by a clinician REF).  Here they are analysed independently, though the results are presented in groups. 
 

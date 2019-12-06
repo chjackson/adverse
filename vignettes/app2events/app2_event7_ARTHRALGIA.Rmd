@@ -33,13 +33,13 @@ arrfn("ARTHRALGIA")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.13
+Proportion of potential comparisons with direct data: 0.17
 
-Proportion of treatments compared to more than one other: 0.5
+Proportion of treatments compared to more than one other: 0.56
 
-Median number of studies per direct comparison: 2 (interquartile range 1-2)
+Median number of studies per direct comparison: 2 (interquartile range 1-3)
 
-Proportion of direct comparisons informed by more than one study: 0.56
+Proportion of direct comparisons informed by more than one study: 0.6
 
 ## Meta analysis results
 Estimates (and 95% credible intervals) of the odds ratio of each bisphosphonate treatment, versus observation only, under

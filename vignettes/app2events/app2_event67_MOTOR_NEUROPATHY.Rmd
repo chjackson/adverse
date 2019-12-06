@@ -33,9 +33,9 @@ arrfn("MOTOR NEUROPATHY")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.21
+Proportion of potential comparisons with direct data: 0.25
 
-Proportion of treatments compared to more than one other: 0.38
+Proportion of treatments compared to more than one other: 0.67
 
 Median number of studies per direct comparison: 1 (interquartile range 1-1)
 

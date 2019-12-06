@@ -30,7 +30,7 @@ library(plotly)
 library(binom) 
 library(dplyr) 
 load_all("..")
-source("paper_theme.R")
+source("theme.r")
 load("ors.rda")
 
 hae <- unique(bpaeprevma$aetype) 

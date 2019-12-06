@@ -33,9 +33,9 @@ arrfn("MUCOSITIS")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.29
+Proportion of potential comparisons with direct data: 0.32
 
-Proportion of treatments compared to more than one other: 0.57
+Proportion of treatments compared to more than one other: 0.62
 
 Median number of studies per direct comparison: 1 (interquartile range 1-1)
 

@@ -25,7 +25,6 @@ all.comparisons <- function(dat, net, net.grp=NULL, groups=NULL){
 }
 
 direct.comparisons <- function(dat, net, event, net.grp=NULL, groups=NULL){
-    
     ns <- nrow(dat$t)
     trt <- r <- n <- sid <- vector(ns, mode="list")
     for (i in 1:ns){

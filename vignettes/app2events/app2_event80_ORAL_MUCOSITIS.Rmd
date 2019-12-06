@@ -33,11 +33,11 @@ arrfn("ORAL MUCOSITIS")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 1
+Proportion of potential comparisons with direct data: 3
 
-Proportion of treatments compared to more than one other: 0
+Proportion of treatments compared to more than one other: 1
 
-Median number of studies per direct comparison: 3 (interquartile range 3-3)
+Median number of studies per direct comparison: 2 (interquartile range 2-2)
 
 Proportion of direct comparisons informed by more than one study: 1
 

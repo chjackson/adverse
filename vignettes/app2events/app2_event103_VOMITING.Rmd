@@ -33,9 +33,9 @@ arrfn("VOMITING")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.14
+Proportion of potential comparisons with direct data: 0.18
 
-Proportion of treatments compared to more than one other: 0.53
+Proportion of treatments compared to more than one other: 0.65
 
 Median number of studies per direct comparison: 1 (interquartile range 1-2)
 

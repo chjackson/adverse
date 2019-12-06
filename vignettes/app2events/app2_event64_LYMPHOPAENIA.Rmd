@@ -33,9 +33,9 @@ arrfn("LYMPHOPAENIA")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.67
+Proportion of potential comparisons with direct data: 0.5
 
-Proportion of treatments compared to more than one other: 0.33
+Proportion of treatments compared to more than one other: 0.8
 
 Median number of studies per direct comparison: 1 (interquartile range 1-1)
 

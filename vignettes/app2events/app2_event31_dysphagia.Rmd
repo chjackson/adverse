@@ -33,9 +33,9 @@ arrfn("dysphagia")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.67
+Proportion of potential comparisons with direct data: 0.47
 
-Proportion of treatments compared to more than one other: 0.75
+Proportion of treatments compared to more than one other: 0.83
 
 Median number of studies per direct comparison: 1 (interquartile range 1-1)
 
