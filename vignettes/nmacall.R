@@ -23,7 +23,6 @@ for (i in 1:nev){
 
 ## sensitivity analysis using only high quality data 
 for (i in 1:nev){
-for (i in 22:nev){
     event <- events[i]
     cat(sprintf("EVENT %s = %s, complete reporting\n", i, event))
     if (!is.null(models_complete[[event]])){
@@ -36,12 +35,3 @@ for (i in 22:nev){
         save(nmai, file=sprintf("/scratch/chris/winton/nmares_complete/nmaall%s.rda", i))
     }
 }
-
-load(file=sprintf("/scratch/chris/winton/nmares_complete/nmaall%s.rda", i))
-
-load(file=sprintf("/scratch/chris/winton/nmares_complete/nmaall%s.rda", 19))
-nmai$event
-load(file=sprintf("/scratch/chris/winton/nmares_complete/nmaall%s.rda", 20))
-nmai$event
-load(file=sprintf("/scratch/chris/winton/nmares_complete/nmaall%s.rda", 21))
-nmai$event

@@ -33,13 +33,13 @@ arrfn("FEVER")
 
 ### Network geometry summary
 
-Proportion of potential comparisons with direct data: 0.22
+Proportion of potential comparisons with direct data: 0.2
 
 Proportion of treatments compared to more than one other: 0.67
 
 Median number of studies per direct comparison: 1 (interquartile range 1-2)
 
-Proportion of direct comparisons informed by more than one study: 0.43
+Proportion of direct comparisons informed by more than one study: 0.38
 
 ## Meta analysis results
 Estimates (and 95% credible intervals) of the odds ratio of each bisphosphonate treatment, versus observation only, under

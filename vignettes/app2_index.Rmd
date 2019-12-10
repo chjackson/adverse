@@ -146,69 +146,67 @@ output:
 
 [MYALGIA](app2events/app2_event70_MYALGIA.html)
 
-[NAIL CHANGES](app2events/app2_event71_NAIL_CHANGES.html)
+[Nasopharyngitis](app2events/app2_event71_Nasopharyngitis.html)
 
-[Nasopharyngitis](app2events/app2_event72_Nasopharyngitis.html)
+[NAUSEA](app2events/app2_event72_NAUSEA.html)
 
-[NAUSEA](app2events/app2_event73_NAUSEA.html)
+[neuralgia](app2events/app2_event73_neuralgia.html)
 
-[neuralgia](app2events/app2_event74_neuralgia.html)
+[NEUROSENSORY PROBLEMS](app2events/app2_event74_NEUROSENSORY_PROBLEMS.html)
 
-[NEUROSENSORY PROBLEMS](app2events/app2_event75_NEUROSENSORY_PROBLEMS.html)
+[NEUTROPENIA](app2events/app2_event75_NEUTROPENIA.html)
 
-[NEUTROPENIA](app2events/app2_event76_NEUTROPENIA.html)
+[neutrophil count decreased](app2events/app2_event76_neutrophil_count_decreased.html)
 
-[neutrophil count decreased](app2events/app2_event77_neutrophil_count_decreased.html)
+[OEDEMA](app2events/app2_event77_OEDEMA.html)
 
-[OEDEMA](app2events/app2_event78_OEDEMA.html)
+[oesophagitis](app2events/app2_event78_oesophagitis.html)
 
-[oesophagitis](app2events/app2_event79_oesophagitis.html)
+[ORAL MUCOSITIS](app2events/app2_event79_ORAL_MUCOSITIS.html)
 
-[ORAL MUCOSITIS](app2events/app2_event80_ORAL_MUCOSITIS.html)
+[OsteoNecrosis of the Jaw](app2events/app2_event80_OsteoNecrosis_of_the_Jaw.html)
 
-[OsteoNecrosis of the Jaw](app2events/app2_event81_OsteoNecrosis_of_the_Jaw.html)
+[OTHER EYE DISORDERS](app2events/app2_event81_OTHER_EYE_DISORDERS.html)
 
-[OTHER EYE DISORDERS](app2events/app2_event82_OTHER_EYE_DISORDERS.html)
+[pain in extremity](app2events/app2_event82_pain_in_extremity.html)
 
-[pain in extremity](app2events/app2_event83_pain_in_extremity.html)
+[PANCREATITIS](app2events/app2_event83_PANCREATITIS.html)
 
-[PANCREATITIS](app2events/app2_event84_PANCREATITIS.html)
+[PARAESTHESIA](app2events/app2_event84_PARAESTHESIA.html)
 
-[PARAESTHESIA](app2events/app2_event85_PARAESTHESIA.html)
+[periodontal disease](app2events/app2_event85_periodontal_disease.html)
 
-[periodontal disease](app2events/app2_event86_periodontal_disease.html)
+[phlebitis](app2events/app2_event86_phlebitis.html)
 
-[phlebitis](app2events/app2_event87_phlebitis.html)
+[PNEUMONIA](app2events/app2_event87_PNEUMONIA.html)
 
-[PNEUMONIA](app2events/app2_event88_PNEUMONIA.html)
+[PULMONARY EMBOLUS](app2events/app2_event88_PULMONARY_EMBOLUS.html)
 
-[PULMONARY EMBOLUS](app2events/app2_event89_PULMONARY_EMBOLUS.html)
+[renal impairment](app2events/app2_event89_renal_impairment.html)
 
-[renal impairment](app2events/app2_event90_renal_impairment.html)
+[SKIN DISORDER](app2events/app2_event90_SKIN_DISORDER.html)
 
-[SKIN DISORDER](app2events/app2_event91_SKIN_DISORDER.html)
+[stiffness](app2events/app2_event91_stiffness.html)
 
-[stiffness](app2events/app2_event92_stiffness.html)
+[STOMATITIS](app2events/app2_event92_STOMATITIS.html)
 
-[STOMATITIS](app2events/app2_event93_STOMATITIS.html)
+[SYNCOPE](app2events/app2_event93_SYNCOPE.html)
 
-[SYNCOPE](app2events/app2_event94_SYNCOPE.html)
+[THROMBOEMBOLIC EVENTS](app2events/app2_event94_THROMBOEMBOLIC_EVENTS.html)
 
-[THROMBOEMBOLIC EVENTS](app2events/app2_event95_THROMBOEMBOLIC_EVENTS.html)
+[THROMBOPAENIA](app2events/app2_event95_THROMBOPAENIA.html)
 
-[THROMBOPAENIA](app2events/app2_event96_THROMBOPAENIA.html)
+[THYROID CANCER](app2events/app2_event96_THYROID_CANCER.html)
 
-[THYROID CANCER](app2events/app2_event97_THYROID_CANCER.html)
+[TRAUMATIC FRACTURES](app2events/app2_event97_TRAUMATIC_FRACTURES.html)
 
-[TRAUMATIC FRACTURES](app2events/app2_event98_TRAUMATIC_FRACTURES.html)
+[uterine dilation/curettage](app2events/app2_event98_uterine_dilation_curettage.html)
 
-[uterine dilation/curettage](app2events/app2_event99_uterine_dilation_curettage.html)
+[uterine polyp](app2events/app2_event99_uterine_polyp.html)
 
-[uterine polyp](app2events/app2_event100_uterine_polyp.html)
+[VAGINAL BLEEDING](app2events/app2_event100_VAGINAL_BLEEDING.html)
 
-[VAGINAL BLEEDING](app2events/app2_event101_VAGINAL_BLEEDING.html)
+[VAGINAL DISCHARGE](app2events/app2_event101_VAGINAL_DISCHARGE.html)
 
-[VAGINAL DISCHARGE](app2events/app2_event102_VAGINAL_DISCHARGE.html)
-
-[VOMITING](app2events/app2_event103_VOMITING.html)
+[VOMITING](app2events/app2_event102_VOMITING.html)
 

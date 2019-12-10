@@ -40,12 +40,12 @@ bpaeraw[bpaeraw$study=="REFORM","N Control"] <- NA
 bpaeraw[bpaeraw$study=="Pivot 2011","N Exp2"] <- bpaeraw[bpaeraw$study=="Pivot 2011","N Control"]
 bpaeraw[bpaeraw$study=="Pivot 2011","N Control"] <- NA
 
-## Remove duplicated study
-bpaeraw <- bpaeraw[bpaeraw$study != "NCT001720682",]
+## Remove duplicated study "NCT00172068"
+bpaeraw <- bpaeraw[bpaeraw$studyid != 49,]
 
 ## This one has 56 vs 45 people in two experimental arms, rather than 127 in single experimental arm?  Zoledronic acid in community vs hospital setting 
 #bpaeraw %>% select(`Trial name`)
-#bpaeraw <- bpaeraw %>% filter(`Trial name` != "Wardley2005")
+bpaeraw <- bpaeraw %>% filter(study != "Wardley2005")
 # Single arm study shouldn't be problem for the NMA. Include this for now 
 
 bpaeraw <- bpaeraw %>%

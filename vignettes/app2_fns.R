@@ -20,6 +20,7 @@ plotdata <- function(ev){
                  size=count, col=drugname, label=description, label2=N)) +
       geom_point() +
       xlab(" ") +
+      ylab("") + 
       facet_wrap(~main1) + 
       guides(size=FALSE) +
       theme(legend.title = element_blank(),
@@ -213,45 +214,6 @@ arrfn <- function(event){
 #    l[[4]] <- ggplotly(plotarr[[event]]$modcomp)
     l
 }
-
-## TODO
-## Study-specific odds ratios
-## direct data only? how to illustrate indirect comparisons? 
-## something to elucidate the model comparison
-
-## Currently has pooled OR for each active treatment, direct and NMA 
-## Huh but we'll need to re-run the NMA for the non-optimal models
-## storing the samples or at least the summaries 
-## should be ok to store the samples if it's on the scratch space 
-## OK RERUNNING 
-
-## Could show pooled ORs from alternative models
-## would need to form "ors" dataset for each model.  or better a full one with opt indicator. need extra stuff inside get_nma_ors to loop over models. 
-
-## Could show study-specific ORs from studies contributing to the direct data 
-## direct.comparisons extracts data for this
-## compute est and CI for r and n 
-## could go on top of existing bottom right graph
-
-## nicer to have different legends. one for raw data
-## rename bottom right graph "Meta-analysis", include pooled optimal direct, NMA, and study specific direct data 
-
-## new graph called "meta-analysis model comparison" showing just NMA pooled for all models.  Don't include if just one model. 
-
-## another graph with high quality studies only 
-
-## OK here's the graphs
-## 1) full network, as before
-## 2) optimal network, as before
-## 3) raw data, as before
-## 4) NMA pooled
-## 5) NMA model comparison
-## done all, just need to put on web page 
-
-## TODO Decide where high quality studies go: indicate on current graphs which are higher quality, and add pooled NMA result 
-
-## TODO fixed effects forest plot for classical MA
-## which treatment etc. just bp vs not 
 
 
 graph_geometry <- function(event){

@@ -68,6 +68,29 @@ Technical details of the network meta-analysis models, and the model comparison 
 For the selected model, a corresponding classical meta-analysis is also performed based on the direct comparisons alone.
 
 
+## Full network graph
+
+```{r}
+knitr::opts_chunk$set(echo=FALSE,
+                      fig.width=15,
+                      fig.height=15)
+```
+
+```{r}
+net <- mtc.network(nmadata, treatments=treatments, studies=studies)
+cols <- drugcols[match(
+    treatments$drugname[match(igraph::V(mtc.network.graph(fix.network(net)))$name,
+                              treatments$id)],
+    names(drugcols))]
+ntsize <- 6
+netp_full <- ggplot.mtc.network(net, nstudies=TRUE, use.description=TRUE,
+                                color=cols, layout.exp=0.5,
+                                size=2, label.size=ntsize,
+                                edge.label.size=ntsize)
+netp_full
+```
+
+
 # Results 
 
 ## Table 1: events affected most by bisphosphonate treatment 
@@ -140,6 +163,43 @@ orft_complete <- ortab_complete %>%
 orft_complete
 
 ```
+
+## Change in results when excluding incomplete reporting
+
+The graph below shows all the events for which
+
+* a significant odds ratio was highlighted in the main analysis.
+
+* no significant odds ratio was detected when studies with incomplete reporting were excluded
+
+The treatment categorisations are shown under the best fitting model in the main analysis.   Comparing the red and blue lines shows how the results change when studies with incomplete reporting are excluded. 
+
+
+```{r}
+
+oror <- ors %>% filter(measure=="or")
+orcor <- ors_complete %>% filter(measure=="or")
+evsig0 <- oror %>% filter(sig) %>% pull(event) %>% as.character %>% unique
+
+## events changed from sig to non sig
+evchange <- evsig0[!evsig0 %in% orcor$event[orcor$sig]]
+
+oror2 <- oror %>% filter(event %in% evchange) %>% mutate(reporting="all")
+orcor2 <- orcor %>% filter(event %in% evchange) %>% mutate(reporting="complete")
+orchange <- rbind(oror2, orcor2)
+orchange$y <- paste(orchange$y, orchange$model, sep="|")
+
+ggplot(orchange, aes(x=y, y=est, col=reporting)) +
+  coord_flip(ylim=c(0,20)) + 
+  geom_hline(aes(yintercept=1), col="gray") + 
+  geom_point(position=position_dodge(0.3)) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), position=position_dodge(0.3)) +
+  labs(col="Reporting")
+
+
+```
+
+
 
 ```{r,eval=FALSE,warning=FALSE}
 
