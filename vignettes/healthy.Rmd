@@ -72,19 +72,32 @@ knitr::opts_chunk$set(echo=FALSE,
 eventsh <- bpaeprevma %>% filter(rcon>0|ract>0) %>% select(aetype) %>% unlist %>% as.vector %>% unique
 mares <- data.frame(event=eventsh)
 mares$or <- mares$orl <- mares$oru <- NA
+mares$rd <- mares$rdl <- mares$rdu <- NA
 
 for (i in seq(along=eventsh)){ 
     bpma <- bpaeprevma %>% filter(aetype==eventsh[i])
     if (nrow(bpma) > 0){
         mres <- metabin(ract, nact, rcon, ncon, studlab=study, data=bpma, sm="OR")
         mares[i,c("or","orl","oru")] <- exp(unlist(mres[c("TE.fixed","lower.fixed","upper.fixed")]))
+        mresrd <- metabin(ract, nact, rcon, ncon, studlab=study, data=bpma, sm="RD")
+        mares[i,c("rd","rdl","rdu")] <- unlist(mresrd[c("TE.fixed","lower.fixed","upper.fixed")])
     }
 }
 
 mares <- mares %>%
   mutate(actlab = "Bisphosphonate",
          patient = "Healthy",
-         event_trt = sprintf("%s: Bisphosphonate", event))
+         event_trt = sprintf("%s: Bisphosphonate", event),
+         sig = (or>1.5 & orl>1) | (rd>0.02 & rdl>0)
+         )
+
+
+```
+
+
+
+
+```{r}
 
 sigevents <- ortab %>% filter(sig) %>% pull(event) %>% unique
 sigevent_trts <- ortab %>% filter(sig) %>% mutate(event_trt = paste(event, actlab, sep=": ")) %>% pull(event_trt) %>% unique
@@ -98,12 +111,12 @@ orsh <- ors %>%
   rename(or=est, orl=lower, oru=upper) %>%
   mutate(event_trt = sprintf("%s: %s",event, actlab))
 
-mares <- mares %>% filter(event %in% sigevents)
-orsh <- orsh %>% filter(event %in% pull(mares, event))
-mares <- mares %>% filter(event %in% pull(orsh, event))
-orsh <- orsh %>% full_join(mares)
+maress <- mares %>% filter(event %in% sigevents)
+orsh <- orsh %>% filter(event %in% pull(maress, event))
+maress <- maress %>% filter(event %in% pull(orsh, event))
+orsh <- orsh %>% full_join(maress)
 
-## FIXME why no ONJ, cancer
+## Why no ONJ, cancer? 
 ## Cos that's only sig under direct
 ## Just remove it then. 
 
@@ -120,7 +133,7 @@ ggplot(orsh, aes(y=or, x=event, col=patient, lty=actlab)) +
   theme(plot.margin = margin(t = 0, r = 100, b = 0, l = 0, unit = "pt"),
         legend.key.width = unit(3, "cm"))
 
-marestab <- mares %>%
+marestab <- maress %>%
   mutate(orhealthy = sprintf("%s (%s, %s)", round(or,2), round(orl,2), round(oru,2)))
 orsh <- ortab %>% filter(sig) %>% select(categ, event, actlab, NMA) %>%
   left_join(marestab, by="event") %>% filter(!is.na(orhealthy)) %>%
@@ -136,14 +149,29 @@ orsh <- ortab %>% filter(sig) %>% select(categ, event, actlab, NMA) %>%
                     orhealthy="OR (healthy MA)"
                     ) %>% 
   flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
-  flextable::bold(part = "header", bold = TRUE )
+  flextable::bold(part = "header", bold = TRUE )  %>%
+  width(width = 2)
 orsh
-
-
 
 ```
 
-The study-specific odds ratios underlying these results are shown below.  
+Events deemed significant in a fixed effects meta analysis of HORIZON/FIT, using same criterion as in the main analysis: statistically significant OR > 1.5 or risk difference > 0.02. 
+
+```{r}
+
+mares %>% filter(sig) %>%
+  mutate(orstr = sprintf("%s (%s, %s)", round(or,2), round(orl,2), round(oru,2))) %>%
+  mutate(rdstr = sprintf("%s (%s, %s)", round(rd,2), round(rdl,2), round(rdu,2))) %>%
+  select(event, orstr, rdstr) %>%
+  flextable %>% 
+  set_header_labels(event="",
+                    orstr="Odds ratio",
+                    rdstr="Risk difference") %>% 
+  width(width = 2)
+
+```
+
+The study-specific odds ratios underlying these results are shown below.
 
 For each event, the odds ratios from HORIZON and FIT are not surprising given the variability between studies.
 

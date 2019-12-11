@@ -246,7 +246,7 @@ bpae <- bpae %>%
 bpae <- bpae %>%
   mutate_at(vars(matches(!!aestr)), list(p = ~ . / N))
 
-## Define the control arm for each study 
+## Define the control arm for each study, for studies that have an observation/placebo control
 
 bpaecon <- bpae %>%
   mutate(armno2 = paste0("A", armno)) %>%

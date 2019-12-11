@@ -9,6 +9,7 @@ output:
 
 ```{r,message=FALSE,warning=FALSE,echo=FALSE}
 knitr::opts_chunk$set(echo=FALSE,
+                      warning=FALSE,message=FALSE,
                       fig.width=50,
                       fig.height=100)
 library(knitr)
@@ -16,6 +17,7 @@ library(dplyr)
 filter <- dplyr::filter
 library(flextable)
 load(file="ors.rda")
+load_all("..")
 ```	
 
 
@@ -110,24 +112,59 @@ Where there is no baseline risk / risk difference for healthy women, this is bec
 
 ```{r}
 
+# a) Number of studies reporting that event 
+npts <- nmadata %>% group_by(aetype) %>% summarise(npts = sum(sampleSize))
+nstudies <- nmadata %>% group_by(aetype) %>% summarise(nstudies = length(unique(studyid)))
+
+## b) Number of studies comparing that trt combo with obs only or placebo 
+ndirect <- nptsdirect <- numeric(nrow(ortab))
+for (i in 1:nrow(ortab)){
+    optmodel <- unique(na.omit(ors$optmodel[ors$event==ortab$event[i] & ors$actlab==ortab$actlab[i]]))
+    if (length(optmodel) > 0) {
+        rdsub <- bpaeriskdiff[bpaeriskdiff$aetype==ortab$event[i] &
+                              bpaeriskdiff[,optmodel]==ortab$actlab[i],]
+        ndirect[i] <- length(unique(rdsub$study))
+        nptsdirect[i] <- sum(rdsub$N) + sum(rdsub$ncon)
+    } else ndirect[i] <- nptsdirect[i] <- 0
+}
+
+ortab$ndirect <- ndirect
+ortab$nptsdirect <- nptsdirect
+ortab <- left_join(ortab, nstudies, by=c("event"="aetype"))
+ortab <- left_join(ortab, npts, by=c("event"="aetype"))
+rm(nstudies, npts, ndirect, nptsdirect)
+
+basec <- baseres %>% filter(patient=="Cancer") %>% mutate(p=round(100*p)) %>% select(aetype, p) %>% rename(event=aetype, basec=p)
+baseh <- baseres %>% filter(patient=="Healthy") %>% mutate(p=round(100*p)) %>% select(aetype, p) %>% rename(event=aetype, baseh=p)
+ortab <- ortab %>% left_join(basec) %>% left_join(baseh)
+
 orft <- ortab %>%
   as_tibble %>%
   filter(!is.na(sig) & sig) %>%
-  select(categ, event, actlab, direct, NMA, brc, rdc, brh, rdh, pser) %>%
+  mutate(nstudies = sprintf("%s (%s)", nstudies, npts),
+         ndirect = sprintf("%s (%s)", ndirect, nptsdirect),
+         basec = ifelse(is.na(basec), "", as.character(basec)),
+         baseh = ifelse(is.na(baseh), "", as.character(baseh))) %>%
+  select(categ, event, actlab, direct, NMA, nstudies,
+         ndirect, basec, arc, baseh, arh, pser) %>%
   as_grouped_data(groups="categ") %>%
   flextable %>% 
-  set_header_labels(categ="", event="",
+  set_header_labels(categ="",
+                    event="",
                     actlab="Treatment",
                     direct="Direct OR",
+                    nstudies="Studies in network meta analysis (total n)",
+                    ndirect="Direct comparison studies (total n)",
                     NMA="NMA OR",
-                    brc="Baseline risk (cancer)",
-                    rdc="Risk difference (cancer)",
-                    brh="Baseline risk (healthy)",
-                    rdh="Risk difference (healthy)",
+                    basec="Risk/100 without treatment (cancer)",
+                    arc="Risk/100 with treatment (cancer)",
+                    baseh="Risk/100 without treatment (healthy)",
+                    arh="Risk/100 with treatment (healthy)",
                     pser="Proportion of graded events that are serious"
                     ) %>% 
   flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
   flextable::bold(part = "header", bold = TRUE )
+
 orft
 
 ```
@@ -333,46 +370,4 @@ orft <- orft %>%
   flextable::bold(part = "header", bold = TRUE )
 orft
 ```
-
-
-## Other things to include in the paper 
-
-* Simple meta-analysis 
-
-Should it be odds ratio, not risk difference, until we've discussed baseline? 
-Discuss heterogeneity in ORs vs RDs  To illustrate this, just point to forest plot ORs for homogeneity.  Can we discuss het in baselines when choosing a baseline. 
-Question whether we should be discussing risk differences here at all - as we want to make the baselines transparent.  Could mention baseilne het as a motivator for picking a constant baseline. Just needs quick summary using direct-only data to motivate. 
-
-Group symptoms by class as in NMA results? 
-Show number of studies contributing to the result in the row label 
-
-The data extracted from the 59 trials that fulfilled our criteria is shown in Supplementary Data 1. What is this? 
-
-Table 1 shows the study chars.  Where is this?  Should include blinding, follow up, any other data extracted 
-
-Subset analysis done for direct as well as NMA?  [ suggest no! ] 
-
-
-* NMA 
-
-notAI - indicate in supp Table 1 - is this table in there? 
-
-Appendix plots in progress. Adding more transparent direct data and model comparison 
-
-
-
-* AZURE 
-
-both risk ratio and risk difference? 
-
-point out which are sig in azure alone
-
-
-Methods
-
-1.  Talk through how we did FEVER
-
-2.  Forest plots for selected odds ratios
-
-Healthy women analysis
 
