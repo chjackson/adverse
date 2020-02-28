@@ -12,6 +12,15 @@ load(file="ddat.rda")
 load(file="datmodcomp.rda")
 source("theme.r")
 
+clean_aetype <- function(aetype){
+    aetype <- stringr::str_to_sentence(aetype)
+    aetype[aetype=="Ggt increased"] <-"GGT increased"
+    aetype[aetype=="Cpk increased"] <-"CPK increased"
+    aetype[aetype=="Inr increased"] <-"INR increased"
+    aetype[aetype=="Withdrawals because of aes"] <-"Withdrawals because of AEs"
+    aetype
+}
+
 plotdata <- function(ev){
     p <- bpaearmtype %>%
       filter(aetype %in% ev) %>%

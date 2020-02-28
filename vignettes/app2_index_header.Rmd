@@ -1,8 +1,0 @@
----
-title: "Bisphosphonates adverse-events network meta-analysis: Appendix 2"
-author: ""
-date: "`r Sys.Date()`"
-output:
- html_document:
-  code_folding: hide
----

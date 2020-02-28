@@ -53,14 +53,14 @@ for (i in 1:nev){
     evname_clean[i] <- gsub(" ", "_", events[i])
     evname_clean[i] <- gsub("/", "_", evname_clean[i])
     evname_clean[i] <- gsub(":", "_", evname_clean[i])
-    fnamer[i] <- sprintf("app2events/app2_event%s_%s.Rmd", i, evname_clean[i])
-    fnameh[i] <- sprintf("app2events/app2_event%s_%s.html", i, evname_clean[i])
+    fnamer[i] <- sprintf("bisph_app2events/app2_event%s_%s.Rmd", i, evname_clean[i])
+    fnameh[i] <- sprintf("bisph_app2events/app2_event%s_%s.html", i, evname_clean[i])
 }
 
-ifname <- "app2_index.Rmd"
-cat(scan("app2_index_header.Rmd", what="char", sep="\n"), file=ifname, sep="\n")
+ifname <- "bisph_app2_index.Rmd"
+cat(scan("bisph_app2_index_header.Rmd", what="char", sep="\n"), file=ifname, sep="\n")
 for (i in 1:nev){
-    cat(sprintf("[%s](%s)\n\n", events[i], fnameh[i]), file=ifname, append=TRUE)
+    cat(sprintf("[%s](%s)\n\n", clean_aetype(events[i]), fnameh[i]), file=ifname, append=TRUE)
 }
 render(ifname)
 
@@ -77,9 +77,9 @@ render(ifname)
 
 for (i in 1:nev){
 
-cat(scan("app2_event_header.Rmd", what="char", sep="\n"),
+cat(scan("bisph_app2_event_header.Rmd", what="char", sep="\n"),
     file=fnamer[i], sep="\n")
-cat(sprintf("## %s\n\n", events[i]),
+cat(sprintf("## %s\n\n", clean_aetype(events[i])),
     file=fnamer[i], append=TRUE)
 cat(sprintf("```{r, warning=FALSE}\narrfn(\"%s\")\n```\n\n", events[i]), file=fnamer[i], append=TRUE)
 cat(sprintf("### Network geometry summary\n\n%s", graph_geometry(events[i])), file=fnamer[i], append=TRUE)

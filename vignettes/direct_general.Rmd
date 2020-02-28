@@ -19,7 +19,17 @@ library(dplyr)
 filter <- dplyr::filter
 library(ggplot2)
 library(plotly)
+library(stringr)
 source("theme.r")
+
+clean_aetype <- function(aetype){
+    aetype <- stringr::str_to_sentence(aetype)
+    aetype[aetype=="Ggt increased"] <-"GGT increased"
+    aetype[aetype=="Cpk increased"] <-"CPK increased"
+    aetype[aetype=="Inr increased"] <-"INR increased"
+    aetype[aetype=="Withdrawals because of aes"] <-"Withdrawals because of AEs"
+    aetype
+}
 
 ```
 
@@ -41,6 +51,7 @@ aecount <-
   summarise(N=sum(N), count=sum(count)) %>%
   mutate(prop = count/N) %>%
   mutate(aetype=factor(aetype, levels=unique(aetype)[order(prop)])) %>%
+  mutate(aetype = clean_aetype(aetype)) %>% 
   mutate(pse = N*prop*(1-prop))
 
 p <- ggplot(aecount, aes(x=prop, y=aetype, size=count)) + 
@@ -137,7 +148,7 @@ Standard fixed effects meta analysis
 
 library(meta)
 
-mares <- data.frame(aetype=levels(aecount$aetype))
+mares <- data.frame(aetype=unique(as.character(aecount$aetype)))
 mares$totn <- mares$totr <- mares$totncon <- mares$totrcon <-
   mares$or <- mares$orl <- mares$oru <- 
     mares$rd <- mares$rdl <- mares$rdu <- NA
@@ -145,6 +156,7 @@ mares$totn <- mares$totr <- mares$totncon <- mares$totrcon <-
 for (i in seq(along.with=mares$aetype)){ 
     bpma <-
       bpaeriskdiff %>%
+      mutate(aetype = clean_aetype(aetype)) %>% 
       filter(trtcon %in% c("100","101","103")) %>%
       filter(aetype==mares$aetype[i])
     if (nrow(bpma) > 0){
@@ -171,8 +183,9 @@ mares <- mares %>%
 ```{r,warning=FALSE}
 
 cres <- aecount %>% select(aetype, prop, count) %>% rename(est=prop) %>% mutate(measure="Proportion having event")
-rdres <- mares %>% select(aetype, rd, rdl, rdu) %>% rename(est=rd, lower=rdl, upper=rdu) %>% mutate(measure="Risk difference (vs control)")
-orres <- mares %>% select(aetype, or, orl, oru) %>% rename(est=or, lower=orl, upper=oru) %>% mutate(measure="Odds ratio (bisphosphonates / control)")
+rdres <- mares %>% select(aetype, rd, rdl, rdu) %>% rename(est=rd, lower=rdl, upper=rdu) %>% mutate(measure="Risk difference (vs control)") %>% mutate(aetype=as.character(aetype))
+orres <- mares %>% select(aetype, or, orl, oru) %>% rename(est=or, lower=orl, upper=oru) %>% mutate(measure="Odds ratio (bisphosphonates / control)") %>% mutate(aetype=as.character(aetype))
+
 
 directplot <- cres %>%
   full_join(rdres) %>% full_join(orres)
@@ -212,7 +225,8 @@ levels(p2dat$aetype) <- sprintf("%s (%s)", levels(p2dat$aetype), round(cres$est[
 sigcol <- rep("black", length(levels(p1dat$aetype)))
 sigcol[match(as.character(p1dat$aetype), levels(p1dat$aetype))] <- ifelse(p1dat$sig | p2dat$sig, "red","black")
 
-p1 <- p1dat %>% 
+p1 <- p1dat %>%
+  droplevels %>% 
   ggplot(aes(y=est, x=aetype, color=sig)) +
   coord_flip(ylim=c(-0.1, 0.2)) + 
   scale_x_discrete(drop=FALSE) +
@@ -229,7 +243,8 @@ p1 <- p1dat %>%
   paper_theme + 
   ylab("") + xlab("") 
 
-p2 <- p2dat %>% 
+p2 <- p2dat %>%
+  droplevels %>% 
   ggplot(aes(y=est, x=aetype, color=sig)) +
   coord_flip(ylim=c(0.2, 20)) + 
   scale_x_discrete(drop=FALSE) + 

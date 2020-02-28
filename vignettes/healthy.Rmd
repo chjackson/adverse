@@ -17,12 +17,21 @@ Just two studies of bisphosphonates for preventing osteoperosis in "healthy" wom
 
 * HORIZON: two papers reported on the same population, one reporting acute events following the start of treatment, and one with longer follow-up.   It's unclear whether some of the same events are repeated between the two reports. 
 
-* FIT: two papers, one reporting the full trial population and the other reporting a subgroup.  The only events reported were abdominal pain, oesophagitis, dyspepsia, gastrointestinal (unspecified) and nausea.  
+* FIT: two papers, one reporting the full trial population and the other reporting a subgroup.  The only events reported were abdominal pain, oesophagitis, dyspepsia, gastrointestinal (unspecified) and nausea.
 
 
 
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
+
+clean_aetype <- function(aetype){
+    aetype <- stringr::str_to_sentence(aetype)
+    aetype[aetype=="Ggt increased"] <-"GGT increased"
+    aetype[aetype=="Cpk increased"] <-"CPK increased"
+    aetype[aetype=="Inr increased"] <-"INR increased"
+    aetype[aetype=="Withdrawals because of aes"] <-"Withdrawals because of AEs"
+    aetype
+}
 
 library(flextable)
 library(meta)
@@ -182,6 +191,8 @@ knitr::opts_chunk$set(echo=FALSE,
                       fig.height=40)
 ```
 
+
+
 ```{r}
 
 p <- bpcma %>%
@@ -202,4 +213,56 @@ ggplot(aes(y=or, x=study, col=patient, label=Events)) +
 
 #ggplotly(p, tooltip=c("label"), height=5000)
 p
+
+```
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      fig.width=15,
+                      fig.height=12)
+```
+
+```{r}
+
+bpplot <- bpcma %>%
+  filter(aetype %in% unique(ortab$event[ortab$sig])) %>%
+  mutate(aetype = clean_aetype(aetype))
+
+bpplot$aetype[bpplot$aetype=="Influenza-like symptoms"] <- "Influenza-like"
+
+evsig <- unique(bpplot$aetype)
+
+bsize <- 20
+supp_theme <-
+  theme(axis.text = element_text(size=bsize),
+        strip.text = element_text(size=bsize),
+        text = element_text(size=bsize),
+        legend.text = element_text(size=bsize),
+        axis.title = element_text(size=bsize, margin=margin(t=0.2, b=0.2)),
+        axis.title.x = element_text(size=bsize,
+                                    margin=margin(t=10, b=10)))
+
+plotfn <- function(ev){ 
+    ggplot(bpplot[bpplot$aetype %in% ev,],
+           aes(y=or, x=study, col=patient, label=Events)) +
+      coord_flip(ylim=c(0.1, 20)) +
+      geom_hline(yintercept = 1, col="gray",size=2) + 
+      geom_point(size=2) +
+      geom_errorbar(aes(ymin = orl, ymax = oru), width=0) +
+      facet_grid(cols=vars(aetype)) + 
+      scale_y_continuous(trans="log", 
+                         breaks=c(0.1, 0.5, 1, 5)) +
+      ylab("Odds ratio (bisphosphonates / control)") +
+      xlab("") +
+      scale_colour_manual(values=c("black","red")) +
+      supp_theme
+}
+
+plotfn(evsig[1:3])
+plotfn(evsig[4:6])
+plotfn(evsig[7:9])
+plotfn(evsig[10:13])
+
 ```

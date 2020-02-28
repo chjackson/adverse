@@ -76,3 +76,5 @@ orft <- ortab %>%
 orft
 
 ```
+
+For `r sum(!is.na(ortab$dir_ind_or))` out of `r nrow(ortab)` there was both direct and indirect evidence on the same effect. 

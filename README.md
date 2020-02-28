@@ -2,34 +2,9 @@
 
 Meta-analysis of adverse events of adjuvant breast cancer treatments
 
-Project in progress 
-
-### Exploratory plots
-
-[Absolute rates by study and treatment arm](https://chjackson.github.io/adverse/inst/doc/plot.html)
-
-[Absolute rates by study and treatment arm, restricted to serious adverse events](https://chjackson.github.io/adverse/inst/doc/plotsae.html)
-
-[Adverse compared with serious adverse events](https://chjackson.github.io/adverse/inst/doc/sae.html)
-
-[Risk differences from control, for studies with a no-biphosphonate control](https://chjackson.github.io/adverse/inst/doc/trtvscon.html)
-
-### Network meta-analyses
-
-[Fever](https://chjackson.github.io/adverse/inst/doc/nmafever.html)
-
-[Several selected events](https://chjackson.github.io/adverse/inst/doc/nmageneral.html)
-
-## Data on all events aggregated over studies 
-
-[All events](https://chjackson.github.io/adverse/inst/doc/nmaother.html)
+Code and supplementary material from papers 
 
 
+## Bisphosphonates
 
-## Full analysis of all events (July 2019) 
-
-[Main results](https://chjackson.github.io/adverse/vignettes/results.html)
-
-[Appendix 1](https://chjackson.github.io/adverse/vignettes/app1.html)
-
-[Appendix 2](https://chjackson.github.io/adverse/vignettes/app2_index.html)
+[Full event-specific results](https://chjackson.github.io/adverse/vignettes/app2_index.html)
