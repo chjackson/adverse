@@ -1,0 +1,373 @@
+---
+title: "Bisphosphonates adverse-events meta-analysis results"
+author: ""
+date: "`r Sys.Date()`"
+output:
+ html_document
+---
+
+
+```{r,message=FALSE,warning=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      warning=FALSE,message=FALSE,
+                      fig.width=50,
+                      fig.height=100)
+library(knitr)
+library(dplyr)
+filter <- dplyr::filter
+library(flextable)
+load(file="ors.rda")
+load_all("..")
+```	
+
+
+# Overview
+
+This report describes the meta-analysis of aggregate data on adverse effects of bisphosphonates. 
+
+`r length(unique(nmadata))` studies are considered, which in total reported `r length(unique(nmadata$aetype))` distinctly-named adverse events.   Among these events, there are `r length(models_all)` distinct events for which there is at least one study comparing incidence of that event between a bisphosphonate treatment group and a no-bisphosphonate control group.
+
+For each of these `r length(models_all)` events, the data were analysed in the same way.  The methods, and highlighted results, are given in in this document.  Extra details for each of these analyses are reported in [Appendix 2](app2_index.html). 
+
+Events might be grouped into categories corresponding to similar physiological systems (as advised by a clinician REF).  Here they are analysed independently, though the results are presented in groups. 
+
+
+## Treatment groupings
+
+For each event, there is a different set of trials that reported data on that event, giving a different network of comparisons between treatments.   Five alternative models for network meta-analysis are compared, defined by different groupings of treatments.  From the finest to the coarsest grouping, these are: 
+
+1. Different _doses and delivery methods_ of different drugs considered as different treatments.  The network corresponding to this model is shown as the "full network of comparisons" in [Appendix 2](app2_index.html). 
+
+2. Different _delivery methods_ considered as different treatments, but different doses of the same drug considered as the same treatment. 
+
+3. Different _drugs_ considered as different treatments, but different doses and delivery methods of the same drug considered as the same treatment.
+
+4. _Nitrogenous_ bisphosphonates and non-nitrogenous bisphosphonates (just clodronate) considered as different treatments. 
+
+5. _All bisphosphonates_ considered as the same treatment. 
+
+Non-bisphosphonate control groups were distinguished as either placebo, observation-only or denosumab.
+
+In two studies, treatment arms are distinguished by the different hormone therapies given.  These are modelled in the same way as different doses of the same drug.  (In Appendix 2, the arm given a hormone therapy that is not an aromatase inhibitor is labelled "notai"). 
+
+
+## Network meta-analysis procedure
+
+A network meta-analysis model was obtained for each event using the following procedure.  This procedure aims to find the best-fitting model which uses all potentially-relevant data, which requires a "connected network" of treatments.
+
+1. If the treatment network is disconnected under the finest model (grouping 1), but becomes connected when placebo and observation-only controls are considered to be the same treatment, then these two control groups are considered to be the same.  Otherwise these controls are separated.
+
+2. Starting with the finest model (grouping 1), the treatments are grouped until the resulting treatment network is connected. 
+
+3. All network meta-analysis models ranging from the finest connected model to the coarsest are fitted. 
+
+4. The optimal model is selected from among those which fitted successfully, using the deviance information criterion (DIC REF), a measure of model fit or predictive ability.   The network diagram for the selected model is shown in [Appendix 2](app2_index.html). 
+
+5. If no network meta-analysis model fitted successfully, then the results for that event are reported from direct-data meta-analysis only.  Unsuccessful fits are generally due to sparsity of information. 
+
+Technical details of the network meta-analysis models, and the model comparison and checking procedure, are reported in [Appendix 1](app1.html). 
+
+For the selected model, a corresponding classical meta-analysis is also performed based on the direct comparisons alone.
+
+
+## Full network graph
+
+```{r}
+knitr::opts_chunk$set(echo=FALSE,
+                      fig.width=15,
+                      fig.height=15)
+```
+
+```{r}
+net <- mtc.network(nmadata, treatments=treatments, studies=studies)
+cols <- drugcols[match(
+    treatments$drugname[match(igraph::V(mtc.network.graph(fix.network(net)))$name,
+                              treatments$id)],
+    names(drugcols))]
+ntsize <- 6
+netp_full <- ggplot.mtc.network(net, nstudies=TRUE, use.description=TRUE,
+                                color=cols, layout.exp=0.5,
+                                size=2, label.size=ntsize,
+                                edge.label.size=ntsize)
+netp_full
+```
+
+
+# Results 
+
+## Table 1: events affected most by bisphosphonate treatment 
+
+This table lists the events and treatments for which either the direct comparison or the selected network meta-analysis model produced a practically and statistically significant treatment effect, defined as either 
+
+* an odds ratio with a posterior median of 1.5 or greater, or
+* a risk difference (for either healthy or cancer patients) with a posterior median of 0.02 or greater,
+
+which is also "statistically significant" (lower credible limit greater than 1 for odds ratios, or 0 for risk differences).
+
+The odds ratio is the ratio of the odds of the event between the treatment group (as defined in the table) and an "observation only" control group. 
+
+The risk difference is the estimated absolute risk for patients given the active treatment, minus a constant baseline risk.  These baseline risks are listed in the table below.  For cancer patients they are obtained from classical meta-analysis of the direct data from the "observation-only" arms of the bisphosphonate trials.  For "healthy" patients they are obtained from the placebo arm of the NCT00083174 study of exemestane v placebo for postmenopausal women at high risk of breast cancer.   The risk differences are (currently) only calculated under the network meta-analysis model.
+
+Where there is no baseline risk / risk difference for healthy women, this is because the event was not reported in the NCT00083174 study.  If the baseline risk is close to zero, then the risk difference will also be negligible. 
+
+```{r}
+
+# a) Number of studies reporting that event 
+npts <- nmadata %>% group_by(aetype) %>% summarise(npts = sum(sampleSize))
+nstudies <- nmadata %>% group_by(aetype) %>% summarise(nstudies = length(unique(studyid)))
+
+## b) Number of studies comparing that trt combo with obs only or placebo 
+ndirect <- nptsdirect <- numeric(nrow(ortab))
+for (i in 1:nrow(ortab)){
+    optmodel <- unique(na.omit(ors$optmodel[ors$event==ortab$event[i] & ors$actlab==ortab$actlab[i]]))
+    if (length(optmodel) > 0) {
+        rdsub <- bpaeriskdiff[bpaeriskdiff$aetype==ortab$event[i] &
+                              bpaeriskdiff[,optmodel]==ortab$actlab[i],]
+        ndirect[i] <- length(unique(rdsub$study))
+        nptsdirect[i] <- sum(rdsub$N) + sum(rdsub$ncon)
+    } else ndirect[i] <- nptsdirect[i] <- 0
+}
+
+ortab$ndirect <- ndirect
+ortab$nptsdirect <- nptsdirect
+ortab <- left_join(ortab, nstudies, by=c("event"="aetype"))
+ortab <- left_join(ortab, npts, by=c("event"="aetype"))
+rm(nstudies, npts, ndirect, nptsdirect)
+
+basec <- baseres %>% filter(patient=="Cancer") %>% mutate(p=round(100*p)) %>% select(aetype, p) %>% rename(event=aetype, basec=p)
+baseh <- baseres %>% filter(patient=="Healthy") %>% mutate(p=round(100*p)) %>% select(aetype, p) %>% rename(event=aetype, baseh=p)
+ortab <- ortab %>% left_join(basec) %>% left_join(baseh)
+
+orft <- ortab %>%
+  as_tibble %>%
+  filter(!is.na(sig) & sig) %>%
+  mutate(nstudies = sprintf("%s (%s)", nstudies, npts),
+         ndirect = sprintf("%s (%s)", ndirect, nptsdirect),
+         basec = ifelse(is.na(basec), "", as.character(basec)),
+         baseh = ifelse(is.na(baseh), "", as.character(baseh))) %>%
+  select(categ, event, actlab, direct, NMA, nstudies,
+         ndirect, basec, arc, baseh, arh, pser) %>%
+  as_grouped_data(groups="categ") %>%
+  flextable %>% 
+  set_header_labels(categ="",
+                    event="",
+                    actlab="Treatment",
+                    direct="Direct OR",
+                    nstudies="Studies in network meta analysis (total n)",
+                    ndirect="Direct comparison studies (total n)",
+                    NMA="NMA OR",
+                    basec="Risk/100 without treatment (cancer)",
+                    arc="Risk/100 with treatment (cancer)",
+                    baseh="Risk/100 without treatment (healthy)",
+                    arh="Risk/100 with treatment (healthy)",
+                    pser="Proportion of graded events that are serious"
+                    ) %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  flextable::bold(part = "header", bold = TRUE )
+
+orft
+
+```
+
+
+Note the reported "treatment" in these tables depends on the selected model - this could refer to all bisphosphonates, or the dose and delivery method of a particular drug, or some categorisation in between.   If the selected model distinguishes between doses, the dose categories are labelled with a number.
+
+## Events that are significant if we just include studies with complete reporting. 
+
+The same procedure above was followed to select an optimal network meta-analysis model for the data including just studies with "complete" reporting.   About half of the events selected above still have significant treatment effects, though perhaps for a slightly different treatment definition.  Many are no longer "significant", and there are some new ones (hypertonia/muscle spasms, dysgeusia, abdominal pain) that become "significant" by some criterion.
+
+```{r}
+
+orft_complete <- ortab_complete %>%
+  as_tibble %>%
+  filter(!is.na(sig) & sig) %>%
+  select(categ, event, actlab, direct, NMA, brc, rdc, brh, rdh, pser) %>%
+  as_grouped_data(groups="categ") %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Treatment",
+                    direct="Direct OR",
+                    NMA="NMA OR",
+                    brc="Baseline risk (cancer)",
+                    rdc="Risk difference (cancer)",
+                    brh="Baseline risk (healthy)",
+                    rdh="Risk difference (healthy)",
+                    pser="Proportion of events that are serious"
+                    ) %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  width(width = 1) %>%
+  flextable::bold(part = "header", bold = TRUE )
+orft_complete
+
+```
+
+## Change in results when excluding incomplete reporting
+
+The graph below shows all the events for which
+
+* a significant odds ratio was highlighted in the main analysis.
+
+* no significant odds ratio was detected when studies with incomplete reporting were excluded
+
+The treatment categorisations are shown under the best fitting model in the main analysis.   Comparing the red and blue lines shows how the results change when studies with incomplete reporting are excluded. 
+
+
+```{r}
+
+oror <- ors %>% filter(measure=="or")
+orcor <- ors_complete %>% filter(measure=="or")
+evsig0 <- oror %>% filter(sig) %>% pull(event) %>% as.character %>% unique
+
+## events changed from sig to non sig
+evchange <- evsig0[!evsig0 %in% orcor$event[orcor$sig]]
+
+oror2 <- oror %>% filter(event %in% evchange) %>% mutate(reporting="all")
+orcor2 <- orcor %>% filter(event %in% evchange) %>% mutate(reporting="complete")
+orchange <- rbind(oror2, orcor2)
+orchange$y <- paste(orchange$y, orchange$model, sep="|")
+
+ggplot(orchange, aes(x=y, y=est, col=reporting)) +
+  coord_flip(ylim=c(0,20)) + 
+  geom_hline(aes(yintercept=1), col="gray") + 
+  geom_point(position=position_dodge(0.3)) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), position=position_dodge(0.3)) +
+  labs(col="Reporting")
+
+
+```
+
+
+
+```{r,eval=FALSE,warning=FALSE}
+
+plot_ors <- function(dat){
+    p <- ggplot(dat, aes(y=est, x=y, col=model)) +
+      coord_flip(ylim=c(0.08, 20)) +
+      ylab("Odds ratio") +
+      xlab("") + 
+      geom_point(position=position_dodge(-0.4)) + 
+      geom_errorbar(aes(ymin=lower, ymax=upper),
+                    position=position_dodge(-0.4),
+                    width=0) +
+      geom_hline(aes(yintercept=1), col="gray") + 
+      geom_text(aes(y=0, label=datstr), col="black", hjust="left") + 
+      scale_y_continuous(trans="log", 
+                         breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10)) +
+      facet_grid(categ ~ . , space="free", scales="free")
+    ggplotly(p)
+}
+                                        #+
+#  theme(text = element_text(size=50))
+
+orplot <- ors %>%
+  filter(measure=="or") %>% 
+  arrange(desc(y)) 
+orplot$datstr[duplicated(paste(orplot$categ,orplot$event))] <- ""
+
+dat <- orplot %>% filter(categ=="OTHERS")
+plot_ors(dat)
+
+dat <- orplot %>% filter(categ=="GASTROINTESTINAL")
+plot_ors(dat)
+
+dat <- orplot %>% filter(!(categ %in% c("OTHERS","GASTROINTESTINAL")))
+plot_ors(dat)
+
+```
+
+
+```{r,eval=FALSE}
+
+orplot <- ors_compare_reporting %>%
+  arrange(desc(y)) 
+orplot$datstr[duplicated(paste(orplot$categ,orplot$event))] <- ""
+orplot$y <- 
+
+plot_reporting <- function(dat){
+    p <- ggplot(dat, aes(y=est, x=y, col=reporting)) +
+      coord_flip(ylim=c(0.08, 20)) +
+      ylab("Odds ratio") +
+      xlab("") + 
+      geom_point(position=position_dodge(-0.4)) + 
+      geom_errorbar(aes(ymin=lower, ymax=upper),
+                    position=position_dodge(-0.4),
+                    width=0) +
+      geom_hline(aes(yintercept=1), col="gray") + 
+      geom_text(aes(y=0, label=datstr), col="black", hjust="left") + 
+      scale_y_continuous(trans="log", 
+                         breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10)) +
+      facet_grid(categ ~ . , space="free", scales="free")
+    ggplotly(p)
+}
+
+dat <- orplot %>% filter(categ=="OTHERS")
+plot_reporting(dat)
+
+```
+
+# Table 2: Summary of results for every event
+
+Table 2 gives odds ratios from direct and selected network meta-analysis models for all events, sorted by clinical category, including non-significant results.  Effects significant by either criterion, as listed in Table 1, are shown here in red.
+
+More detailed results, for all 103 events, including network diagrams, raw data and "forest plots" of meta-analysis results, are given in [Appendix 2](appendix2_index.html).
+
+```{r, size='footnotesize'}
+
+rowgrps <- as.list(table(ortab$categ))
+orft <- ortab %>%
+  as_tibble %>%
+  select(categ, event, actlab, direct, NMA, sig, brc, rdc, brh, rdh) %>%
+  as_grouped_data(groups="categ")
+sigs <- (!is.na(orft$sig) & orft$sig)
+orft$sig <- NULL
+
+orft <- orft %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Treatment",
+                    direct="Direct OR",
+                    NMA="NMA OR",
+                    brc="Baseline risk (cancer)",
+                    rdc="Risk difference (cancer)",
+                    brh="Baseline risk (healthy)",
+                    rdh="Risk difference (healthy)"
+                    )  %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  flextable::color(i = sigs, color="red") %>%
+  flextable::bold(i = sigs, bold=TRUE) %>%
+  width(width = 1) %>%
+  flextable::bold(part = "header", bold = TRUE )
+orft
+
+```
+
+# Table 2: Summary of results for every event using only studies with complete reporting 
+
+```{r}
+rowgrps <- as.list(table(ortab_complete$categ))
+orft <- ortab_complete %>%
+  as_tibble %>%
+  select(categ, event, actlab, direct, NMA, sig, brc, rdc, brh, rdh) %>%
+  as_grouped_data(groups="categ")
+sigs <- (!is.na(orft$sig) & orft$sig)
+orft$sig <- NULL
+
+orft <- orft %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Treatment",
+                    direct="Direct OR",
+                    NMA="NMA OR",
+                    brc="Baseline risk (cancer)",
+                    rdc="Risk difference (cancer)",
+                    brh="Baseline risk (healthy)",
+                    rdh="Risk difference (healthy)"
+                    )  %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  flextable::color(i = sigs, color="red") %>%
+  flextable::bold(i = sigs, bold=TRUE) %>%
+  width(width = 1) %>%
+  flextable::bold(part = "header", bold = TRUE )
+orft
+```
+

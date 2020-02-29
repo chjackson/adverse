@@ -1,0 +1,268 @@
+---
+title: "Bisphosphonates adverse events meta-analysis: comparing healthy and cancer patients"
+author: ""
+date: "`r Sys.Date()`"
+output:
+ html_document:
+  code_folding: hide
+vignette: >
+ %\VignetteIndexEntry{Vignette Title}
+ %\VignetteEngine{knitr::rmarkdown}
+ \usepackage[utf8]{inputenc}
+---
+
+# Bisphosphonate effects on events compared between cancer and healthy patients. 
+
+Just two studies of bisphosphonates for preventing osteoperosis in "healthy" women without cancer: FIT and Horizon.
+
+* HORIZON: two papers reported on the same population, one reporting acute events following the start of treatment, and one with longer follow-up.   It's unclear whether some of the same events are repeated between the two reports. 
+
+* FIT: two papers, one reporting the full trial population and the other reporting a subgroup.  The only events reported were abdominal pain, oesophagitis, dyspepsia, gastrointestinal (unspecified) and nausea.
+
+
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+
+clean_aetype <- function(aetype){
+    aetype <- stringr::str_to_sentence(aetype)
+    aetype[aetype=="Ggt increased"] <-"GGT increased"
+    aetype[aetype=="Cpk increased"] <-"CPK increased"
+    aetype[aetype=="Inr increased"] <-"INR increased"
+    aetype[aetype=="Withdrawals because of aes"] <-"Withdrawals because of AEs"
+    aetype
+}
+
+library(flextable)
+library(meta)
+library(plotly)
+library(binom) 
+library(dplyr) 
+load_all("..")
+source("theme.r")
+load("ors.rda")
+
+hae <- unique(bpaeprevma$aetype) 
+bpaeprevma$patient <- "Healthy"
+bpcma <-
+  bpaeriskdiff %>%
+  filter(trtcon %in% c("100","101","103")) %>%
+  filter(aetype %in% hae) %>%
+  rename(ract=count, nact=N) %>% 
+  mutate(patient = "Cancer") %>% 
+  select(names(bpaeprevma)) %>% 
+  rbind(bpaeprevma) %>%
+  arrange(patient, study, aetype) %>%
+  mutate(p0 = (rcon+0.5)/(ncon+1),
+         p1 = (ract+0.5)/(nact+1),
+         or = p1/(1-p1) / (p0/(1-p0)),
+         logor = log(or), 
+         selogor = sqrt(1/(rcon+0.5) + 1/(ncon-rcon+0.5) +
+                        1/(ract+0.5) + 1/(nact-ract+0.5)),
+         orl = exp(log(or) - qnorm(0.975)*selogor),
+         oru = exp(log(or) + qnorm(0.975)*selogor)) %>%
+  mutate(`Events` = sprintf("\nTreatment %s/%s\nControl %s/%s",
+                          ract, nact, rcon, ncon))
+
+```
+
+The table below compares the odds ratios from the network meta-analysis of bisphosphonates in women with cancer with the equivalent odds ratios from a simple meta-analysis of HORIZON and FIT, for the events that are significant in the cancer analysis and also reported in HORIZON and FIT. 
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      fig.width=15,
+                      fig.height=10)
+```
+
+
+```{r,warning=FALSE,message=FALSE}
+
+eventsh <- bpaeprevma %>% filter(rcon>0|ract>0) %>% select(aetype) %>% unlist %>% as.vector %>% unique
+mares <- data.frame(event=eventsh)
+mares$or <- mares$orl <- mares$oru <- NA
+mares$rd <- mares$rdl <- mares$rdu <- NA
+
+for (i in seq(along=eventsh)){ 
+    bpma <- bpaeprevma %>% filter(aetype==eventsh[i])
+    if (nrow(bpma) > 0){
+        mres <- metabin(ract, nact, rcon, ncon, studlab=study, data=bpma, sm="OR")
+        mares[i,c("or","orl","oru")] <- exp(unlist(mres[c("TE.fixed","lower.fixed","upper.fixed")]))
+        mresrd <- metabin(ract, nact, rcon, ncon, studlab=study, data=bpma, sm="RD")
+        mares[i,c("rd","rdl","rdu")] <- unlist(mresrd[c("TE.fixed","lower.fixed","upper.fixed")])
+    }
+}
+
+mares <- mares %>%
+  mutate(actlab = "Bisphosphonate",
+         patient = "Healthy",
+         event_trt = sprintf("%s: Bisphosphonate", event),
+         sig = (or>1.5 & orl>1) | (rd>0.02 & rdl>0)
+         )
+
+
+```
+
+
+
+
+```{r}
+
+sigevents <- ortab %>% filter(sig) %>% pull(event) %>% unique
+sigevent_trts <- ortab %>% filter(sig) %>% mutate(event_trt = paste(event, actlab, sep=": ")) %>% pull(event_trt) %>% unique
+
+orsh <- ors %>%
+  filter(measure=="or" & model=="NMA") %>%
+  mutate(event_trt = paste(event, actlab, sep=": ")) %>%
+  filter(event_trt %in% sigevent_trts) %>% 
+  select(event, actlab, est, lower, upper) %>%
+  mutate(patient="Cancer") %>%
+  rename(or=est, orl=lower, oru=upper) %>%
+  mutate(event_trt = sprintf("%s: %s",event, actlab))
+
+maress <- mares %>% filter(event %in% sigevents)
+orsh <- orsh %>% filter(event %in% pull(maress, event))
+maress <- maress %>% filter(event %in% pull(orsh, event))
+orsh <- orsh %>% full_join(maress)
+
+## Why no ONJ, cancer? 
+## Cos that's only sig under direct
+## Just remove it then. 
+
+ggplot(orsh, aes(y=or, x=event, col=patient, lty=actlab)) +
+  coord_flip(ylim=c(0.7,30)) +
+  geom_hline(yintercept=1, col="gray") + 
+  geom_point(position=position_dodge(0.2), size=4) +
+  geom_errorbar(aes(ymin = orl, ymax=oru), position=position_dodge(0.2), size=2) +
+  scale_y_continuous(trans="log", breaks=c(0.7, 1, 1.5, 2, 5, 10, 20, 30)) +
+  ylab("Odds ratio") +
+  xlab("") +
+  labs(col="Patients", lty="Bisphosphonate treatment") +
+  paper_theme +
+  theme(plot.margin = margin(t = 0, r = 100, b = 0, l = 0, unit = "pt"),
+        legend.key.width = unit(3, "cm"))
+
+marestab <- maress %>%
+  mutate(orhealthy = sprintf("%s (%s, %s)", round(or,2), round(orl,2), round(oru,2)))
+orsh <- ortab %>% filter(sig) %>% select(categ, event, actlab, NMA) %>%
+  left_join(marestab, by="event") %>% filter(!is.na(orhealthy)) %>%
+  rename(actlab="actlab.x", treatmenth="actlab.y") %>% 
+  as_tibble %>%
+  select(categ, event, actlab, NMA, treatmenth, orhealthy) %>%
+  as_grouped_data(groups="categ") %>%
+  flextable %>% 
+  set_header_labels(categ="", event="",
+                    actlab="Treatment (cancer NMA)",
+                    NMA="OR (Cancer, NMA)",
+                    treatmenth="Treatment (healthy MA)",
+                    orhealthy="OR (healthy MA)"
+                    ) %>% 
+  flextable::bold(j = 1, i = ~ !is.na(categ), bold = TRUE, part = "body" ) %>%
+  flextable::bold(part = "header", bold = TRUE )  %>%
+  width(width = 2)
+orsh
+
+```
+
+Events deemed significant in a fixed effects meta analysis of HORIZON/FIT, using same criterion as in the main analysis: statistically significant OR > 1.5 or risk difference > 0.02. 
+
+```{r}
+
+mares %>% filter(sig) %>%
+  mutate(orstr = sprintf("%s (%s, %s)", round(or,2), round(orl,2), round(oru,2))) %>%
+  mutate(rdstr = sprintf("%s (%s, %s)", round(rd,2), round(rdl,2), round(rdu,2))) %>%
+  select(event, orstr, rdstr) %>%
+  flextable %>% 
+  set_header_labels(event="",
+                    orstr="Odds ratio",
+                    rdstr="Risk difference") %>% 
+  width(width = 2)
+
+```
+
+The study-specific odds ratios underlying these results are shown below.
+
+For each event, the odds ratios from HORIZON and FIT are not surprising given the variability between studies.
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      fig.width=15,
+                      fig.height=40)
+```
+
+
+
+```{r}
+
+p <- bpcma %>%
+  filter(aetype %in% unique(ortab$event[ortab$sig])) %>% 
+ggplot(aes(y=or, x=study, col=patient, label=Events)) +
+                                        #  coord_flip(ylim=c(0.1, 15)) +
+  coord_flip(ylim=c(0.1, 20)) +
+  geom_hline(yintercept = 1, col="gray") + 
+  geom_point() +
+  geom_errorbar(aes(ymin = orl, ymax = oru), width=0) +
+  facet_wrap(~ aetype, ncol=3) + 
+  scale_y_continuous(trans="log", 
+                     breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10, 20)) +
+  ylab("Odds ratio (bisphosphonates / control)") +
+  xlab("") +
+  scale_colour_manual(values=c("black","red")) +
+  paper_theme
+
+#ggplotly(p, tooltip=c("label"), height=5000)
+p
+
+```
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      fig.width=15,
+                      fig.height=12)
+```
+
+```{r}
+
+bpplot <- bpcma %>%
+  filter(aetype %in% unique(ortab$event[ortab$sig])) %>%
+  mutate(aetype = clean_aetype(aetype))
+
+bpplot$aetype[bpplot$aetype=="Influenza-like symptoms"] <- "Influenza-like"
+
+evsig <- unique(bpplot$aetype)
+
+bsize <- 20
+supp_theme <-
+  theme(axis.text = element_text(size=bsize),
+        strip.text = element_text(size=bsize),
+        text = element_text(size=bsize),
+        legend.text = element_text(size=bsize),
+        axis.title = element_text(size=bsize, margin=margin(t=0.2, b=0.2)),
+        axis.title.x = element_text(size=bsize,
+                                    margin=margin(t=10, b=10)))
+
+plotfn <- function(ev){ 
+    ggplot(bpplot[bpplot$aetype %in% ev,],
+           aes(y=or, x=study, col=patient, label=Events)) +
+      coord_flip(ylim=c(0.1, 20)) +
+      geom_hline(yintercept = 1, col="gray",size=2) + 
+      geom_point(size=2) +
+      geom_errorbar(aes(ymin = orl, ymax = oru), width=0) +
+      facet_grid(cols=vars(aetype)) + 
+      scale_y_continuous(trans="log", 
+                         breaks=c(0.1, 0.5, 1, 5)) +
+      ylab("Odds ratio (bisphosphonates / control)") +
+      xlab("") +
+      scale_colour_manual(values=c("black","red")) +
+      supp_theme
+}
+
+plotfn(evsig[1:3])
+plotfn(evsig[4:6])
+plotfn(evsig[7:9])
+plotfn(evsig[10:13])
+
+```
