@@ -1,0 +1,213 @@
+---
+title: "Bisphosphonates adverse events network meta-analysis: detailed results"
+author: ""
+date: "`r Sys.Date()`"
+output:
+ html_document:
+  code_folding: hide
+  ---
+
+[Abdominal pain](bisph_app2events/app2_event1_ABDOMINAL_PAIN.html)
+
+[Alanine aminotransferase](bisph_app2events/app2_event2_ALANINE_AMINOTRANSFERASE.html)
+
+[Alkaline phosphatase](bisph_app2events/app2_event3_ALKALINE_PHOSPHATASE.html)
+
+[Allergic reactions](bisph_app2events/app2_event4_ALLERGIC_REACTIONS.html)
+
+[Alopecia](bisph_app2events/app2_event5_ALOPECIA.html)
+
+[Anaemia](bisph_app2events/app2_event6_ANAEMIA.html)
+
+[Arthralgia](bisph_app2events/app2_event7_ARTHRALGIA.html)
+
+[Arthropathy/arthritis](bisph_app2events/app2_event8_arthropathy_arthritis.html)
+
+[Aspartate aminotransferase](bisph_app2events/app2_event9_ASPARTATE_AMINOTRANSFERASE.html)
+
+[Asthenia](bisph_app2events/app2_event10_ASTHENIA.html)
+
+[Back pain](bisph_app2events/app2_event11_BACK_PAIN.html)
+
+[Bilirubin](bisph_app2events/app2_event12_BILIRUBIN.html)
+
+[Cardiac: congestive heart failure](bisph_app2events/app2_event13_CARDIAC__CONGESTIVE_HEART_FAILURE.html)
+
+[Cardiac events](bisph_app2events/app2_event14_CARDIAC_EVENTS.html)
+
+[Cataract](bisph_app2events/app2_event15_CATARACT.html)
+
+[Cellulitis](bisph_app2events/app2_event16_CELLULITIS.html)
+
+[Chest pain](bisph_app2events/app2_event17_CHEST_PAIN.html)
+
+[Chills](bisph_app2events/app2_event18_CHILLS.html)
+
+[Colitis](bisph_app2events/app2_event19_COLITIS.html)
+
+[Constipation](bisph_app2events/app2_event20_constipation.html)
+
+[Cough](bisph_app2events/app2_event21_COUGH.html)
+
+[CPK increased](bisph_app2events/app2_event22_CPK_increased.html)
+
+[Decreased appetite](bisph_app2events/app2_event23_DECREASED_APPETITE.html)
+
+[Dehydration](bisph_app2events/app2_event24_DEHYDRATION.html)
+
+[Depression](bisph_app2events/app2_event25_DEPRESSION.html)
+
+[Diarrhoea](bisph_app2events/app2_event26_DIARRHOEA.html)
+
+[Dizziness](bisph_app2events/app2_event27_DIZZINESS.html)
+
+[Dry mouth](bisph_app2events/app2_event28_dry_mouth.html)
+
+[Dysgeusia](bisph_app2events/app2_event29_DYSGEUSIA.html)
+
+[Dyspepsia](bisph_app2events/app2_event30_DYSPEPSIA.html)
+
+[Dysphagia](bisph_app2events/app2_event31_dysphagia.html)
+
+[Dyspnoea](bisph_app2events/app2_event32_DYSPNOEA.html)
+
+[Elevated creatinine](bisph_app2events/app2_event33_Elevated_creatinine.html)
+
+[Endometrial hyperplasia](bisph_app2events/app2_event34_endometrial_hyperplasia.html)
+
+[Fatigue](bisph_app2events/app2_event35_FATIGUE.html)
+
+[Febrile neutropenia](bisph_app2events/app2_event36_FEBRILE_NEUTROPENIA.html)
+
+[Fever](bisph_app2events/app2_event37_FEVER.html)
+
+[GGT increased](bisph_app2events/app2_event38_GGT_increased.html)
+
+[Hand-foot syndrome](bisph_app2events/app2_event39_HAND-FOOT_SYNDROME.html)
+
+[Headache](bisph_app2events/app2_event40_HEADACHE.html)
+
+[Hepatotoxicity](bisph_app2events/app2_event41_HEPATOTOXICITY.html)
+
+[Hot flushes](bisph_app2events/app2_event42_HOT_FLUSHES.html)
+
+[Hyperglycaemia](bisph_app2events/app2_event43_HYPERGLYCAEMIA.html)
+
+[Hypertension](bisph_app2events/app2_event44_HYPERTENSION.html)
+
+[Hypertonia/muscle spasms](bisph_app2events/app2_event45_hypertonia_muscle_spasms.html)
+
+[Hypoalbuminemia](bisph_app2events/app2_event46_hypoalbuminemia.html)
+
+[Hypocalcemia](bisph_app2events/app2_event47_HYPOCALCEMIA.html)
+
+[Hypokalaemia](bisph_app2events/app2_event48_HYPOKALAEMIA.html)
+
+[Hyponatremia](bisph_app2events/app2_event49_hyponatremia.html)
+
+[Hypophosphatemia](bisph_app2events/app2_event50_Hypophosphatemia.html)
+
+[Increased bone pain](bisph_app2events/app2_event51_increased_bone_pain.html)
+
+[Infection](bisph_app2events/app2_event52_INFECTION.html)
+
+[Influenza-like symptoms](bisph_app2events/app2_event53_Influenza-like_symptoms.html)
+
+[INR increased](bisph_app2events/app2_event54_INR_increased.html)
+
+[Insomnia](bisph_app2events/app2_event55_INSOMNIA.html)
+
+[Irregular menstruation](bisph_app2events/app2_event56_IRREGULAR_MENSTRUATION.html)
+
+[Ischaemic cardiovascular disease](bisph_app2events/app2_event57_ISCHAEMIC_CARDIOVASCULAR_DISEASE.html)
+
+[Ischaemic cerebrovascular event](bisph_app2events/app2_event58_ISCHAEMIC_CEREBROVASCULAR_EVENT.html)
+
+[Leucocytopaenia](bisph_app2events/app2_event59_LEUCOCYTOPAENIA.html)
+
+[Lipase increased](bisph_app2events/app2_event60_lipase_increased.html)
+
+[Liver problems](bisph_app2events/app2_event61_LIVER_PROBLEMS.html)
+
+[Loss of appetite](bisph_app2events/app2_event62_LOSS_OF_APPETITE.html)
+
+[Lymphoedema](bisph_app2events/app2_event63_LYMPHOEDEMA.html)
+
+[Lymphopaenia](bisph_app2events/app2_event64_LYMPHOPAENIA.html)
+
+[Menometrorrhagia](bisph_app2events/app2_event65_menometrorrhagia.html)
+
+[Mood distrubances](bisph_app2events/app2_event66_MOOD_DISTRUBANCES.html)
+
+[Motor neuropathy](bisph_app2events/app2_event67_MOTOR_NEUROPATHY.html)
+
+[Mucositis](bisph_app2events/app2_event68_MUCOSITIS.html)
+
+[Musculoskeletal pain/event](bisph_app2events/app2_event69_MUSCULOSKELETAL_PAIN_EVENT.html)
+
+[Myalgia](bisph_app2events/app2_event70_MYALGIA.html)
+
+[Nasopharyngitis](bisph_app2events/app2_event71_Nasopharyngitis.html)
+
+[Nausea](bisph_app2events/app2_event72_NAUSEA.html)
+
+[Neuralgia](bisph_app2events/app2_event73_neuralgia.html)
+
+[Neurosensory problems](bisph_app2events/app2_event74_NEUROSENSORY_PROBLEMS.html)
+
+[Neutropenia](bisph_app2events/app2_event75_NEUTROPENIA.html)
+
+[Neutrophil count decreased](bisph_app2events/app2_event76_neutrophil_count_decreased.html)
+
+[Oedema](bisph_app2events/app2_event77_OEDEMA.html)
+
+[Oesophagitis](bisph_app2events/app2_event78_oesophagitis.html)
+
+[Oral mucositis](bisph_app2events/app2_event79_ORAL_MUCOSITIS.html)
+
+[Osteonecrosis of the jaw](bisph_app2events/app2_event80_OsteoNecrosis_of_the_Jaw.html)
+
+[Other eye disorders](bisph_app2events/app2_event81_OTHER_EYE_DISORDERS.html)
+
+[Pain in extremity](bisph_app2events/app2_event82_pain_in_extremity.html)
+
+[Pancreatitis](bisph_app2events/app2_event83_PANCREATITIS.html)
+
+[Paraesthesia](bisph_app2events/app2_event84_PARAESTHESIA.html)
+
+[Periodontal disease](bisph_app2events/app2_event85_periodontal_disease.html)
+
+[Phlebitis](bisph_app2events/app2_event86_phlebitis.html)
+
+[Pneumonia](bisph_app2events/app2_event87_PNEUMONIA.html)
+
+[Pulmonary embolus](bisph_app2events/app2_event88_PULMONARY_EMBOLUS.html)
+
+[Renal impairment](bisph_app2events/app2_event89_renal_impairment.html)
+
+[Skin disorder](bisph_app2events/app2_event90_SKIN_DISORDER.html)
+
+[Stiffness](bisph_app2events/app2_event91_stiffness.html)
+
+[Stomatitis](bisph_app2events/app2_event92_STOMATITIS.html)
+
+[Syncope](bisph_app2events/app2_event93_SYNCOPE.html)
+
+[Thromboembolic events](bisph_app2events/app2_event94_THROMBOEMBOLIC_EVENTS.html)
+
+[Thrombopaenia](bisph_app2events/app2_event95_THROMBOPAENIA.html)
+
+[Thyroid cancer](bisph_app2events/app2_event96_THYROID_CANCER.html)
+
+[Traumatic fractures](bisph_app2events/app2_event97_TRAUMATIC_FRACTURES.html)
+
+[Uterine dilation/curettage](bisph_app2events/app2_event98_uterine_dilation_curettage.html)
+
+[Uterine polyp](bisph_app2events/app2_event99_uterine_polyp.html)
+
+[Vaginal bleeding](bisph_app2events/app2_event100_VAGINAL_BLEEDING.html)
+
+[Vaginal discharge](bisph_app2events/app2_event101_VAGINAL_DISCHARGE.html)
+
+[Vomiting](bisph_app2events/app2_event102_VOMITING.html)
+
