@@ -72,7 +72,7 @@ The table below compares the odds ratios from the network meta-analysis of bisph
 knitr::opts_chunk$set(echo=FALSE,
                       message=FALSE,
                       fig.width=15,
-                      fig.height=10)
+                      fig.height=15)
 ```
 
 
@@ -130,10 +130,10 @@ orsh <- orsh %>% full_join(maress)
 ## Just remove it then. 
 
 ggplot(orsh, aes(y=or, x=event, col=patient, lty=actlab)) +
-  coord_flip(ylim=c(0.7,30)) +
+  coord_flip(ylim=c(0.7, 30)) +
   geom_hline(yintercept=1, col="gray") + 
-  geom_point(position=position_dodge(0.2), size=4) +
-  geom_errorbar(aes(ymin = orl, ymax=oru), position=position_dodge(0.2), size=2) +
+  geom_point(position=position_dodge(0.4), size=4) +
+  geom_errorbar(aes(ymin = orl, ymax=oru), position=position_dodge(0.4), size=2) +
   scale_y_continuous(trans="log", breaks=c(0.7, 1, 1.5, 2, 5, 10, 20, 30)) +
   ylab("Odds ratio") +
   xlab("") +

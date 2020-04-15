@@ -222,8 +222,6 @@ p2dat <- directplot %>%
   filter(!is.na(est))
 levels(p2dat$aetype) <- sprintf("%s (%s)", levels(p2dat$aetype), round(cres$est[order(cres$est)],2))
 
-sigcol <- rep("black", length(levels(p1dat$aetype)))
-sigcol[match(as.character(p1dat$aetype), levels(p1dat$aetype))] <- ifelse(p1dat$sig | p2dat$sig, "red","black")
 
 p1 <- p1dat %>%
   droplevels %>% 
@@ -235,9 +233,9 @@ p1 <- p1dat %>%
   geom_point(position=position_dodge(-0.4)) +
   geom_errorbar(aes(ymin=lower, ymax=upper),
                 position=position_dodge(-0.4)) +
-  scale_colour_manual(values=c("black","red")) +
+  scale_colour_manual(values=c("gray70","black")) +
   theme(legend.position = "none",
-        axis.text.y = element_text(colour=sigcol),
+        axis.text.y = element_text(colour="black"),
         plot.title = element_text(hjust = 0)) +
   ggtitle("Risk difference (vs control)") + 
   paper_theme + 
@@ -254,7 +252,7 @@ p2 <- p2dat %>%
   geom_point(position=position_dodge(-0.4)) +
   geom_errorbar(aes(ymin=lower, ymax=upper),
                 position=position_dodge(-0.4)) +
-  scale_colour_manual(values=c("black","red")) +
+  scale_colour_manual(values=c("gray70","black")) +
   theme(legend.position = "none",
         axis.text.y = element_blank(),
         plot.title = element_text(hjust = 0)) + 
@@ -266,7 +264,7 @@ library(gridExtra)
 grid.arrange(p1, p2, ncol=2, widths=c(3,2))
 
 #png("direct.png")
-#grid.arrange(p0, p1, p2, ncol=3, widths=c(2,3,3))
+#grid.arrange(p1, p2, ncol=2, widths=c(3,2))
 #dev.off() 
 
 ```

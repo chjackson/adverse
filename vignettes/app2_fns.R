@@ -24,7 +24,7 @@ clean_aetype <- function(aetype){
 plotdata <- function(ev){
     p <- bpaearmtype %>%
       filter(aetype %in% ev) %>%
-      mutate(main1 = "Raw data") %>% 
+      mutate(main1 = "Raw data: area of blobs proportional to number of patients") %>% 
       ggplot(aes(x=prop, y=study,
                  size=count, col=drugname, label=description, label2=N)) +
       geom_point() +
@@ -105,6 +105,7 @@ plotnmares <- function(ev){
                     position=position_jitter(-0.4),
                     width = 0) +
       paper_theme + 
+      theme(legend.key.width=unit(4,"cm")) + 
       facet_grid(rows=vars(actlab), scales="free_y") +
       scale_y_continuous(trans="log", 
                          breaks=c(0.1, 0.2, 0.5, 1, 2, 5, 10)) +
@@ -255,10 +256,12 @@ prop_edges_morethanonestudy <- function(g){
     round(mean(nstudies > 1), 2)
 }
 
-getnet_app <- function(event){
+getnet_app <- function(event, short=FALSE){
     dat <- nmadata %>% filter(aetype == event)
     stu <- studies %>% filter(aetype == event)
     trt <- treatments %>% filter(id %in% dat$treatment)
+    if (short)
+        trt$description <- bpcoding$descriptionshort[match(trt$description, bpcoding$description)]
     net <- mtc.network(dat, treatments=trt, studies=stu)
     net
 }

@@ -5,6 +5,7 @@ events <- names(models_all)
 nev <- length(events)
 library(rmarkdown)
 library(tidyverse)
+library(ggrepel)
 
 ## Generate plots 
 
@@ -17,21 +18,26 @@ names(plotarr) <- events[1:nev]
 for (i in seq(1:nev)){
     event <- events[i]
     plotarr[[i]]$data <- plotdata(event)
-    net <- getnet_app(event)
+    net <- getnet_app(event, short=TRUE)
     cols <- drugcols[match(
         treatments$drugname[match(igraph::V(mtc.network.graph(fix.network(net)))$name,
                                   treatments$id)],
         names(drugcols))]
-    ntsize <- 4
+    ntsize <- 3
     netp_full <- ggplot.mtc.network(net, nstudies=TRUE, use.description=TRUE,
+                                    mode = "fruchtermanreingold",
+#                                    mode = "kamadakawai",
+                                    label.alpha = 0.7,
+                                    nudge_x = -0.04, 
+                                    nudge_y = 0.03, 
                                     color=cols, layout.exp=0.5,
                                     size=2, label.size=ntsize,
-                                    edge.label.size=ntsize)
+                                    edge.label.size=ntsize) 
 
     opt <- modcomp[modcomp$event==event,"opt"]
     if (opt != "none"){
-        net_conn <- getnet(event, opt)$net
-        netp_conn <- ggplot.mtc.network(net_conn, nstudies=TRUE, use.description=FALSE,
+        net_conn <- getnet(event, opt, short=TRUE)$net
+        netp_conn <- ggplot.mtc.network(net_conn, nstudies=TRUE, use.description=TRUE,
                                         layout.exp=0.5,
                                         size=2, label.size=ntsize,
                                         edge.label.size=ntsize)
@@ -75,14 +81,18 @@ render(ifname)
 ##         file=fnamer[i], append=TRUE)
 ## }
 
+## drugkey <- "Treatment abbreviations:  Obs=observation, Pla=placebo, Zol=zoledronic acid, Iba=ibandronate, Pam=pamidronate, Ris=risedronate, Den=denosumab, Clo=clodronate, Den=denosumab"
+
 for (i in 1:nev){
 
 cat(scan("bisph_app2_event_header.Rmd", what="char", sep="\n"),
     file=fnamer[i], sep="\n")
 cat(sprintf("## %s\n\n", clean_aetype(events[i])),
     file=fnamer[i], append=TRUE)
-cat(sprintf("```{r, warning=FALSE}\narrfn(\"%s\")\n```\n\n", events[i]), file=fnamer[i], append=TRUE)
-cat(sprintf("### Network geometry summary\n\n%s", graph_geometry(events[i])), file=fnamer[i], append=TRUE)
+    cat(sprintf("```{r, warning=FALSE}\narrfn(\"%s\")\n```\n\n", events[i]),
+        file=fnamer[i], append=TRUE)
+    cat(sprintf("\n\n### Network geometry summary\n\n%s", graph_geometry(events[i])),
+        file=fnamer[i], append=TRUE)
 cat("
 ## Meta analysis results
 Estimates (and 95% credible intervals) of the odds ratio of each bisphosphonate treatment, versus observation only, under

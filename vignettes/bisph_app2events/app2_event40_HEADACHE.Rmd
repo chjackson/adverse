@@ -31,6 +31,8 @@ load(file="ors.rda")
 arrfn("HEADACHE")
 ```
 
+
+
 ### Network geometry summary
 
 Proportion of potential comparisons with direct data: 0.15

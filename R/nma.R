@@ -4,7 +4,7 @@ library(meta)
 ## Also return the event, study and treatment datasets corresponding to a NMA on that network.
 ## That network should be connected 
 
-getnet <- function(event, model, complete=FALSE){
+getnet <- function(event, model, complete=FALSE, short=FALSE){
     filter <- dplyr::filter
     dat <- nmadata %>%
       mutate(treatment = nmadata[,model]) %>% 
@@ -53,6 +53,8 @@ getnet <- function(event, model, complete=FALSE){
       filter(id %in% dat$treatment) %>% 
       as.data.frame 
     if (is.null(graph)) { 
+        if (short)
+            trt$description <- bpcoding$descriptionshort[match(trt$description, bpcoding$description)]
         net <- mtc.network(as.data.frame(dat), treatments=trt, studies=stu)
         graph <- mtc.network.graph(fix.network(net), TRUE)
     } else net <- NULL

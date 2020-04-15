@@ -159,7 +159,8 @@ bpcoding <- bpae %>%
     extract(treatment,
             c("drug", "dose", "delivery"),
             "^([0-9])([0-9])([0-9])$", remove=FALSE) %>%
-    mutate(drugname0 = recode(drug,
+    mutate(drugnameshort = drug,
+           drugname0 = recode(drug,
                          `1` = "Control",
                          `7` = "Denosumab",
                          `2` = "Zoledronic_acid",
@@ -167,8 +168,18 @@ bpcoding <- bpae %>%
                          `4` = "Ibandronate",
                          `5` = "Risedronate",
                          `6` = "Clodronate"),
+           drugnameshort = recode(drugnameshort,
+                         `1` = "Con",
+                         `7` = "Den",
+                         `2` = "Zol",
+                         `3` = "Pam",
+                         `4` = "Iba",
+                         `5` = "Ris",
+                         `6` = "Clo"),
            drugname = ifelse(treatment %in% c("100","101"), "Placebo",
                       ifelse(treatment == "103", "Observation", drugname0)),
+           drugnameshort = ifelse(treatment %in% c("100","101"), "Pla",
+                      ifelse(treatment == "103", "Obs", drugnameshort)),
            delivery = recode(delivery,
                              `0` = "IV",
                              `1` = "Oral",
@@ -181,6 +192,7 @@ bpcoding <- bpae %>%
     mutate(dose = ifelse(notai, paste0(dose, "notai"), dose)) %>% 
     mutate(treatment = ifelse(notai, paste0(treatment, "notai"), treatment)) %>% 
     mutate(description = paste(drugname, dose, delivery, sep="_")) %>%
+    mutate(descriptionshort = paste(drugnameshort, dose, delivery, sep="_")) %>%
     ## don't include delivery method for placebo in "drugdose" and "drugdm" 
     mutate(drugdose = ifelse(drugname0 =="Control", drugname, description))  %>% 
     mutate(drugdm = paste(drugname, delivery, sep="_")) %>%
@@ -189,7 +201,9 @@ bpcoding <- bpae %>%
         drugdm = ifelse(drugdm=="Observation_Observation", "Observation", drugdm),
         drugdm = ifelse(drugdm=="Observation_0notai_Observation", "Observation", drugdm),
         description = ifelse(description=="Observation_0_Observation", "Observation", description),
-        description = ifelse(description=="Observation_0notai_Observation", "Observation_notai", description)
+        description = ifelse(description=="Observation_0notai_Observation", "Observation_notai", description),
+        descriptionshort = ifelse(descriptionshort=="Obs_0_Observation", "Obs", descriptionshort),
+        descriptionshort = ifelse(descriptionshort=="Obs_0notai_Observation", "Obs_notai", descriptionshort)
     ) %>%
     mutate(drugdm0 = ifelse(drugname0=="Control", drugname0, drugdm))  %>%     
     mutate(drugnitro = fct_collapse(drugname,
@@ -210,9 +224,9 @@ bpcoding <- bpae %>%
     select(-addtrt) %>%
     distinct
     
-drugclasses <- c("treatment", "description", "dose", "delivery", 
+drugclasses <- c("treatment", "description", "descriptionshort", "dose", "delivery", 
                  "drugdose","drugdm", "drugname",  "drugnitro",  "drugbp", 
-                 "drugdose0","drugdm0", "drugname0",  "drugnitro0",  "drugbp0")
+                 "drugdose0","drugdm0", "drugname0",  "drugnitro0",  "drugbp0", "drugnameshort")
 
 bpcoding <- bpcoding %>% 
   select(drugclasses)
