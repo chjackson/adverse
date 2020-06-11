@@ -37,7 +37,9 @@ library(flextable)
 library(meta)
 library(plotly)
 library(binom) 
-library(dplyr) 
+library(dplyr)
+filter <- dplyr::filter
+load_all("../../gemtc/gemtc")
 load_all("..")
 source("theme.r")
 load("ors.rda")
@@ -132,8 +134,8 @@ orsh <- orsh %>% full_join(maress)
 ggplot(orsh, aes(y=or, x=event, col=patient, lty=actlab)) +
   coord_flip(ylim=c(0.7, 30)) +
   geom_hline(yintercept=1, col="gray") + 
-  geom_point(position=position_dodge(0.4), size=4) +
-  geom_errorbar(aes(ymin = orl, ymax=oru), position=position_dodge(0.4), size=2) +
+  geom_point(position=position_dodge(0.6), size=4) +
+  geom_errorbar(aes(ymin = orl, ymax=oru), position=position_dodge(0.6), size=2) +
   scale_y_continuous(trans="log", breaks=c(0.7, 1, 1.5, 2, 5, 10, 20, 30)) +
   ylab("Odds ratio") +
   xlab("") +

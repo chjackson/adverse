@@ -222,6 +222,17 @@ p2dat <- directplot %>%
   filter(!is.na(est))
 levels(p2dat$aetype) <- sprintf("%s (%s)", levels(p2dat$aetype), round(cres$est[order(cres$est)],2))
 
+midblue <- "#9999FF"
+
+p1dat <- droplevels(p1dat)
+p2dat <- droplevels(p2dat)
+levelssig1 <- p1dat$sig[match(levels(p1dat$aetype), p1dat$aetype)]
+levelssig2 <- p2dat$sig[match(levels(p1dat$aetype), p2dat$aetype)]
+
+levels(p2dat$aetype)[levelssig2]
+sort(p2dat$aetype[p2dat$sig])
+
+faccols <- ifelse((levelssig1 | levelssig2), "black", midblue)
 
 p1 <- p1dat %>%
   droplevels %>% 
@@ -233,9 +244,9 @@ p1 <- p1dat %>%
   geom_point(position=position_dodge(-0.4)) +
   geom_errorbar(aes(ymin=lower, ymax=upper),
                 position=position_dodge(-0.4)) +
-  scale_colour_manual(values=c("gray70","black")) +
+  scale_colour_manual(values=c(midblue,"black")) +
   theme(legend.position = "none",
-        axis.text.y = element_text(colour="black"),
+        axis.text.y = element_text(colour=faccols),
         plot.title = element_text(hjust = 0)) +
   ggtitle("Risk difference (vs control)") + 
   paper_theme + 
@@ -252,7 +263,7 @@ p2 <- p2dat %>%
   geom_point(position=position_dodge(-0.4)) +
   geom_errorbar(aes(ymin=lower, ymax=upper),
                 position=position_dodge(-0.4)) +
-  scale_colour_manual(values=c("gray70","black")) +
+  scale_colour_manual(values=c(midblue,"black")) +
   theme(legend.position = "none",
         axis.text.y = element_blank(),
         plot.title = element_text(hjust = 0)) + 
@@ -268,3 +279,229 @@ grid.arrange(p1, p2, ncol=2, widths=c(3,2))
 #dev.off() 
 
 ```
+
+
+## Comparison of effects between subgroups
+
+Meta-regression or subgroup analysis?
+
+metareg function in meta package. 
+
+standard fixed effects model estimtes the weighted ave of study-specific effects among included studies 
+     Moderators can be included in the fixed-effects model, yielding a
+     *fixed-effects with moderators model*... 
+     the regression coefficients from the fitted model estimate the
+     weighted relationship (in the least squares sense) between the
+     true effects/outcomes and the moderator variables ...
+ also among the included studies [ can't generalize ] 
+
+Fixed effects meta-regression [ Viechtbauer, W. (2010). Conducting meta-analyses in R with the "metafor" package. Journal of Statistical Software, 36(3), 1-48. ] 
+
+```{r}
+
+mares <- data.frame(aetype=unique(as.character(aecount$aetype)))
+mares[,c("totn","totr","totncon","totrcon",
+         "or","orl","oru", "rd","rdl","rdu",
+         "nmeno", "nbone", "nmenopre", "nmenopost", "nbonenone", "nboneall",
+         "meno.orp","bone.orp","meno.rdp","bone.rdp",
+         "ormeno","ormenol","ormenou", "orbone","orbonel","orboneu", 
+         "rdmeno","rdmenol","rdmenou", "rdbone","rdbonel","rdboneu", 
+         "orbonenone","orbonenonel","orbonenoneu",  "orboneall","orbonealll","orboneallu",
+         "ormenopre","ormenoprel","ormenopreu", "ormenopost","ormenopostl","ormenopostu", 
+         "rdbonenone","rdbonenonel","rdbonenoneu",  "rdboneall","rdbonealll","rdboneallu",
+         "rdmenopre","rdmenoprel","rdmenopreu", "rdmenopost","rdmenopostl","rdmenopostu",
+         "totnmenopre", "totnmenopost", "totrmenopre", "totrmenopost",
+         "totnbonenone", "totnboneall", "totrbonenone", "totrboneall",
+         "totnconmenopre", "totnconmenopost", "totrconmenopre", "totrconmenopost",
+         "totnconbonenone", "totnconboneall", "totrconbonenone", "totrconboneall"
+         )] <- NA
+
+
+for (i in seq(along.with=mares$aetype)){ 
+    bpma <-
+        bpaeriskdiff %>%
+        mutate(aetype = clean_aetype(aetype)) %>% 
+        filter(trtcon %in% c("100","101","103")) %>%
+        filter(aetype==mares$aetype[i]) %>%
+        mutate(meno2 = ifelse(meno=="mixed", NA, as.character(meno)),
+               meno2 = factor(meno2, levels=c("pre","post")),
+               bonemeta2 = ifelse(bonemeta=="mixed", NA, as.character(bonemeta)),
+               bonemeta2 = factor(bonemeta2, levels = c("none", "all")))
+    if (nrow(bpma) > 0){
+        mres <- metabin(count, N, rcon, ncon, studlab=study, data=bpma, sm="OR")
+        mresrd <- metabin(count, N, rcon, ncon, studlab=study, data=bpma, sm="RD")
+
+        mares[i,"nmeno"] <- sum(!is.na(bpma$meno2))
+        mares[i,"nmenopre"] <- sum(bpma$meno2=="pre", na.rm=TRUE)
+        mares[i,"nmenopost"] <- sum(bpma$meno2=="post", na.rm=TRUE)
+        if (mares[i,"nmeno"] > 0){
+            mrtry <- try(mregmeno <- metareg(mres,  ~ meno2))
+            if (!inherits(mrtry, "try-error") && (length(coef(mrtry))>1)){
+                orsmeno <- exp(coef(summary(mregmeno)))[c("meno2post"),c("estimate","ci.lb","ci.ub")]
+                mares$meno.orp[i] <- mregmeno$QMp
+                mares[i,c("ormeno","ormenol","ormenou")] <- orsmeno
+                ormenopre <- unlist(unclass(predict(mrtry, newmods = 0))[c("pred","ci.lb","ci.ub")])
+                ormenopost <- unlist(unclass(predict(mrtry, newmods = 1))[c("pred","ci.lb","ci.ub")])
+                mares[i,c("ormenopre","ormenoprel","ormenopreu")] <- exp(ormenopre)
+                mares[i,c("ormenopost","ormenopostl","ormenopostu")] <- exp(ormenopost)
+            }
+            mrtryd <- try(mregmeno <- metareg(mresrd,  ~ meno2))
+            if (!inherits(mrtryd, "try-error") && (length(coef(mrtryd))>1)){
+                rdsmeno <- coef(summary(mregmeno))[c("meno2post"),c("estimate","ci.lb","ci.ub")]
+                mares$meno.rdp[i] <- mregmeno$QMp
+                mares[i,c("rdmeno","rdmenol","rdmenou")] <- rdsmeno
+                rdmenopre <- unlist(unclass(predict(mrtryd, newmods = 0))[c("pred","ci.lb","ci.ub")])
+                rdmenopost <- unlist(unclass(predict(mrtryd, newmods = 1))[c("pred","ci.lb","ci.ub")])
+                mares[i,c("rdmenopre","rdmenoprel","rdmenopreu")] <- rdmenopre 
+                mares[i,c("rdmenopost","rdmenopostl","rdmenopostu")] <- rdmenopost
+            }
+        }
+
+        mares[i,"nbone"] <- sum(!is.na(bpma$bonemeta2))
+        mares[i,"nboneall"] <- sum(bpma$bonemeta2=="all", na.rm=TRUE)
+        mares[i,"nbonenone"] <- sum(bpma$bonemeta2=="none", na.rm=TRUE)
+        if (mares[i,"nbone"] > 0){
+            mrtry <- try(mregbone <- metareg(mres,  ~ bonemeta2))
+            if (!inherits(mrtry, "try-error") && (length(coef(mrtry))>1)){
+                orsbone <- exp(coef(summary(mregbone)))[c("bonemeta2all"),c("estimate","ci.lb","ci.ub")]
+                mares$bone.orp[i] <- mregbone$QMp
+                mares[i,c("orbone","orbonel","orboneu")] <- orsbone
+                orbonenone <- unlist(unclass(predict(mrtry, newmods = 0))[c("pred","ci.lb","ci.ub")])
+                orboneall <- unlist(unclass(predict(mrtry, newmods = 1))[c("pred","ci.lb","ci.ub")])
+                mares[i,c("orbonenone","orbonenonel","orbonenoneu")] <- exp(orbonenone)
+                mares[i,c("orboneall","orbonealll","orboneallu")] <- exp(orboneall)
+            }
+            mrtryd <- try(mregbone <- metareg(mresrd,  ~ bonemeta2))
+            if (!inherits(mrtryd, "try-error") && (length(coef(mrtryd))>1)){
+                rdsbone <- coef(summary(mregbone))[c("bonemeta2all"),c("estimate","ci.lb","ci.ub")]
+                mares$bone.rdp[i] <- mregbone$QMp
+                mares[i,c("rdbone","rdbonel","rdboneu")] <- rdsbone
+                rdbonenone <- unlist(unclass(predict(mrtryd, newmods = 0))[c("pred","ci.lb","ci.ub")])
+                rdboneall <- unlist(unclass(predict(mrtryd, newmods = 1))[c("pred","ci.lb","ci.ub")])
+                mares[i,c("rdbonenone","rdbonenonel","rdbonenoneu")] <- rdbonenone 
+                mares[i,c("rdboneall","rdbonealll","rdboneallu")] <- rdboneall
+            }
+        }
+
+
+        mares$totn[i] <- sum(bpma$N) 
+        mares$totr[i] <- sum(bpma$count) 
+        mares$totncon[i] <- sum(bpma$ncon) 
+        mares$totrcon[i] <- sum(bpma$rcon)
+
+        mares$totnmenopre[i] <- sum(bpma$N[bpma$meno2=="pre"],na.rm=TRUE)
+        mares$totnmenopost[i] <- sum(bpma$N[bpma$meno2=="post"],na.rm=TRUE)
+        mares$totrmenopre[i] <- sum(bpma$count[bpma$meno2=="pre"],na.rm=TRUE)
+        mares$totrmenopost[i] <- sum(bpma$count[bpma$meno2=="post"],na.rm=TRUE)
+
+        mares$totnbonenone[i] <- sum(bpma$N[bpma$bonemeta2=="none"],na.rm=TRUE)
+        mares$totnboneall[i] <- sum(bpma$N[bpma$bonemeta2=="all"],na.rm=TRUE)
+        mares$totrbonenone[i] <- sum(bpma$count[bpma$bonemeta2=="none"],na.rm=TRUE)
+        mares$totrboneall[i] <- sum(bpma$count[bpma$bonemeta2=="all"],na.rm=TRUE)
+
+        mares$totnconmenopre[i] <- sum(bpma$ncon[bpma$meno2=="pre"],na.rm=TRUE)
+        mares$totnconmenopost[i] <- sum(bpma$ncon[bpma$meno2=="post"],na.rm=TRUE)
+        mares$totrconmenopre[i] <- sum(bpma$rcon[bpma$meno2=="pre"],na.rm=TRUE)
+        mares$totrconmenopost[i] <- sum(bpma$rcon[bpma$meno2=="post"],na.rm=TRUE)
+
+        mares$totnconbonenone[i] <- sum(bpma$ncon[bpma$bonemeta2=="none"],na.rm=TRUE)
+        mares$totnconboneall[i] <- sum(bpma$ncon[bpma$bonemeta2=="all"],na.rm=TRUE)
+        mares$totrconbonenone[i] <- sum(bpma$rcon[bpma$bonemeta2=="none"],na.rm=TRUE)
+        mares$totrconboneall[i] <- sum(bpma$rcon[bpma$bonemeta2=="all"],na.rm=TRUE)
+
+        mares$totr[i] <- sum(bpma$count) 
+        mares$totncon[i] <- sum(bpma$ncon) 
+        mares$totrcon[i] <- sum(bpma$rcon)
+
+        mares[i,c("or","orl","oru")] <- exp(unlist(mres[c("TE.fixed","lower.fixed","upper.fixed")]))
+        mares[i,c("rd","rdl","rdu")] <- unlist(mresrd[c("TE.fixed","lower.fixed","upper.fixed")])
+    } else
+        mares[i,c("totn","totr","totncon","totrcon")] <- 0
+
+}
+
+# Filter to those for which the OR or RD is prac and stat sig for a subgroup 
+# 1.5 for ORs, and 0.02 for RDs 
+
+mares <- mares %>% mutate(
+              statsigbonerd = bone.rdp < 0.05 & !is.na(bone.rdp),
+              statsigboneor = bone.orp < 0.05 & !is.na(bone.orp),
+              statsigmenord = meno.rdp < 0.05 & !is.na(meno.rdp),
+              statsigmenoor = meno.orp < 0.05 & !is.na(meno.orp),
+              sigbonenone = (rdbonenone > 0.02 & !is.na(rdbonenone) & statsigbonerd) | (orbonenone > 1.5 & !is.na(orbonenone) & statsigboneor),
+              sigboneall = (rdboneall > 0.02 & !is.na(rdboneall) & statsigbonerd) | (orboneall > 1.5 & !is.na(orboneall) & statsigboneor),
+              sigmenopre = (rdmenopre > 0.02 & !is.na(rdmenopre) & statsigmenord) | (ormenopre > 1.5 & !is.na(ormenopre) & statsigmenoor),
+              sigmenopost = (rdmenopost > 0.02 & !is.na(rdmenopost) & statsigmenord) | (ormenopost > 1.5 & !is.na(ormenopost) & statsigmenoor),
+              datamenopre =  sprintf("%s/%s vs %s/%s", totrmenopre, totnmenopre, totrconmenopre, totnconmenopre),
+              datamenopost =  sprintf("%s/%s vs %s/%s", totrmenopost, totnmenopost, totrconmenopost, totnconmenopost),
+              databonenone =  sprintf("%s/%s vs %s/%s", totrbonenone, totnbonenone, totrconbonenone, totnconbonenone),
+              databoneall =  sprintf("%s/%s vs %s/%s", totrboneall, totnboneall, totrconboneall, totnconboneall), 
+              orfmenopre = sprintf("%s (%s,%s)", round(ormenopre,2), round(ormenoprel,2), round(ormenopreu,2)),
+              orfmenopost = sprintf("%s (%s,%s)", round(ormenopost,2), round(ormenopostl,2), round(ormenopostu,2)),
+              rdfmenopre = sprintf("%s (%s,%s)", round(rdmenopre,2), round(rdmenoprel,2), round(rdmenopreu,2)),
+              rdfmenopost = sprintf("%s (%s,%s)", round(rdmenopost,2), round(rdmenopostl,2), round(rdmenopostu,2)),
+              orfbonenone = sprintf("%s (%s,%s)", round(orbonenone,2), round(orbonenonel,2), round(orbonenoneu,2)),
+              orfboneall = sprintf("%s (%s,%s)", round(orboneall,2), round(orbonealll,2), round(orboneallu,2)),
+              rdfbonenone = sprintf("%s (%s,%s)", round(rdbonenone,2), round(rdbonenonel,2), round(rdbonenoneu,2)),
+              rdfboneall = sprintf("%s (%s,%s)", round(rdboneall,2), round(rdbonealll,2), round(rdboneallu,2))
+         )
+
+
+```
+
+
+Need a clean presentation for tables
+figure this out with single meno result first
+Data in pre: 2/40 vs 9/41 
+Data in post: 
+OR in pre, OR in post
+RD in pre, RD in post (each estimate and CI)
+
+cardia OR 1.5 in bone none  (but other subgroup has opposite effect) 
+
+
+To investigate whether the adverse effects of bisphosphonates were modified by menopausal status or by the presence of bone metastases, the previous meta-analyses of the studies with direct comparisons of a bisphosphonate with a non-bisphosphonate control were extended to meta-regression analyses [ ref Viechtbauer, W. (2010). Conducting meta-analyses in R with the "metafor" package. Journal of Statistical Software, 36(3), 1-48. ].     The studies were categorised according to whether they included pre-menopausal, post-menopausal women or a mixture, and according to whether the participants had bone metastases (no participants, all participants or a mixture).  The studies with a mixture of patient types were excluded, then a linear regression term for "all metastatic patients" or "all post-menopausal patients", compared to none, was included on the log odds ratio or the risk difference. 
+
+The meta-regression results for all adverse events were filtered to include only those where the regression effect was statistically significant, and the subgroup-specific treatment effect on adverse event risk for the higher-risk subgroup was practically significant (odds ratio >  1.5 or risk difference > 2%).   The remaining results are presented in Table  ??? and ??? 
+
+
+## Meno.
+only sig one is Insomnia.  big OR for post, but it's not stat sig 
+This is based on small counts 
+
+## Bone
+
+Note the thing that is significant is the contrast between the two subgroups. 
+Want the contrast to be stat sig, but also the absolute risk for the higher risk subgroup to be prac sig 
+
+* Cardiac - bone none has bigger O, but RD not sig
+* Dizziness - same
+* Fatigue - bone all has bigger OR and RD 
+* Flu - bone none has bigger RD, but bone all has bigger OR?
+* Hypocalcaemia - same
+* Increased bone pain - bone none has bigger OR and RD
+* Flu-like - bone none has bigger RD, but small counts.
+* Neuralgia -  small counts.
+* Neutropenia - sig RD but not sig OR.
+* Osteo - tiny counts
+
+do we want it prac sig for both OR and RD?  clearly OR doesn't matter if RD is low.
+but does RD matter if OR is low?     e.g. 70%vs60% is less exciting than 20%vs10%
+maybe
+
+```{r}
+
+options(width=150)
+
+mares %>%
+    filter(sigmenopre | sigmenopost) %>%
+    select(aetype, nmenopre, nmenopost, datamenopre, datamenopost, orfmenopre, rdfmenopre, orfmenopost, rdfmenopost, meno.orp, meno.rdp)
+
+mares %>%
+    filter(sigbonenone | sigboneall) %>%
+    mutate(bone.orp = round(bone.orp,2), bone.rdp=round(bone.rdp,2)) %>% 
+    select(aetype, nbonenone, nboneall, databonenone, databoneall, orfbonenone, rdfbonenone, orfboneall, rdfboneall, bone.orp, bone.rdp)
+
+```
+
+

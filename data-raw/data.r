@@ -58,7 +58,15 @@ bpaeraw <- bpaeraw %>%
   mutate(has_control = as.numeric(!is.na(`A1 coding`) | !is.na(`A2 coding`))) %>%
   mutate(reporting = recode(reporting,
                             `1` = "Complete", `2` = "Table of highest", `3` = "Less")) %>%
-  mutate(reporting = factor(reporting, levels = c("Complete","Table of highest","Less","x")))
+  mutate(reporting = factor(reporting, levels = c("Complete","Table of highest","Less","x"))) %>%
+    rename(meno = "Pre/post menopausal",
+           bonemeta = "bone metasteses") %>% 
+    mutate(meno = recode(meno, `1` = "pre", `2` = "post", `3` = "mixed"),
+           bonemeta = recode(bonemeta, `1` = "all", `2` = "none", `3` = "mixed"),
+           meno = factor(meno, levels = c("mixed", "pre", "post")),
+           bonemeta = factor(bonemeta, levels = c("none", "mixed", "all"))
+           )
+
 
 ## Remove character notes in numeric cells
 
@@ -100,7 +108,7 @@ bpaelong <- bpaeraw %>%
          matches("A[[:digit:]]"),
          matches(";A[[:digit:]]")
          ) %>%
-  select(study, studyid, reporting, has_control, vname, x) %>% 
+  select(study, studyid, reporting, meno, bonemeta, has_control, vname, x) %>% 
   extract(vname, "armno1", "^(?:A|N)([[:digit:]]).*", remove=FALSE) %>%
   extract(vname, "armno2", ";A([[:digit:]]).*$", remove=FALSE) %>%
   mutate(armno = ifelse(is.na(armno1), armno2, armno1)) %>%
@@ -127,7 +135,7 @@ use_data(bpaelong, overwrite=TRUE)
 
 bpaelongsum <- bpaelong %>%
   filter(!is.na(x)) %>% 
-  group_by(study, studyid, reporting, armno, aecat) %>%
+  group_by(study, studyid, reporting, meno, bonemeta, armno, aecat) %>%
     summarise(
         xser = sum(x[!is.na(grade) & grade>=3]),
         xgraded = sum(x[!is.na(grade) & grade>=1]),
@@ -256,7 +264,7 @@ aestr <- paste(aecategs, collapse="|")
 bpae <- bpae %>%
     left_join(bpcoding) %>%
     left_join(addtrtcoding) %>%
-  select(study, studyid, reporting, armno, drugclasses, N, matches(!!aestr), addtrt, addtrtclass)
+  select(study, studyid, reporting, meno, bonemeta, armno, drugclasses, N, matches(!!aestr), addtrt, addtrtclass)
 bpae <- bpae %>%
   mutate_at(vars(matches(!!aestr)), list(p = ~ . / N))
 
@@ -336,7 +344,7 @@ bpaearmtype <- bpae %>%
   mutate(pcon = pcon$pcon) %>% 
   mutate(rcon = rcon$rcon) %>% 
   mutate(aecateg = aetypes$cat3[match(aetype, aetypes$name)]) %>%
-  select(study, studyid, reporting, armno,
+  select(study, studyid, reporting, meno, bonemeta, armno,
          drugclasses, 
          addtrt, addtrtclass,
          N, aetype, aecateg, count, prop, pcon, rcon, ncon, trtcon) %>%
@@ -410,7 +418,7 @@ use_data(nmadata, overwrite=TRUE)
 ## Does this still need to be by aetype, or just by study? 
 
 studies <- nmadata %>%
-  select(aetype, aecateg, study, reporting, addtrt, addtrtclass) %>%
+  select(aetype, aecateg, study, reporting, meno, bonemeta, addtrt, addtrtclass) %>%
   unique %>%
   filter(!(study=="HOBOE" & addtrtclass=="hormoneaionly")) %>% 
   filter(!(study=="ABCSG12" & addtrtclass=="hormoneaionly")) %>%
