@@ -2,5 +2,10 @@
 .Rhistory
 .RData
 vignettes/*_cache
+vignettes/bisph_app2events/*
 *~
 .DS_Store
+meetings.md
+notes.md
+vignettes/old/*
+adverse.Rproj
