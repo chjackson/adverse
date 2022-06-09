@@ -1,0 +1,449 @@
+---
+title: "Trastuzumab adverse events meta-analysis"
+author: ""
+date: "`r Sys.Date()`"
+output:
+  html_document
+editor_options: 
+  chunk_output_type: console
+---
+  
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+knitr::opts_chunk$set(echo=FALSE,
+                      warning=FALSE,
+                      message=FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+library(plotly)
+library(meta)
+# source("tranothing.r")
+tracon <- readRDS("tracon.rds")
+traarmtypegrade <- readRDS("tranothing_byarmtypegrade.rds")
+traarmtype <- readRDS("tranothing_byarmtype.rds")
+trastudytype <- readRDS("tranothing_bystudytype.rds")
+```
+
+Sheet 1 data, with `r length(unique(trastudytype$study))` studies comparing trastuzumab against a non-trastuzumab control. 
+
+Number of patients: `r sum(traarmtypegrade %>% filter(aetype=="N") %>% pull(x))`
+
+Number of patients getting trastuzumab: `r sum(traarmtypegrade %>% filter(aetype=="N", trt=="Trastuzumab") %>% pull(x))`
+
+Number of patients getting control: `r sum(traarmtypegrade %>% filter(aetype=="N", trt=="Control") %>% pull(x))`
+
+`r length(unique(traarmtype$aetype))` distinct kinds of event.
+
+Count the proportion of patients having each event: aggregated over all arms of all studies 
+
+```{r,fig.height=10}
+aecount <- 
+  traarmtype %>%
+  filter(!aetype %in% c("Any Adverse Event", "Serious Adverse Events")) %>% 
+  group_by(aetype) %>%
+  summarise(N=sum(N), count=sum(count)) %>%
+  mutate(prop = count/N) %>%
+  mutate(aetype=factor(aetype, levels=unique(aetype)[order(prop)])) %>%
+  mutate(pse = N*prop*(1-prop))
+
+p <- ggplot(aecount, aes(x=prop, y=aetype, size=count)) + 
+  geom_point() +
+  xlab("Proportion having event") +
+  ylab("") + xlim(0,1)
+
+p
+```
+
+
+Odds ratios for all events, pooled over studies and sorted by size of point estimate
+
+Number of studies reporting that event indicated in brackets, and raw numbers of events contributing to the estimate can be shown by hovering over the point. 
+
+Statistically and practically significant (OR > 1.5 or RD > 0.02) estimates indicated in red
+
+```{r,fig.height=10}
+mares <- data.frame(aetype=unique(trastudytype$aetype))
+mares$nstudy <- mares$totn <- mares$totr <- mares$totncon <- mares$totrcon <-
+  mares$or <- mares$orl <- mares$oru <- 
+    mares$rd <- mares$rdl <- mares$rdu <-   
+  mares$p <- mares$pl <- mares$pu <- NA
+
+estnames <- c("TE.fixed","lower.fixed","upper.fixed")
+estnames <- c("TE.random","lower.random","upper.random")
+
+for (i in seq(along.with=mares$aetype)){ 
+    trama <-
+      trastudytype %>%
+      filter(aetype==mares$aetype[i],
+             !is.na(ncon))
+    mares$nstudy[i] <- nrow(trama)
+    if (nrow(trama) > 0){
+      mres <- metabin(count, N, rcon, ncon, studlab=study, data=trama, sm="OR")
+      mresrd <- metabin(count, N, rcon, ncon, studlab=study, data=trama, sm="RD")
+      mares$totn[i] <- sum(trama$N) 
+      mares$totr[i] <- sum(trama$count) 
+      mares$totncon[i] <- sum(trama$ncon) 
+      mares$totrcon[i] <- sum(trama$rcon)
+      mares[i,c("or","orl","oru")] <- exp(unlist(mres[estnames]))
+      mares[i,c("rd","rdl","rdu")] <- unlist(mresrd[estnames])
+      bres <- metaprop(rcon, ncon, studlab=study, data=trama, sm="PLN")
+      mares[i,c("p","pl","pu")] <- exp(unlist(bres[estnames]))
+    } else
+      mares[i,c("totn","totr","totncon","totrcon","p","pl","pu")] <- 0
+}
+mares <- mares %>% 
+    mutate(sig = ((or > 1.5)&(orl>1.0)) | ((rd > 0.02)&(rdl > 0.0)))
+maresplot <- mares %>%
+  filter(!aetype %in% c("Any adverse event","Serious adverse events")) %>%
+  mutate(totp = totr / totn, 
+         totpcon = totrcon / totncon,
+         totrboth = totr + totrcon) %>%
+  mutate(label = sprintf("\n%s/%s treatment\n%s/%s control\nOR = %s\nRisk difference = %s",
+                         totr,totn,totrcon,totncon,
+                         round(or,3), round(rd,3))) %>%
+  mutate(aetype = sprintf("%s (%s/%s)", aetype, nstudy, totrboth)) %>% 
+  mutate(aetype = factor(aetype, levels=.data$aetype[order(.data$totp)]))
+overflows <- maresplot %>% filter(oru > 20)
+maresplot$oru[maresplot$oru>20] <- 20
+
+absplot_long <- maresplot %>% 
+  select(aetype, totpcon, totp) %>%
+  pivot_longer(all_of(c("totpcon", "totp")), names_to = "trt", values_to = "p") %>%
+  mutate(trt = fct_recode(trt, "Trastuzumab"="totp", "Control"="totpcon"))
+
+pabs <- ggplot(maresplot, aes(y=or, x=aetype)) +  
+  coord_flip(ylim=c(0, 0.7)) + 
+  geom_linerange(aes(x=aetype, ymin=totpcon, ymax=totp)) + 
+  geom_point(data=absplot_long, aes(y=p, col=trt)) + 
+  ylab("Proportion having event") + xlab("") +
+  labs(col="") + 
+  theme(legend.position = c(0.7, 0.1), 
+        legend.text = element_text(size=5),
+        axis.text.y = element_text(size=12))
+
+por <- maresplot %>%
+  ggplot(aes(y=or, x=aetype, color=sig, label=label)) +
+  coord_flip(ylim=c(0.2, 20)) + 
+  scale_x_discrete(drop=FALSE) + 
+  scale_y_continuous(trans="log",
+                     breaks=c(0.2, 0.5, 1, 2, 5, 10, 20)) +
+  geom_hline(yintercept=1.0, col="gray") + 
+  geom_point(position=position_dodge(-0.4)) +
+  geom_errorbar(aes(ymin=orl, ymax=oru),
+                position=position_dodge(-0.4), width=0) +
+  scale_colour_manual(values=c("black","red")) +
+  ylab("Odds ratio (trastuzumab / control)") +
+  xlab("") + 
+  theme(legend.position = "none")  + 
+  geom_segment(data=overflows, 
+               aes(x=aetype, xend=aetype, y=orl, yend=21, col=sig), 
+               arrow=arrow(type="open", length=unit(0.3,"cm"))) + 
+  theme(axis.text.y=element_blank(), #remove x axis labels
+        axis.ticks.y=element_blank() #remove x axis ticks
+  )
+
+library(gridExtra)
+
+#pdf("pboth.pdf", width=8, height=10)
+png("pboth.png", width=800, height=1000)
+grid.arrange(pabs, por, nrow=1, widths=c(3,2), right=0, left=0)
+dev.off()
+
+saveRDS(mares, file="mares_tranothing.rds")
+
+```
+
+Numbers for the significant results shown in red in the above plot, with events ordered alphabetically: 
+
+```{r}
+mares %>% 
+  filter(sig) %>% 
+  mutate(rd=sprintf("%s (%s,%s)",round(rd,2),round(rdl,2),round(rdu,2)),
+         or=sprintf("%s (%s,%s)",round(or,2),round(orl,2),round(or,2)),
+         nev=totr) %>%
+  select("Event"=aetype, "Studies"=nstudy, 
+         "Odds ratio"=or, "Risk difference"=rd, 
+         "Events (trastuzumab groups)"=nev) %>%
+  knitr::kable()
+```
+
+
+
+
+## Odds ratios by event, study and dose 
+
+For events where trastuzumab effect is judged significant 
+
+Illustration of between-study heterogeneity 
+
+```{r,fig.width=12,fig.height=35}
+
+sigevents2 <- mares %>%
+  filter(sig, !(aetype %in% c("Any adverse event","Serious adverse events"))) %>% 
+  pull(aetype)
+
+mahet <- mapool <- mrres <- mrresm <-  vector(length(sigevents2), mode="list")
+for (i in seq_along(sigevents2)){
+  madata <- trastudytype %>% 
+    filter(aetype==sigevents2[i],
+           !is.na(or)) %>%
+    select(study, or, orlower, orupper, riskdiff, rdlower, rdupper, 
+           brisk, brisklower, briskupper, count, N, rcon, ncon, trtdose, metasteses) %>%
+    mutate(study = factor(study, levels=.data$study[order(.data$trtdose, .data$study)])) %>%
+    mutate(trtdose = ifelse(trtdose=="Tra", NA, as.character(trtdose))) %>%
+    mutate(hidose = ifelse(trtdose %in% c("Trastuzumab high"), 1, 0)) %>%
+    mutate(metast_all = ifelse(metasteses==1, 1, 0))
+  
+  orres.meta <- metabin(count, N, rcon, ncon, studlab=study, data=madata, sm="OR")
+  rdres.meta <- metabin(count, N, rcon, ncon, studlab=study, data=madata, sm="RD")
+  orres <- as.data.frame(lapply(orres.meta[estnames], exp))
+  names(orres) <- c("or", "orlower", "orupper")
+  rdres <- as.data.frame(rdres.meta[estnames])
+  names(rdres) <- c("riskdiff", "rdlower", "rdupper")
+  mapool[[i]] <- c(unlist(orres), unlist(rdres)) 
+  orres$study <- rdres$study <- "Pooled estimate"
+  madata$event <- orres$event <- sigevents2[i]
+  madata$pooled <- FALSE
+  mahet[[i]] <- madata
+
+  enames <- c("estimate","ci.lb","ci.ub")
+
+  mrtry <- try(mregdose <- metareg(orres.meta,  ~ hidose))
+  if (!inherits(mrtry, "try-error") && (length(coef(mrtry))>1)){
+    orhidose <- exp(coef(summary(mregdose)))[c("hidose"),enames]
+  } else orhidose <- rep(NA, 3)
+  mrtry <- try(mregdose <- metareg(rdres.meta,  ~ hidose))
+  if (!inherits(mrtry, "try-error") && (length(coef(mrtry))>1)){
+    rdhidose <- exp(coef(summary(mregdose)))[c("hidose"),enames]
+  } else rdhidose <- rep(NA, 3)
+  mrres[[i]] <- as.data.frame(rbind(orhidose, rdhidose)) %>%
+    setNames(enames) %>%
+    mutate(metric = c("or","rd"),
+           pred = c("High","High"),
+           event = sigevents2[i]) %>%
+    relocate(event, pred, metric)
+  
+  mrtry <- try(mregmetast <- metareg(orres.meta,  ~ metast_all))
+  if (!inherits(mrtry, "try-error") && (length(coef(mrtry))>1)){
+    ormetast <- exp(coef(summary(mregmetast)))[c("metast"),enames]
+  } else ormetast <- rep(NA, 3)
+  mrtry <- try(mregmetast <- metareg(rdres.meta,  ~ metast_all))
+  if (!inherits(mrtry, "try-error") && (length(coef(mrtry))>1)){
+    rdmetast <- exp(coef(summary(mregmetast)))[c("metast"),enames]
+  } else rdmetast <- rep(NA, 3)
+  mrresm[[i]] <- as.data.frame(rbind(ormetast, rdmetast)) %>%
+    setNames(enames) %>%
+    mutate(metric = c("or","rd"),
+           event = sigevents2[i]) %>%
+    relocate(event, metric)
+  
+}
+mahet <- do.call("rbind", mahet)
+mapool <- as.data.frame(do.call("rbind", mapool)) %>% 
+  mutate(event=sigevents2)
+mrres <- do.call("rbind", mrres)
+mrresm <- do.call("rbind", mrresm)
+
+mahetp <- mahet %>%
+  mutate(label = sprintf("%s/%s trastu, %s/%s control", count, N, rcon, ncon),
+         trtdose = factor(trtdose),
+         orupper = ifelse(orupper > 20, 20, orupper),
+         study = fct_reorder(study, 1-as.numeric(trtdose)),
+         base_str = sprintf("%s/%s (%s%%)",rcon,ncon,round(100*rcon/ncon)),
+         trt_str = sprintf("%s/%s (%s%%)",count,N,round(100*count/N)),
+         metastatic = ifelse(metast_all==1, "Yes", "No")) #%>%
+  #filter(event %in% c("Myalgia","Cardiac events"))
+    
+psize <- 3
+lsize <- 1.5
+wsize <- 0.1
+blues <- colorRampPalette(c("darkblue", "lightblue"))(2)
+cols <- c(blues, "gray")
+
+forestplot <- function(dat) { 
+  mapoolp <- mapool %>% filter(event %in% dat$event)
+  overflows <- dat %>% filter(orupper == 20)
+  p1 <- ggplot(dat, aes(x=study, y=or, col=trtdose, 
+                         label=label
+                         #, lty=metastatic
+                         )) +
+  coord_flip(ylim=c(0.001, 3000), xlim=c(-1,25)) +
+  geom_hline(yintercept=1, col="gray") + 
+  geom_point(size=psize) +
+  geom_errorbar(aes(ymin = orlower, ymax = orupper), size=lsize, width=wsize) +
+  geom_text(aes(y=0.001, x=study, label=base_str), 
+            col="black", hjust=0, nudge_x=-0.1) + 
+  geom_text(aes(y=30, x=study, label=trt_str), 
+            col="black", hjust=0, nudge_x=-0.1) + 
+  scale_y_continuous(trans="log", breaks=c(0.2, 1, 5, 20)) + 
+  facet_wrap(~event, ncol=3
+             #,labeller = label_wrap_gen(20)
+             ) + 
+  ylab("Odds ratio for event (trastu/control), log scale") + 
+  xlab("") +
+  labs(col="Dose group"
+       #, lty="All metastatic patients"
+       ) + 
+  theme(strip.text = element_text(size=12),
+        text = element_text(size=8),
+        axis.text = element_text(size=8),
+        axis.title = element_text(size=12),
+        legend.title = element_text(size=12),
+        legend.text = element_text(size=12)
+        ) + 
+  scale_color_manual(values=cols) +
+#  scale_linetype_manual(values=c("solid","dotted")) +
+  geom_point(data=mapoolp, aes(y=or, x=-1), inherit.aes=FALSE) + 
+  geom_errorbar(data=mapoolp, aes(ymin=orlower, ymax=orupper, x=-1),
+                width=3*wsize, size=lsize, inherit.aes=FALSE) + 
+  geom_text(y=log(0.1), x=-1, label="(Pooled)", col="black", hjust=1, size=2.5) + 
+  geom_segment(data=overflows, 
+               aes(x=study, xend=study, y=orlower, yend=21, col=trtdose), 
+               arrow=arrow(type="open", length=unit(0.3,"cm")), size=1.2)
+  p1
+}
+
+png("trastu_meta_all1.png", width=1000, height=1600)
+forestplot(mahetp %>% filter(event %in% sort(unique(mahetp$event))[1:12]))
+dev.off()
+
+png("trastu_meta_all2.png", width=1000, height=1600)
+forestplot(mahetp %>% filter(event %in% sort(unique(mahetp$event))[13:24]))
+dev.off()
+
+#if (interactive()) p1
+#ggplotly(p1, width = 400*2, height=700*2)
+```
+
+# Meta-regression of the effect of dose 
+
+On either the odds ratio or the risk difference.  
+
+Exclude studies where dose unknown. 
+
+Dose expressed as comparing high with medium or low, or as comparing high or medium with low. 
+
+```{r}
+mrres %>% filter(!is.na(estimate), metric=="or") %>%
+ggplot(aes(y=event, x=estimate, col=pred)) + 
+  scale_x_continuous(limits=c(0,3), 
+                     oob = scales::squish) +
+  geom_errorbarh(aes(xmin=ci.lb, xmax=ci.ub), lwd=1,
+                 position=ggstance::position_dodgev(height=0.7)) + 
+  geom_vline(xintercept = 1) +
+  xlab("Odds ratio (higher / lower dose)") + ylab("") + 
+  labs(col="Higher dose")
+mrres %>% filter(!is.na(estimate), metric=="rd") %>%
+ggplot(aes(y=event, x=estimate, col=pred)) + 
+  geom_errorbarh(aes(xmin=ci.lb, xmax=ci.ub), lwd=1,
+                 position=ggstance::position_dodgev(height=0.7)) + 
+  geom_vline(xintercept = 1) +
+  xlab("Risk difference (higher - lower dose)") + ylab("") +
+  labs(col="Higher dose")
+```
+
+A few where higher dose is associated with lower risk, but this is implausible, and consistent with 5\% error rate for multiple testing. 
+
+Dose effect on risk difference for gastrointestinal issues appears statistically significant from the above plot, but it would not be significant after controlling for multiple testing, and this result is only based on two studies. [Cochrane](https://handbook-5-1.cochrane.org/chapter_9/9_6_4_meta_regression.htm) advise that "Meta-regression should generally not be considered when there are fewer than ten studies in a meta-analysis."
+
+I'd just state that no dose effects were shown to be significant in meta regression, without giving any tables or figures.  Could just point to the study-specific odds ratios with the doses coloured.
+
+
+# Meta-regression on the effect of metastasis
+
+Indicator for whether all patients in the study had metastatic cancer.  Remaining studies had only non-metastatic patients. Only one study with a mixture. 
+
+
+```{r}
+mrresm %>% filter(!is.na(estimate), metric=="or") %>%
+ggplot(aes(y=event, x=estimate)) + 
+  scale_x_continuous(limits=c(0.1,10), trans="log", 
+                     breaks = c(0.1, 0.5, 1, 2, 5, 10),
+                     oob = scales::squish) +
+  geom_errorbarh(aes(xmin=ci.lb, xmax=ci.ub), lwd=1,
+                 position=ggstance::position_dodgev(height=0.7)) + 
+  geom_vline(xintercept = 1) +
+  xlab("Odds ratio (metastatic / non-metastatic)") + ylab("") + 
+  labs(col="Metastatic")
+
+mrresm %>% filter(!is.na(estimate), metric=="rd") %>%
+  ggplot(aes(y=event, x=estimate)) + 
+  geom_errorbarh(aes(xmin=ci.lb, xmax=ci.ub), lwd=1,
+                 position=ggstance::position_dodgev(height=0.7)) + 
+  geom_vline(xintercept = 1) +
+  xlab("Risk difference (metastatic - non-metastatic)") + ylab("") +
+  labs(col="Metastatic")
+```
+
+No significant effect modification for odds ratio. 
+
+For the risk difference model, more things significantly different between metat/nonmeta
+
+Only ones sig are ones with 5 studies (chills) and cough (7 studies)
+
+Metaregression not recommended with less than 10! 
+
+
+
+
+
+### Table of results for the paper 
+
+
+```{r}
+tser <- traarmtypegrade %>% 
+  filter(!is.na(grade3)) %>%
+  group_by(aetype, grade3) %>% 
+  summarise(n = sum(x), .groups="drop") %>%
+  complete(aetype, grade3, fill = list(n = 0))
+tgraded <- tser %>% 
+  group_by(aetype) %>%
+  summarise(ngraded=sum(n), .groups="drop")
+pser <- tser %>% 
+  left_join(tgraded, by="aetype") %>%
+  filter(grade3 == "Grade 3+") %>% 
+  mutate(pser = n / ngraded, 
+         pserf = sprintf("%s%% (%s/%s)", round(100*pser,1), n, ngraded),
+         pserf = replace_na(pserf, "Unknown"))
+
+tracon %>% filter(aetype=="Cardiac events", study=="NCCTG N9831")
+traarmtype %>% filter(aetype=="Cardiac events", study=="NCCTG N9831")
+# says control arm is C1.  Doesn't have a "trt==Control" record 
+# can we check if zero or no reports in control
+
+tser %>% filter(aetype=="Insomnia")
+pser %>% filter(aetype=="Insomnia")
+
+nstudy <- trastudytype %>%
+  filter(!(study=="NCCTG N9831")) %>%
+  rename(event = aetype) %>%
+  group_by(event) %>% 
+  summarise(nstudy=n(),
+            rpts=sum(count) + sum(rcon),
+            npts=sum(N) + sum(ncon))   # events/pts among trt and control
+
+tab <- mapool %>% 
+  filter(!(event %in% c("Any adverse event","Serious adverse events"))) %>%
+  mutate(orf = sprintf("%s (%s-%s)", 
+                      round(or, 2), round(orlower, 2), round(orupper, 2))) %>%
+  mutate(rdf = sprintf("%s (%s-%s)", 
+                      round(100*riskdiff), round(100*rdlower), round(100*rdupper))) %>%
+  left_join(mares %>% select(event=aetype, brisk=p), by="event") %>%
+  left_join(nstudy, by="event") %>%
+  mutate(absrisk = plogis(qlogis(brisk) + log(or)),
+         briskf = round(brisk*100),
+         nf = sprintf("%s (%s/%s)", nstudy, rpts, npts)) %>%
+  left_join(pser, by=c("event"="aetype")) %>%
+  select(event, orf, briskf, rdf, pserf, nf)
+tab
+
+# Outcome	Odds ratio	Risk difference	Not taking trastuzumab	Taking trastuzumab	Number of studies reporting this event (number of women reporting event / total number of women)	Percentage of graded events that were serious (Grade 3+) (absolute numbers)
+
+write.table(tab, quote = FALSE, row.names = FALSE, sep="\t")
+```
+
+
+

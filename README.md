@@ -8,3 +8,8 @@ Code and supplementary material from papers
 ## Bisphosphonates
 
 [Full event-specific results](https://chjackson.github.io/adverse/vignettes/bisph_app2_index.html)
+
+
+## Trastuzumab
+
+Analysis code 
